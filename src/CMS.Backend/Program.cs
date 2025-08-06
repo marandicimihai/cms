@@ -36,7 +36,7 @@ builder.Services
 
 // ? Custom Services
 builder.Services
-    .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailQueuer>();
+    .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>();
 
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);
