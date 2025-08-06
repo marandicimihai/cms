@@ -1,46 +1,39 @@
-using CMS.Backend.Commands;
+using System.Net;
 using CMS.Backend.Data;
-using FastEndpoints;
+using CMS.Backend.Emails.Templates;
+using FluentEmail.Core;
 using Microsoft.AspNetCore.Identity;
-using SendGrid.Helpers.Mail;
 
 namespace CMS.Backend.Services;
 
-public class IdentityEmailQueuer : IEmailSender<ApplicationUser>
+public class IdentityEmailQueuer(
+    ILogger<IdentityEmailQueuer> logger, 
+    IFluentEmail fluentEmail
+) : IEmailSender<ApplicationUser>
 {
-    private readonly ILogger<IdentityEmailQueuer> logger;
-    private readonly EmailSenderOptions? options;
-
-    public IdentityEmailQueuer(ILogger<IdentityEmailQueuer> logger, IConfiguration configuration)
-    {
-        this.logger = logger;
-        
-        options = configuration.GetSection("SendGrid").Get<EmailSenderOptions>();
-        if (options is null)
-        {
-            logger.LogWarning("SendGrid options not found. Email sending will not work.");
-        }
-    }
-    
     public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
     {
-        if (options is null) return;
-        
-        var from = new EmailAddress(options.From, options.FromName);
-        var to = new EmailAddress(email);
-        
-        var msg = MailHelper.CreateSingleTemplateEmail(from, to, options.ConfirmationEmailTemplateId, new
+        try
         {
-            confirmationLink = "asdasd"
-        });
-        
-        await new SendEmailCommand
+            var result = await fluentEmail
+                .To(email)
+                .Subject("Confirm your account")
+                .UsingTemplateFromFile("Emails/Templates/ConfirmAccount.cshtml",
+                    new ConfirmAccountModel { ConfirmationLink = WebUtility.HtmlDecode(confirmationLink) })
+                .SendAsync();
+
+            if (!result.Successful)
+            {
+                logger.LogError("There was an error when sending confirmation email to {userId}.", user.Id);
+                return;
+            }
+            
+            logger.LogInformation("Confirmation email sent to {userId}.", user.Id);
+        }
+        catch (Exception ex)
         {
-            UserId = user.Id,
-            Message = msg
-        }.QueueJobAsync();
-        
-        logger.LogInformation("Confirmation email queued for {userId}.", user.Id);
+            logger.LogInformation(ex, "There was an error when sending confirmation email to {userId}.", user.Id);
+        }
     }
 
     public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
@@ -51,12 +44,5 @@ public class IdentityEmailQueuer : IEmailSender<ApplicationUser>
     public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
     {
         throw new NotImplementedException();
-    }
-    
-    internal sealed class EmailSenderOptions
-    {
-        public string From { get; set; } = default!;
-        public string FromName { get; set; } = default!;
-        public string ConfirmationEmailTemplateId { get; set; } = default!;
     }
 }

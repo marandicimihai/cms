@@ -1,6 +1,6 @@
-using CMS.Backend.Abstractions;
 using CMS.Backend.Data;
-using CMS.Backend.Data.Jobs;
+using CMS.Backend.Emails;
+using CMS.Backend.Emails.Models;
 using CMS.Backend.Services;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+IConfiguration config = builder.Configuration;
 
 builder.Services
     .AddFastEndpoints()
-    .AddJobQueues<JobRecord, JobStorageProvider>()
     .SwaggerDocument();
 builder.Services.AddOpenApi();
 
@@ -21,16 +21,25 @@ builder.Services.AddAuthentication()
 builder.Services.AddAuthorizationBuilder();
 
 builder.Services.AddDbContext<ApplicationDbContext>(opt => 
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    opt.UseNpgsql(config.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddApiEndpoints();
 
+// ? Settings
+builder.Services
+    .AddOptions<EmailSettings>()
+    .Bind(config.GetSection("EmailSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 // ? Custom Services
 builder.Services
-    .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailQueuer>()
-    .AddScoped<ISendGridEmailSender, SendGridEmailSender>();
+    .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailQueuer>();
+
+builder.Services
+    .ConfigureFluentEmail(config, builder.Environment);
 
 var app = builder.Build();
 
@@ -45,7 +54,6 @@ app.MapGroup("auth")
     .MapIdentityApi<ApplicationUser>();
 
 app.UseFastEndpoints()
-    .UseJobQueues()
     .UseSwaggerGen();
 
 app.Run();
