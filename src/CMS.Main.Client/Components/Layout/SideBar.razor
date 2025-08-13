@@ -1,0 +1,29 @@
+<aside class="hidden md:block w-64 border-r border-slate-200 bg-white overflow-y-auto">
+    <div class="p-4">
+        <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500 mb-3">Navigation</h2>
+        <nav class="space-y-1">
+            <NavLink href="/" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100" ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600" Match="NavLinkMatch.All">
+                <span>Dashboard</span>
+            </NavLink>
+            <NavLink href="/content" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100" ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                <span>Content</span>
+            </NavLink>
+            <NavLink href="/users" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100" ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                <span>Users</span>
+            </NavLink>
+            <NavLink href="/settings" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100" ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                <span>Settings</span>
+            </NavLink>
+        </nav>
+
+        <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500 mt-6 mb-3">Administration</h2>
+        <nav class="space-y-1">
+            <NavLink href="/admin/roles" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100" ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                <span>Roles</span>
+            </NavLink>
+            <NavLink href="/admin/permissions" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100" ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                <span>Permissions</span>
+            </NavLink>
+        </nav>
+    </div>
+</aside>

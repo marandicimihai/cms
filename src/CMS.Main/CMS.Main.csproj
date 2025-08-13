@@ -30,6 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AdditionalFiles Include="Components\Layout\MainLayout.razor" />
       <AdditionalFiles Include="Emails\Templates\ConfirmAccount.cshtml" />
       <AdditionalFiles Include="Emails\Templates\ResetPasswordCode.cshtml" />
       <AdditionalFiles Include="Emails\Templates\ResetPasswordLink.cshtml" />

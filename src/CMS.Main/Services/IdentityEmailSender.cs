@@ -36,7 +36,6 @@ public class IdentityEmailSender(
         }
     }
 
-    // Not used anywhere
     public async Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
     {
         try
