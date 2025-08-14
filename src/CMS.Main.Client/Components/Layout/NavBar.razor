@@ -23,11 +23,11 @@
 
             <!-- Mobile menu button -->
             <div class="md:hidden flex items-center">
-                <button @onclick="ToggleMobileMenu" type="button" class="text-slate-600 hover:text-slate-900 p-2" aria-controls="mobile-menu" aria-expanded="false">
-                    <span class="sr-only">Open main menu</span>
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                <button @onclick="ToggleMobileMenu"
+                        type="button"
+                        class="inline-flex items-center justify-center w-10 h-10 text-slate-600 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+                        aria-label="Open main menu" aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="material-symbols-outlined icons-default text-2xl">menu</span>
                 </button>
             </div>
         </div>
@@ -55,10 +55,6 @@
     private record NavItem(string Href, string DisplayName, bool MatchAll = false);
     private readonly List<NavItem> navItems = new()
     {
-        new NavItem("/", "Dashboard", true),
-        new NavItem("/content", "Content"),
-        new NavItem("/users", "Users"),
-        new NavItem("/settings", "Settings")
     };
 
     private void ToggleMobileMenu()

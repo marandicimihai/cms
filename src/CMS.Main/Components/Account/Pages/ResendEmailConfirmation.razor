@@ -14,22 +14,36 @@
 
 <PageTitle>Resend email confirmation</PageTitle>
 
-<h1>Resend email confirmation</h1>
-<h2>Enter your email.</h2>
-<hr/>
-<StatusMessage Message="@message"/>
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com"/>
-                <label for="Input.Email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger"/>
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
-        </EditForm>
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 text-center">Resend email confirmation</h1>
+            <p class="mt-2 text-center text-sm text-slate-600">
+                Enter your email address to resend the confirmation link.
+            </p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6">
+            <StatusMessage Message="@message"/>
+            <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="validation-summary" role="alert"/>
+                <div class="space-y-4">
+                    <div>
+                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                            Email
+                        </label>
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" aria-required="true" placeholder="name@example.com"/>
+                        <ValidationMessage For="() => Input.Email" class="validation-message"/>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="material-symbols-outlined icons-default text-base mr-2">send</span>
+                            Resend
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
     </div>
 </div>
 

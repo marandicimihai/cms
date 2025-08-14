@@ -17,40 +17,93 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
-
-<div class="row">
-    <div class="col-lg-6">
-        <StatusMessage Message="@Message"/>
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator/>
-            <h2>Create a new account.</h2>
-            <hr/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
-                <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger"/>
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 text-center">Create your account</h1>
+            <p class="mt-2 text-center text-sm text-slate-600">
+                Already have an account?
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" 
+                   class="font-medium text-blue-600 hover:text-blue-500">
+                    Sign in
+                </a>
+            </p>
+        </div>
+        
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6">
+            <StatusMessage Message="@Message"/>
+            
+            <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="validation-summary" role="alert"/>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                            Email
+                        </label>
+                        <InputText @bind-Value="Input.Email" 
+                                  id="Input.Email" 
+                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  autocomplete="username" 
+                                  aria-required="true" 
+                                  placeholder="name@example.com"/>
+                        <ValidationMessage For="() => Input.Email" class="validation-message"/>
+                    </div>
+                    
+                    <div>
+                        <label for="Input.Password" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                            Password
+                        </label>
+                        <InputText type="password" 
+                                  @bind-Value="Input.Password" 
+                                  id="Input.Password" 
+                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  autocomplete="new-password" 
+                                  aria-required="true" 
+                                  placeholder="password"/>
+                        <ValidationMessage For="() => Input.Password" class="validation-message"/>
+                    </div>
+                    
+                    <div>
+                        <label for="Input.ConfirmPassword" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                            Confirm Password
+                        </label>
+                        <InputText type="password" 
+                                  @bind-Value="Input.ConfirmPassword" 
+                                  id="Input.ConfirmPassword" 
+                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  autocomplete="new-password" 
+                                  aria-required="true" 
+                                  placeholder="confirm password"/>
+                        <ValidationMessage For="() => Input.ConfirmPassword" class="validation-message"/>
+                    </div>
+                    
+                    <div>
+                        <button type="submit" 
+                                class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="material-symbols-outlined icons-default text-base mr-2">person_add</span>
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+            
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200" />
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-slate-500">Or continue with</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <ExternalLoginPicker/>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
-                <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger"/>
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
-                <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger"/>
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr/>
-            <ExternalLoginPicker/>
-        </section>
+        </div>
     </div>
 </div>
 

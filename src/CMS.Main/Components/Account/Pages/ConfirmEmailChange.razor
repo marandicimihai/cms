@@ -11,9 +11,26 @@
 
 <PageTitle>Confirm email change</PageTitle>
 
-<h1>Confirm email change</h1>
-
-<StatusMessage Message="@message"/>
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6 text-center">
+            @if (message?.StartsWith("Thank you") == true)
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-emerald-600">check_circle</span>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(message))
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-rose-600">error</span>
+                </div>
+            }
+            <h1 class="text-2xl font-semibold text-slate-900 mb-2">Confirm email change</h1>
+            <StatusMessage Message="@message"/>
+        </div>
+    </div>
+</div>
 
 @code {
     private string? message;
@@ -41,7 +58,7 @@
         var user = await UserManager.FindByIdAsync(UserId);
         if (user is null)
         {
-            message = "Unable to find user with Id '{userId}'";
+            message = $"Unable to find user with Id '{UserId}'";
             return;
         }
 
@@ -53,8 +70,6 @@
             return;
         }
 
-        // In our UI email and user name are one and the same, so when we update the email
-        // we need to update the user name.
         var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
         if (!setUserNameResult.Succeeded)
         {

@@ -18,29 +18,36 @@
 
 <PageTitle>Register</PageTitle>
 
-<StatusMessage Message="@message"/>
-<h1>Register</h1>
-<h2>Associate your @ProviderDisplayName account.</h2>
-<hr/>
-
-<div class="alert alert-info">
-    You've successfully authenticated with <strong>@ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="confirmation" method="post">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email."/>
-                <label for="Input.Email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email"/>
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6 text-center">
+            <StatusMessage Message="@message"/>
+            <h1 class="text-2xl font-semibold text-slate-900 mb-2">Register</h1>
+            <h2 class="text-lg font-medium text-slate-900 mb-2">Associate your @ProviderDisplayName account.</h2>
+            <div class="bg-blue-50 border border-blue-200 text-blue-700 text-sm p-3 rounded-md mb-4">
+                You've successfully authenticated with <strong>@ProviderDisplayName</strong>.<br/>
+                Please enter an email address for this site below and click the Register button to finish logging in.
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
+            <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="confirmation" method="post">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="validation-summary" role="alert"/>
+                <div class="space-y-4">
+                    <div>
+                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                            Email
+                        </label>
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" autocomplete="email" placeholder="Please enter your email."/>
+                        <ValidationMessage For="() => Input.Email" class="validation-message"/>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="material-symbols-outlined icons-default text-base mr-2">person_add</span>
+                            Register
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
     </div>
 </div>
 

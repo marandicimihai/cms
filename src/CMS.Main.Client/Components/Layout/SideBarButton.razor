@@ -1,0 +1,28 @@
+<NavLink href="@Href"
+         class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100"
+         ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+         Match="@Match">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <span class="material-symbols-outlined icons-default text-base">@Icon</span>
+    }
+    <span>@ChildContent</span>
+</NavLink>
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public string Href { get; set; } = default!;
+    
+    [Parameter] 
+    public string? Icon { get; set; }
+    
+    [Parameter] 
+    public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
+
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+}

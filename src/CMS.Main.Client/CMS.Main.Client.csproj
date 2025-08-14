@@ -18,4 +18,8 @@
       <Folder Include="Components\Pages\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CMS.Shared\CMS.Shared.csproj" />
+    </ItemGroup>
+
 </Project>

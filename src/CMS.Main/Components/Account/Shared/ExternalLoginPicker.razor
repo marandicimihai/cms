@@ -23,10 +23,12 @@ else
         <div>
             <AntiforgeryToken/>
             <input type="hidden" name="ReturnUrl" value="@ReturnUrl"/>
-            <p>
+            <p class="flex flex-wrap gap-2">
                 @foreach (var provider in externalLogins)
                 {
-                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                    <button type="submit" class="btn bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium px-3 py-2 rounded-md" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                        <span class="material-symbols-outlined text-base mr-2">login</span>@provider.DisplayName
+                    </button>
                 }
             </p>
         </div>
@@ -34,6 +36,7 @@ else
 }
 
 @code {
+    
     private AuthenticationScheme[] externalLogins = [];
 
     [SupplyParameterFromQuery]

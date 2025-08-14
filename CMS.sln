@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Main", "src\CMS.Main\CM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Main.Client", "src\CMS.Main.Client\CMS.Main.Client.csproj", "{C0E132F8-096A-4837-88B5-B0A70484C9C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Shared", "src\CMS.Shared\CMS.Shared.csproj", "{6156E886-B760-4602-A464-BD2324526398}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{C0E132F8-096A-4837-88B5-B0A70484C9C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0E132F8-096A-4837-88B5-B0A70484C9C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0E132F8-096A-4837-88B5-B0A70484C9C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6156E886-B760-4602-A464-BD2324526398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6156E886-B760-4602-A464-BD2324526398}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6156E886-B760-4602-A464-BD2324526398}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6156E886-B760-4602-A464-BD2324526398}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

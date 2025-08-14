@@ -16,10 +16,9 @@
 
 <StatusMessage Message="@message"/>
 
-<h3>Delete Personal Data</h3>
-
-<div class="alert alert-warning" role="alert">
-    <p>
+<h3 class="text-lg font-medium">Delete Personal Data</h3>
+<div class="alert alert-warning bg-amber-100 text-amber-900 border border-amber-200 rounded-md p-3" role="alert">
+    <p class="text-sm">
         <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
     </p>
 </div>
@@ -27,16 +26,16 @@
 <div>
     <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
         <DataAnnotationsValidator/>
-        <ValidationSummary class="text-danger" role="alert"/>
+        <ValidationSummary class="text-rose-600 text-xs" role="alert"/>
         @if (requirePassword)
         {
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
-                <label for="Input.Password" class="form-label">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger"/>
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+                <label for="Input.Password" class="form-label text-xs uppercase tracking-wide">Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-rose-600 text-xs"/>
             </div>
         }
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete data and close my account</button>
+        <button class="w-100 btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md" type="submit">Delete data and close my account</button>
     </EditForm>
 </div>
 

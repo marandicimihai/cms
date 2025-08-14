@@ -15,13 +15,13 @@
 <StatusMessage/>
 @if (currentLogins?.Count > 0)
 {
-    <h3>Registered Logins</h3>
-    <table class="table">
+    <h3 class="text-lg font-medium">Registered Logins</h3>
+    <table class="table border border-slate-200 rounded-lg shadow-sm">
         <tbody>
         @foreach (var login in currentLogins)
         {
             <tr>
-                <td>@login.ProviderDisplayName</td>
+                <td class="text-sm text-slate-900">@login.ProviderDisplayName</td>
                 <td>
                     @if (showRemoveButton)
                     {
@@ -30,7 +30,9 @@
                             <div>
                                 <input type="hidden" name="@nameof(LoginProvider)" value="@login.LoginProvider"/>
                                 <input type="hidden" name="@nameof(ProviderKey)" value="@login.ProviderKey"/>
-                                <button type="submit" class="btn btn-primary" title="Remove this @login.ProviderDisplayName login from your account">Remove</button>
+                                <button type="submit" class="btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md" title="Remove this @login.ProviderDisplayName login from your account">
+                                    <span class="material-symbols-outlined text-base mr-2">delete</span>Remove
+                                </button>
                             </div>
                         </form>
                     }
@@ -46,16 +48,16 @@
 }
 @if (otherLogins?.Count > 0)
 {
-    <h4>Add another service to log in.</h4>
-    <hr/>
+    <h4 class="text-lg font-medium">Add another service to log in.</h4>
+    <hr class="my-4 border-slate-200"/>
     <form class="form-horizontal" action="Account/Manage/LinkExternalLogin" method="post">
         <AntiforgeryToken/>
         <div>
-            <p>
+            <p class="flex flex-wrap gap-2">
                 @foreach (var provider in otherLogins)
                 {
-                    <button type="submit" class="btn btn-primary" name="Provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
-                        @provider.DisplayName
+                    <button type="submit" class="btn bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium px-3 py-2 rounded-md" name="Provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                        <span class="material-symbols-outlined text-base mr-2">login</span>@provider.DisplayName
                     </button>
                 }
             </p>

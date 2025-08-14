@@ -65,11 +65,13 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
     - Primary: `bg-blue-600 text-white hover:bg-blue-700`
     - Secondary: `bg-slate-200 text-slate-900 hover:bg-slate-300`
     - Danger: `bg-rose-600 text-white hover:bg-rose-700`
+- **Icons:** Allowed and encouraged on buttons for clarity and visual cues.
 
 ### Inputs
 - Base: `block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500`
 - Sizes: Default `text-sm px-3 py-2`
 - Disabled: `bg-slate-100 text-slate-500 cursor-not-allowed`
+- **No icons on field labels.** Keep field labels clean and text-only for clarity and compactness.
 
 ### Cards / Panels
 - Base: `rounded-lg border border-slate-200 bg-white shadow-sm`
@@ -97,5 +99,11 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 
 ```html
 <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md">
+  <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
   Save Changes
 </button>
+<!-- Good: icon on button -->
+
+<label class="text-xs uppercase tracking-wide">Project Name</label>
+<!-- Good: no icon on field label -->
+```

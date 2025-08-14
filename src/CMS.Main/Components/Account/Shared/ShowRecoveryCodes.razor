@@ -1,10 +1,10 @@
 ﻿<StatusMessage Message="@StatusMessage"/>
-<h3>Recovery codes</h3>
-<div class="alert alert-warning" role="alert">
-    <p>
+<h3 class="text-lg font-medium">Recovery codes</h3>
+<div class="alert alert-warning bg-amber-100 text-amber-900 border border-amber-200 rounded-md p-3" role="alert">
+    <p class="text-sm">
         <strong>Put these codes in a safe place.</strong>
     </p>
-    <p>
+    <p class="text-sm">
         If you lose your device and don't have the recovery codes you will lose access to your account.
     </p>
 </div>
@@ -13,7 +13,7 @@
         @foreach (var recoveryCode in RecoveryCodes)
         {
             <div>
-                <code class="recovery-code">@recoveryCode</code>
+                <code class="recovery-code bg-slate-100 text-slate-900 px-3 py-2 rounded-md">@recoveryCode</code>
             </div>
         }
     </div>

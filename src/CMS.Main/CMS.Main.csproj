@@ -7,6 +7,7 @@
         <UserSecretsId>aspnet-CMS.App-46397a20-78d9-49b8-9138-8e526e64035b</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <RootNamespace>CMS.Main</RootNamespace>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
     </PropertyGroup>
 
     <ItemGroup>

@@ -7,7 +7,7 @@ public class Project
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public string Id { get; set; } = default!;
-    
+
     [Required]
     [StringLength(36)]
     public string OwnerId { get; set; } = default!;
