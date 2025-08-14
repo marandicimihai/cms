@@ -1,0 +1,78 @@
+using Ardalis.Result;
+using CMS.Main.Data;
+using CMS.Main.Models;
+using CMS.Shared.Abstractions;
+using CMS.Shared.DTOs.Pagination;
+using CMS.Shared.DTOs.Project;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
+
+namespace CMS.Main.Services;
+
+public class ProjectService(
+    DbContextConcurrencyHelper dbHelper,
+    ILogger<ProjectService> logger
+) : IProjectService
+{
+    public async Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
+        string userId, 
+        PaginationParams? paginationParams = null)
+    {
+        paginationParams ??= new PaginationParams(1, 10);
+        var cappedPageSize = Math.Clamp(paginationParams.PageSize, 1, IProjectService.MaxPageSize);
+        var cappedPageNumber = Math.Max(paginationParams.PageNumber, 1);
+
+        try
+        {
+            var result = await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                var projects = await dbContext.Projects
+                    .Where(p => p.OwnerId == userId)
+                    .Skip((cappedPageNumber - 1) * cappedPageSize)
+                    .Take(cappedPageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var paginationMetadata = new PaginationMetadata(
+                    TotalCount: await dbContext.Projects.CountAsync(p => p.OwnerId == userId),
+                    CurrentPage: cappedPageNumber,
+                    PageSize: cappedPageSize,
+                    MaxPageSize: IProjectService.MaxPageSize
+                );
+
+                return (projects.Adapt<List<ProjectWithIdDto>>(), paginationMetadata);
+            });
+
+            return Result.Success(result);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when retrieving projects for user {userId}.", userId);
+            return Result.Error($"There was an error when retrieving projects for user {userId}.");
+        }
+    }
+
+    public async Task<Result<ProjectWithIdDto>> CreateProjectAsync(ProjectCreationDto projectDto)
+    {
+        if (!Guid.TryParse(projectDto.OwnerId, out _))
+            return Result.Invalid(new ValidationError("OwnerID must be a valid GUID."));
+
+        try
+        {
+            var project = projectDto.Adapt<Project>();
+            
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                await dbContext.Projects.AddAsync(project);
+                await dbContext.SaveChangesAsync();
+            });
+
+            return Result.Success(project.Adapt<ProjectWithIdDto>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when creating a project for user {ownerId}.", projectDto.OwnerId);
+            return Result.Error($"There was an error when creating a project for user {projectDto.OwnerId}.");
+        }
+    }
+}

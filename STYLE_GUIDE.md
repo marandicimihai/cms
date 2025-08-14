@@ -95,6 +95,14 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 
 ---
 
+## ### Icons
+- Use **Google Material Symbols** for all icons in the app.
+- Add the `icons-default` class to every icon for consistent sizing and alignment.
+- Add any new icon names to the `iconNames` array in `App.razor` for consistency and easy management.
+- Icons are allowed and encouraged on buttons for clarity and visual cues.
+
+---
+
 ## ✅ Example Usage
 
 ```html

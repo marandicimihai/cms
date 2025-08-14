@@ -5,6 +5,7 @@ using CMS.Main.Data;
 using CMS.Main.Emails;
 using CMS.Main.Emails.Config;
 using CMS.Main.Services;
+using CMS.Shared.Abstractions;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
@@ -33,6 +34,8 @@ builder.Services
 
 // ? Custom Services
 builder.Services
+    .AddScoped<DbContextConcurrencyHelper>()
+    .AddScoped<IProjectService, ProjectService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>();
 
 builder.Services
