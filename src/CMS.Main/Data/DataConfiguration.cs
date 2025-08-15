@@ -1,4 +1,6 @@
+using CMS.Main.Auth;
 using CMS.Main.Components.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,13 @@ public static class DataConfiguration
                 options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
             })
             .AddIdentityCookies();
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("MustOwnProject", policy =>
+                policy.Requirements.Add(new MustOwnProjectRequirement()));
+        });
+        services.AddScoped<IAuthorizationHandler, MustOwnProjectHandler>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));

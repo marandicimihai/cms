@@ -139,4 +139,20 @@ public class ProjectService(
             return Result.Error($"There was an error when deleting project {projectId}.");
         }
     }
+
+    public async Task<Result<bool>> OwnsProject(string userId, string projectId)
+    {
+        try
+        {
+            var project = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Projects.FindAsync(projectId));
+
+            return project is null ? Result.NotFound() : Result.Success(project.OwnerId == userId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when checking ownership of project {projectId} for user {userId}.", projectId, userId);
+            return Result.Error($"There was an error when checking ownership of project {projectId} for user {userId}.");
+        }
+    }
 }
