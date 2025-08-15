@@ -52,6 +52,22 @@ public class ProjectService(
         }
     }
 
+    public async Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(string projectId)
+    {
+        try
+        {
+            var result = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Projects.FindAsync(projectId));
+            
+            return result is null ? Result.NotFound() : Result.Success(result.Adapt<ProjectWithIdDto>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when retrieving project {projectId}.", projectId);
+            return Result.Error($"There was an error when retrieving project {projectId}.");
+        }
+    }
+
     public async Task<Result<ProjectWithIdDto>> CreateProjectAsync(ProjectCreationDto projectDto)
     {
         if (!Guid.TryParse(projectDto.OwnerId, out _))
@@ -73,6 +89,54 @@ public class ProjectService(
         {
             logger.LogError(ex, "There was an error when creating a project for user {ownerId}.", projectDto.OwnerId);
             return Result.Error($"There was an error when creating a project for user {projectDto.OwnerId}.");
+        }
+    }
+
+    public async Task<Result<ProjectWithIdDto>> UpdateProjectAsync(ProjectUpdateDto projectDto)
+    {
+        try
+        {
+            var project = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Projects.FindAsync(projectDto.Id));
+
+            if (project is null)
+                return Result.NotFound();
+
+            projectDto.Adapt(project);
+
+            await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
+
+            return Result.Success(project.Adapt<ProjectWithIdDto>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when updating project {projectId}.", projectDto.Id);
+            return Result.Error($"There was an error when updating project {projectDto.Id}.");
+        }
+    }
+
+    public async Task<Result> DeleteProjectAsync(string projectId)
+    {
+        try
+        {
+            var project = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Projects.FindAsync(projectId));
+            
+            if (project is null)
+                return Result.NotFound();
+            
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                dbContext.Remove(project);
+                await dbContext.SaveChangesAsync();
+            });
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when deleting project {projectId}.", projectId);
+            return Result.Error($"There was an error when deleting project {projectId}.");
         }
     }
 }

@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using CMS.Main.Services
+@using CMS.Main.Components.Shared
+
+@inject ConfirmationService ConfirmationService
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -18,13 +23,13 @@
 </head>
 
 <body class="noto-sans">
-<Routes/>
 <script src="_framework/blazor.web.js"></script>
 </body>
-
+<Routes/>
 </html>
 
 @code {
+    
     private readonly string[] iconNames =
     [
         "menu",
@@ -48,7 +53,8 @@
         "settings",
         "close",
         "person",
-        "logout"
+        "logout",
+        "help"
     ];
     
     private string IconNamesSorted => string.Join(',', iconNames.OrderBy(x => x));

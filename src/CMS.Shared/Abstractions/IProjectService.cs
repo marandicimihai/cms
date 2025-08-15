@@ -11,7 +11,16 @@ public interface IProjectService
     Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
         string userId, 
         PaginationParams? paginationParams = null);
+
+    Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
+        string projectId);
     
     Task<Result<ProjectWithIdDto>> CreateProjectAsync(
         ProjectCreationDto projectDto);
+
+    Task<Result<ProjectWithIdDto>> UpdateProjectAsync(
+        ProjectUpdateDto projectDto);
+    
+    Task<Result> DeleteProjectAsync(
+        string projectId);
 }

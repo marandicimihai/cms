@@ -36,7 +36,8 @@ builder.Services
 builder.Services
     .AddScoped<DbContextConcurrencyHelper>()
     .AddScoped<IProjectService, ProjectService>()
-    .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>();
+    .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
+    .AddSingleton<ConfirmationService>();
 
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);

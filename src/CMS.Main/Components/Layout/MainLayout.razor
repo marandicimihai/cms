@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+@inject CMS.Main.Services.ConfirmationService ConfirmationService
+
 <div class="flex flex-col min-h-screen bg-slate-50">
     <!-- Navbar -->
     <NavBar />
@@ -24,6 +26,4 @@
     <span class="dismiss float-right cursor-pointer">🗙</span>
 </div>
 
-@code {
-    // No special code needed here as components handle their own logic
-}
+<ConfirmationModal />
