@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9C27BD92-AD58-4997-B19B-52E45C79A98D}"
 	ProjectSection(SolutionItems) = preProject
 		dev-compose.yaml = dev-compose.yaml
@@ -10,6 +9,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Main.Client", "src\CMS.Main.Client\CMS.Main.Client.csproj", "{C0E132F8-096A-4837-88B5-B0A70484C9C6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Shared", "src\CMS.Shared\CMS.Shared.csproj", "{6156E886-B760-4602-A464-BD2324526398}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Tests", "tests\CMS.Tests\CMS.Tests.csproj", "{B21F2F7A-5F4E-4A5E-A4F7-9D55F2E6C1A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,5 +30,9 @@ Global
 		{6156E886-B760-4602-A464-BD2324526398}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6156E886-B760-4602-A464-BD2324526398}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6156E886-B760-4602-A464-BD2324526398}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B21F2F7A-5F4E-4A5E-A4F7-9D55F2E6C1A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B21F2F7A-5F4E-4A5E-A4F7-9D55F2E6C1A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B21F2F7A-5F4E-4A5E-A4F7-9D55F2E6C1A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B21F2F7A-5F4E-4A5E-A4F7-9D55F2E6C1A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

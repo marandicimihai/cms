@@ -15,6 +15,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ExternalLogin> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Register</PageTitle>
 
@@ -81,7 +82,7 @@
             RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
         }
 
-        var info = await SignInManager.GetExternalLoginInfoAsync();
+        var info = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetExternalLoginInfoAsync());
         if (info is null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
@@ -110,12 +111,11 @@
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
         }
 
-        // Sign in the user with this external login provider if the user already has a login.
-        var result = await SignInManager.ExternalLoginSignInAsync(
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.ExternalLoginSignInAsync(
             externalLoginInfo.LoginProvider,
             externalLoginInfo.ProviderKey,
             isPersistent: false,
-            bypassTwoFactor: true);
+            bypassTwoFactor: true));
 
         if (result.Succeeded)
         {
@@ -147,19 +147,22 @@
         var emailStore = GetEmailStore();
         var user = CreateUser();
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        await ConcurrencyHelper.ExecuteAsync(async _ =>
+        {
+            await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+            await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        });
 
-        var result = await UserManager.CreateAsync(user);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.CreateAsync(user));
         if (result.Succeeded)
         {
-            result = await UserManager.AddLoginAsync(user, externalLoginInfo);
+            result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.AddLoginAsync(user, externalLoginInfo));
             if (result.Succeeded)
             {
                 Logger.LogInformation("User created an account using {Name} provider.", externalLoginInfo.LoginProvider);
 
-                var userId = await UserManager.GetUserIdAsync(user);
-                var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+                var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+                var code = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateEmailConfirmationTokenAsync(user));
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
                 var callbackUrl = NavigationManager.GetUriWithQueryParameters(
@@ -173,7 +176,7 @@
                     RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
                 }
 
-                await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider));
                 RedirectManager.RedirectTo(ReturnUrl);
             }
         }

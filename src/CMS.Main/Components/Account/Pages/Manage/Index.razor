@@ -8,6 +8,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Profile</PageTitle>
 
@@ -51,8 +52,8 @@
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        username = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserNameAsync(user));
+        phoneNumber = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetPhoneNumberAsync(user));
 
         Input.PhoneNumber ??= phoneNumber;
     }
@@ -61,14 +62,13 @@
     {
         if (Input.PhoneNumber != phoneNumber)
         {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+            var setPhoneResult = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber));
             if (!setPhoneResult.Succeeded)
             {
                 RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
             }
         }
-
-        await SignInManager.RefreshSignInAsync(user);
+        await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.RefreshSignInAsync(user));
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
     }
 

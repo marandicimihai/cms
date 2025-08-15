@@ -8,6 +8,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Confirm email change</PageTitle>
 
@@ -55,7 +56,7 @@
                 "Account/Login", "Error: Invalid email change confirmation link.", HttpContext);
         }
 
-        var user = await UserManager.FindByIdAsync(UserId);
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByIdAsync(UserId));
         if (user is null)
         {
             message = $"Unable to find user with Id '{UserId}'";
@@ -63,21 +64,21 @@
         }
 
         var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
-        var result = await UserManager.ChangeEmailAsync(user, Email, code);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.ChangeEmailAsync(user, Email, code));
         if (!result.Succeeded)
         {
             message = "Error changing email.";
             return;
         }
 
-        var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
+        var setUserNameResult = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.SetUserNameAsync(user, Email));
         if (!setUserNameResult.Succeeded)
         {
             message = "Error changing user name.";
             return;
         }
 
-        await SignInManager.RefreshSignInAsync(user);
+        await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.RefreshSignInAsync(user));
         message = "Thank you for confirming your email change.";
     }
 

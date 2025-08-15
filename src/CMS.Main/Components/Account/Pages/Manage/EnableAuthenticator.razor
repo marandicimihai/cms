@@ -12,6 +12,7 @@
 @inject UrlEncoder UrlEncoder
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<EnableAuthenticator> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Configure authenticator app</PageTitle>
 
@@ -93,8 +94,8 @@ else
         // Strip spaces and hyphens
         var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-        var is2faTokenValid = await UserManager.VerifyTwoFactorTokenAsync(
-            user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+        var is2faTokenValid = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.VerifyTwoFactorTokenAsync(
+            user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode));
 
         if (!is2faTokenValid)
         {
@@ -102,15 +103,15 @@ else
             return;
         }
 
-        await UserManager.SetTwoFactorEnabledAsync(user, true);
-        var userId = await UserManager.GetUserIdAsync(user);
+        await ConcurrencyHelper.ExecuteAsync(_ => UserManager.SetTwoFactorEnabledAsync(user, true));
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
         Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
         message = "Your authenticator app has been verified.";
 
-        if (await UserManager.CountRecoveryCodesAsync(user) == 0)
+        if (await ConcurrencyHelper.ExecuteAsync(_ => UserManager.CountRecoveryCodesAsync(user)) == 0)
         {
-            recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+            recoveryCodes = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10));
         }
         else
         {
@@ -121,16 +122,16 @@ else
     private async ValueTask LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
     {
         // Load the authenticator key & QR code URI to display on the form
-        var unformattedKey = await UserManager.GetAuthenticatorKeyAsync(user);
+        var unformattedKey = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetAuthenticatorKeyAsync(user));
         if (string.IsNullOrEmpty(unformattedKey))
         {
-            await UserManager.ResetAuthenticatorKeyAsync(user);
-            unformattedKey = await UserManager.GetAuthenticatorKeyAsync(user);
+            await ConcurrencyHelper.ExecuteAsync(_ => UserManager.ResetAuthenticatorKeyAsync(user));
+            unformattedKey = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetAuthenticatorKeyAsync(user));
         }
 
         sharedKey = FormatKey(unformattedKey!);
 
-        var email = await UserManager.GetEmailAsync(user);
+        var email = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetEmailAsync(user));
         authenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
     }
 

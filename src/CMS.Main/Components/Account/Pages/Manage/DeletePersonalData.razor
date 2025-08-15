@@ -11,6 +11,7 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Delete Personal Data</PageTitle>
 
@@ -54,26 +55,26 @@
     {
         Input ??= new();
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        requirePassword = await UserManager.HasPasswordAsync(user);
+        requirePassword = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.HasPasswordAsync(user));
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
+        if (requirePassword && !await ConcurrencyHelper.ExecuteAsync(_ => UserManager.CheckPasswordAsync(user, Input.Password)))
         {
             message = "Error: Incorrect password.";
             return;
         }
 
-        var result = await UserManager.DeleteAsync(user);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.DeleteAsync(user));
         if (!result.Succeeded)
         {
             throw new InvalidOperationException("Unexpected error occurred deleting user.");
         }
 
-        await SignInManager.SignOutAsync();
+        await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.SignOutAsync());
 
-        var userId = await UserManager.GetUserIdAsync(user);
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
         Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
 
         RedirectManager.RedirectToCurrentPage();

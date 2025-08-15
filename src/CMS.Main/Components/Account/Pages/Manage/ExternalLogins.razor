@@ -9,6 +9,7 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IUserStore<ApplicationUser> UserStore
 @inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Manage your external logins</PageTitle>
 
@@ -88,8 +89,8 @@
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        currentLogins = await UserManager.GetLoginsAsync(user);
-        otherLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync())
+        currentLogins = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetLoginsAsync(user));
+        otherLogins = (await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetExternalAuthenticationSchemesAsync()))
             .Where(auth => currentLogins.All(ul => auth.Name != ul.LoginProvider))
             .ToList();
 
@@ -109,26 +110,26 @@
 
     private async Task OnSubmitAsync()
     {
-        var result = await UserManager.RemoveLoginAsync(user, LoginProvider!, ProviderKey!);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.RemoveLoginAsync(user, LoginProvider!, ProviderKey!));
         if (!result.Succeeded)
         {
             RedirectManager.RedirectToCurrentPageWithStatus("Error: The external login was not removed.", HttpContext);
         }
 
-        await SignInManager.RefreshSignInAsync(user);
+        await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.RefreshSignInAsync(user));
         RedirectManager.RedirectToCurrentPageWithStatus("The external login was removed.", HttpContext);
     }
 
     private async Task OnGetLinkLoginCallbackAsync()
     {
-        var userId = await UserManager.GetUserIdAsync(user);
-        var info = await SignInManager.GetExternalLoginInfoAsync(userId);
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        var info = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetExternalLoginInfoAsync(userId));
         if (info is null)
         {
             RedirectManager.RedirectToCurrentPageWithStatus("Error: Could not load external login info.", HttpContext);
         }
 
-        var result = await UserManager.AddLoginAsync(user, info);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.AddLoginAsync(user, info));
         if (!result.Succeeded)
         {
             RedirectManager.RedirectToCurrentPageWithStatus("Error: The external login was not added. External logins can only be associated with one account.", HttpContext);

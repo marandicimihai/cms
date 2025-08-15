@@ -9,6 +9,7 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Register confirmation</PageTitle>
 
@@ -61,7 +62,7 @@
             RedirectManager.RedirectTo("");
         }
 
-        var user = await UserManager.FindByEmailAsync(Email);
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByEmailAsync(Email));
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;

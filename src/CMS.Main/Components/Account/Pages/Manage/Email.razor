@@ -11,6 +11,7 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Manage email</PageTitle>
 
@@ -64,8 +65,8 @@
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        email = await UserManager.GetEmailAsync(user);
-        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
+        email = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetEmailAsync(user));
+        isEmailConfirmed = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.IsEmailConfirmedAsync(user));
 
         Input.NewEmail ??= email;
     }
@@ -77,16 +78,13 @@
             message = "Your email is unchanged.";
             return;
         }
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        var code = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail));
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmailChange").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["email"] = Input.NewEmail, ["code"] = code });
-
         await EmailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
-
         message = "Confirmation link to change email sent. Please check your email.";
     }
 
@@ -96,14 +94,12 @@
         {
             return;
         }
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        var code = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateEmailConfirmationTokenAsync(user));
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
-
         await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
         message = "Verification email sent. Please check your email.";

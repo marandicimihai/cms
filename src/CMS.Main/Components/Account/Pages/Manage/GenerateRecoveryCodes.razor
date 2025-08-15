@@ -7,6 +7,7 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<GenerateRecoveryCodes> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Generate two-factor authentication (2FA) recovery codes</PageTitle>
 
@@ -51,8 +52,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-
-        var isTwoFactorEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
+        var isTwoFactorEnabled = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetTwoFactorEnabledAsync(user));
         if (!isTwoFactorEnabled)
         {
             throw new InvalidOperationException("Cannot generate recovery codes for user because they do not have 2FA enabled.");
@@ -61,8 +61,8 @@ else
 
     private async Task OnSubmitAsync()
     {
-        var userId = await UserManager.GetUserIdAsync(user);
-        recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        recoveryCodes = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10));
         message = "You have generated new recovery codes.";
 
         Logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", userId);

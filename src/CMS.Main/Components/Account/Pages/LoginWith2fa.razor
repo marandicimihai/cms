@@ -8,6 +8,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<LoginWith2fa> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Two-factor authentication</PageTitle>
 
@@ -71,16 +72,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Ensure the user has gone through the username & password screen first
-        user = await SignInManager.GetTwoFactorAuthenticationUserAsync() ??
+        user = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetTwoFactorAuthenticationUserAsync()) ??
                throw new InvalidOperationException("Unable to load two-factor authentication user.");
     }
 
     private async Task OnValidSubmitAsync()
     {
         var authenticatorCode = Input.TwoFactorCode!.Replace(" ", string.Empty).Replace("-", string.Empty);
-        var result = await SignInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, RememberMe, Input.RememberMachine);
-        var userId = await UserManager.GetUserIdAsync(user);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, RememberMe, Input.RememberMachine));
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
 
         if (result.Succeeded)
         {

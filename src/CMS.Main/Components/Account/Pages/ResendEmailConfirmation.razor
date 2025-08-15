@@ -11,6 +11,7 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Resend email confirmation</PageTitle>
 
@@ -55,15 +56,15 @@
 
     private async Task OnValidSubmitAsync()
     {
-        var user = await UserManager.FindByEmailAsync(Input.Email!);
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByEmailAsync(Input.Email!));
         if (user is null)
         {
             message = "Verification email sent. Please check your email.";
             return;
         }
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        var code = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateEmailConfirmationTokenAsync(user));
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,

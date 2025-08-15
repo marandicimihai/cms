@@ -8,6 +8,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<LoginWithRecoveryCode> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Recovery code verification</PageTitle>
 
@@ -55,18 +56,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Ensure the user has gone through the username & password screen first
-        user = await SignInManager.GetTwoFactorAuthenticationUserAsync() ??
+        user = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetTwoFactorAuthenticationUserAsync()) ??
                throw new InvalidOperationException("Unable to load two-factor authentication user.");
     }
 
     private async Task OnValidSubmitAsync()
     {
         var recoveryCode = Input.RecoveryCode.Replace(" ", string.Empty);
-
-        var result = await SignInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
-
-        var userId = await UserManager.GetUserIdAsync(user);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode));
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
 
         if (result.Succeeded)
         {

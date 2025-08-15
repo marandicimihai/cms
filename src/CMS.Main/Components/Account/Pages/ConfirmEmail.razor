@@ -8,6 +8,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Confirm email</PageTitle>
 
@@ -78,7 +79,7 @@
             return;
         }
 
-        var user = await UserManager.FindByIdAsync(UserId);
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByIdAsync(UserId));
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
@@ -88,17 +89,13 @@
         }
 
         var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
-        var result = await UserManager.ConfirmEmailAsync(user, code);
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.ConfirmEmailAsync(user, code));
         
         if (result.Succeeded)
         {
             isConfirmed = true;
             statusMessage = "Thank you for confirming your email.";
-            
-            // Automatically sign in the user after email confirmation
-            await SignInManager.SignInAsync(user, isPersistent: true);
-            
-            // Redirect after a short delay to show the success message
+            await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.SignInAsync(user, isPersistent: true));
             await Task.Delay(2000);
             RedirectManager.RedirectTo(ReturnUrl ?? "/");
         }
