@@ -1,3 +1,5 @@
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <aside class="hidden md:block w-64 border-r border-slate-200 bg-white overflow-y-auto">
     <div class="p-4">
         <nav class="space-y-1 mb-3">
@@ -6,10 +8,11 @@
         
         <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500 mb-3">Projects</h2>
         <nav class="space-y-1">
-            <SideBarButton Href="/" Match="NavLinkMatch.All">Project1</SideBarButton>
-            <SideBarButton Href="/content">Project2</SideBarButton>
-            <SideBarButton Href="/users">Project3</SideBarButton>
-            <SideBarButton Href="/settings">Project4</SideBarButton>
+            @foreach (var project in Projects)
+            {
+                var uri = $"/project/{project.Id}";
+                <SideBarButton Href="@uri" Match="NavLinkMatch.Prefix">@project.Name</SideBarButton>
+            }
         </nav>
     </div>
 </aside>

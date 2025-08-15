@@ -88,8 +88,4 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Components\Shared\" />
-    </ItemGroup>
-
 </Project>
