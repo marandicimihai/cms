@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Components;
-using CMS.Shared.DTOs.Project;
 using System.Security.Claims;
 using CMS.Main.Client.Components;
 using CMS.Shared.Abstractions;
+using CMS.Shared.DTOs.Project;
+using Microsoft.AspNetCore.Components;
 
-namespace CMS.Main.Components.Pages;
+namespace CMS.Main.Components.Pages.Project;
 
 public partial class CreateProject : ComponentBase
 {
