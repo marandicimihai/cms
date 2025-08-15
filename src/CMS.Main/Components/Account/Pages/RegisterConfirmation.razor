@@ -1,0 +1,73 @@
+﻿@page "/Account/RegisterConfirmation"
+
+@using System.Text
+@using CMS.Main.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
+
+<PageTitle>Register confirmation</PageTitle>
+
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6 text-center">
+            <StatusMessage Message="@statusMessage"/>
+            @if (emailConfirmationLink is not null)
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-blue-600">mail</span>
+                </div>
+                <h1 class="text-2xl font-semibold text-slate-900 mb-2">Confirm your email</h1>
+                <p class="text-sm text-slate-600 mb-4">
+                    This app does not currently have a real email sender registered. See <a href="https://aka.ms/aspaccountconf" class="text-blue-600 hover:text-blue-500 underline">these docs</a> for how to configure a real email sender.<br/>
+                    Normally this would be emailed: <a href="@emailConfirmationLink" class="text-blue-600 hover:text-blue-500 underline">Click here to confirm your account</a>
+                </p>
+            }
+            else
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-blue-600">send</span>
+                </div>
+                <h1 class="text-2xl font-semibold text-slate-900 mb-2">Check your email</h1>
+                <p class="text-sm text-slate-600 mb-4" role="alert">
+                    Please check your email to confirm your account.
+                </p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? emailConfirmationLink;
+    private string? statusMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Email is null)
+        {
+            RedirectManager.RedirectTo("");
+        }
+
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByEmailAsync(Email));
+        if (user is null)
+        {
+            HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            statusMessage = "Error finding user for unspecified email";
+        }
+    }
+
+}

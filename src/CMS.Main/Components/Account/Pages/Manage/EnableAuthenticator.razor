@@ -1,0 +1,172 @@
+﻿@page "/Account/Manage/EnableAuthenticator"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+@using System.Text
+@using System.Text.Encodings.Web
+@using CMS.Main.Data
+@using Microsoft.AspNetCore.Identity
+@using QRCoder
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+@inject UrlEncoder UrlEncoder
+@inject IdentityRedirectManager RedirectManager
+@inject ILogger<EnableAuthenticator> Logger
+@inject DbContextConcurrencyHelper ConcurrencyHelper
+
+<PageTitle>Configure authenticator app</PageTitle>
+
+@if (recoveryCodes is not null)
+{
+    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()" StatusMessage="@message" />
+}
+else
+{
+    <StatusMessage Message="@message" />
+    <div class="max-w-screen-lg mx-auto p-4 rounded-lg bg-white space-y-4">
+        <h3 class="text-lg font-medium">Set up authenticator</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="flex flex-col items-center">
+                <label class="text-xs uppercase tracking-wide mb-2 block">Scan this QR code</label>
+                @if (qrCodeImageUri is not null)
+                {
+                    <img src="@qrCodeImageUri" alt="Authenticator QR code" class="rounded-md bg-white p-2 border border-slate-200" width="180" height="180" />
+                }
+                else
+                {
+                    <div class="text-xs text-rose-600">QR code unavailable.</div>
+                }
+            </div>
+            <div class="flex flex-col items-center">
+                <label class="text-xs uppercase tracking-wide mb-2 block">Or enter this account key</label>
+                <kbd class="bg-slate-100 text-slate-900 px-2 py-1 rounded-md text-base tracking-wider select-all">@sharedKey</kbd>
+                <p class="text-xs text-slate-600 mt-2">Spaces and casing do not matter.</p>
+            </div>
+        </div>
+        <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post" class="space-y-2">
+            <DataAnnotationsValidator />
+            <div>
+                <label for="Input.Code" class="text-xs uppercase tracking-wide mb-1 block">Verification Code</label>
+                <InputText @bind-Value="Input.Code" id="Input.Code" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" autocomplete="one-time-code" inputmode="numeric" placeholder="123456" />
+                <ValidationMessage For="() => Input.Code" class="text-rose-600 text-xs" />
+            </div>
+            <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2">Verify</button>
+            <ValidationSummary class="text-rose-600 text-xs" role="alert" />
+        </EditForm>
+    </div>
+}
+
+@code {
+    private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
+
+    private string? message;
+    private ApplicationUser user = default!;
+    private string? sharedKey;
+    private string? authenticatorUri;
+    private string? qrCodeImageUri;
+    private IEnumerable<string>? recoveryCodes;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        await LoadSharedKeyAndQrCodeUriAsync(user);
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+        var is2FaTokenValid = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.VerifyTwoFactorTokenAsync(
+            user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode));
+
+        if (!is2FaTokenValid)
+        {
+            message = "Error: Verification code is invalid.";
+            return;
+        }
+
+        await ConcurrencyHelper.ExecuteAsync(_ => UserManager.SetTwoFactorEnabledAsync(user, true));
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+
+        message = "Your authenticator app has been verified.";
+
+        if (await ConcurrencyHelper.ExecuteAsync(_ => UserManager.CountRecoveryCodesAsync(user)) == 0)
+        {
+            recoveryCodes = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10));
+        }
+        else
+        {
+            RedirectManager.RedirectToWithStatus("Account/Manage/TwoFactorAuthentication", message, HttpContext);
+        }
+    }
+
+    private async ValueTask LoadSharedKeyAndQrCodeUriAsync(ApplicationUser currentUser)
+    {
+        var unformattedKey = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetAuthenticatorKeyAsync(currentUser));
+        if (string.IsNullOrEmpty(unformattedKey))
+        {
+            await ConcurrencyHelper.ExecuteAsync(_ => UserManager.ResetAuthenticatorKeyAsync(currentUser));
+            unformattedKey = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetAuthenticatorKeyAsync(currentUser));
+        }
+
+        sharedKey = FormatKey(unformattedKey!);
+
+        var email = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetEmailAsync(currentUser));
+        authenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
+        qrCodeImageUri = GenerateQrCodeImageUri(authenticatorUri);
+    }
+
+    private string FormatKey(string unformattedKey)
+    {
+        var result = new StringBuilder();
+        int currentPosition = 0;
+        while (currentPosition + 4 < unformattedKey.Length)
+        {
+            result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
+            currentPosition += 4;
+        }
+        if (currentPosition < unformattedKey.Length)
+        {
+            result.Append(unformattedKey.AsSpan(currentPosition));
+        }
+        return result.ToString().ToLowerInvariant();
+    }
+
+    private string GenerateQrCodeUri(string email, string unformattedKey)
+    {
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            AuthenticatorUriFormat,
+            UrlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
+            UrlEncoder.Encode(email),
+            unformattedKey);
+    }
+
+    private string GenerateQrCodeImageUri(string uri)
+    {
+        if (string.IsNullOrWhiteSpace(uri)) return string.Empty;
+        using var generator = new QRCodeGenerator();
+        using var data = generator.CreateQrCode(uri, QRCodeGenerator.ECCLevel.Q);
+        using var png = new PngByteQRCode(data);
+        var bytes = png.GetGraphic(20);
+        return "data:image/png;base64," + Convert.ToBase64String(bytes);
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Verification Code")]
+        public string Code { get; set; } = string.Empty;
+    }
+
+}

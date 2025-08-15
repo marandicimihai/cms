@@ -1,0 +1,109 @@
+﻿@page "/Account/ConfirmEmail"
+
+@using System.Text
+@using CMS.Main.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
+
+<PageTitle>Confirm email</PageTitle>
+
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6 text-center">
+            @if (isConfirmed)
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-emerald-600">check_circle</span>
+                </div>
+                <h1 class="text-2xl font-semibold text-slate-900 mb-2">Email Confirmed!</h1>
+                <p class="text-sm text-slate-600 mb-4">
+                    Thank you for confirming your email. You are now being signed in automatically.
+                </p>
+                <div class="animate-pulse">
+                    <span class="material-symbols-outlined icons-default text-2xl text-blue-600">login</span>
+                    <p class="text-sm text-blue-600 mt-1">Signing you in...</p>
+                </div>
+            }
+            else if (hasError)
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-rose-600">error</span>
+                </div>
+                <h1 class="text-2xl font-semibold text-slate-900 mb-2">Confirmation Failed</h1>
+                <p class="text-sm text-slate-600 mb-4">@statusMessage</p>
+                <a href="Account/Login" 
+                   class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">login</span>
+                    Go to Login
+                </a>
+            }
+            else
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-blue-600 animate-spin">progress_activity</span>
+                </div>
+                <h1 class="text-2xl font-semibold text-slate-900 mb-2">Confirming Email</h1>
+                <p class="text-sm text-slate-600">Please wait while we confirm your email address...</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? statusMessage;
+    private bool isConfirmed = false;
+    private bool hasError = false;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? UserId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Code { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserId is null || Code is null)
+        {
+            RedirectManager.RedirectTo("");
+            return;
+        }
+
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByIdAsync(UserId));
+        if (user is null)
+        {
+            HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            statusMessage = $"Error loading user with ID {UserId}";
+            hasError = true;
+            return;
+        }
+
+        var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.ConfirmEmailAsync(user, code));
+        
+        if (result.Succeeded)
+        {
+            isConfirmed = true;
+            statusMessage = "Thank you for confirming your email.";
+            await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.SignInAsync(user, isPersistent: true));
+            await Task.Delay(2000);
+            RedirectManager.RedirectTo(ReturnUrl ?? "/");
+        }
+        else
+        {
+            hasError = true;
+            statusMessage = "Error confirming your email.";
+        }
+    }
+
+}

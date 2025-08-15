@@ -1,0 +1,62 @@
+﻿@using CMS.Main.Services
+@using CMS.Main.Components.Shared
+
+@inject ConfirmationService ConfirmationService
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300..500,0..1,-50..200&icon_names=@IconNamesSorted"/>
+    <link rel="stylesheet" href="@Assets["css/tailwind.css"]"/>
+    <link rel="stylesheet" href="@Assets["CMS.Main.styles.css"]"/>
+    <ImportMap/>
+    <HeadOutlet/>
+</head>
+
+<body class="noto-sans">
+<script src="_framework/blazor.web.js"></script>
+</body>
+<Routes/>
+</html>
+
+@code {
+    
+    private readonly string[] iconNames =
+    [
+        "menu",
+        "add", 
+        "email",
+        "lock",
+        "login",
+        "verified_user",
+        "person_add",
+        "send",
+        "arrow_back",
+        "refresh",
+        "check_circle",
+        "error",
+        "progress_activity",
+        "mail",
+        "warning",
+        "download",
+        "delete",
+        "save",
+        "settings",
+        "close",
+        "person",
+        "logout",
+        "help"
+    ];
+    
+    private string IconNamesSorted => string.Join(',', iconNames.OrderBy(x => x));
+
+}

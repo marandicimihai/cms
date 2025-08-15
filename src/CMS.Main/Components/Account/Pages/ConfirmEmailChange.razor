@@ -1,0 +1,85 @@
+﻿@page "/Account/ConfirmEmailChange"
+
+@using System.Text
+@using CMS.Main.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
+
+<PageTitle>Confirm email change</PageTitle>
+
+<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6 text-center">
+            @if (message?.StartsWith("Thank you") == true)
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-emerald-600">check_circle</span>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(message))
+            {
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-6xl text-rose-600">error</span>
+                </div>
+            }
+            <h1 class="text-2xl font-semibold text-slate-900 mb-2">Confirm email change</h1>
+            <StatusMessage Message="@message"/>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? message;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? UserId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Code { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserId is null || Email is null || Code is null)
+        {
+            RedirectManager.RedirectToWithStatus(
+                "Account/Login", "Error: Invalid email change confirmation link.", HttpContext);
+        }
+
+        var user = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.FindByIdAsync(UserId));
+        if (user is null)
+        {
+            message = $"Unable to find user with Id '{UserId}'";
+            return;
+        }
+
+        var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.ChangeEmailAsync(user, Email, code));
+        if (!result.Succeeded)
+        {
+            message = "Error changing email.";
+            return;
+        }
+
+        var setUserNameResult = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.SetUserNameAsync(user, Email));
+        if (!setUserNameResult.Succeeded)
+        {
+            message = "Error changing user name.";
+            return;
+        }
+
+        await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.RefreshSignInAsync(user));
+        message = "Thank you for confirming your email change.";
+    }
+
+}

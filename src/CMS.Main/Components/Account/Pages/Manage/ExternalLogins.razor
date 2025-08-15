@@ -1,0 +1,144 @@
+﻿@page "/Account/Manage/ExternalLogins"
+
+@using CMS.Main.Data
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IUserStore<ApplicationUser> UserStore
+@inject IdentityRedirectManager RedirectManager
+@inject DbContextConcurrencyHelper ConcurrencyHelper
+
+<PageTitle>Manage your external logins</PageTitle>
+
+<StatusMessage/>
+@if (currentLogins?.Count > 0)
+{
+    <h3 class="text-lg font-medium">Registered Logins</h3>
+    <table class="table border border-slate-200 rounded-lg shadow-sm">
+        <tbody>
+        @foreach (var login in currentLogins)
+        {
+            <tr>
+                <td class="text-sm text-slate-900">@login.ProviderDisplayName</td>
+                <td>
+                    @if (showRemoveButton)
+                    {
+                        <form @formname="@($"remove-login-{login.LoginProvider}")" @onsubmit="OnSubmitAsync" method="post">
+                            <AntiforgeryToken/>
+                            <div>
+                                <input type="hidden" name="@nameof(LoginProvider)" value="@login.LoginProvider"/>
+                                <input type="hidden" name="@nameof(ProviderKey)" value="@login.ProviderKey"/>
+                                <button type="submit" class="btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md" title="Remove this @login.ProviderDisplayName login from your account">
+                                    <span class="material-symbols-outlined text-base mr-2">delete</span>Remove
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        @: &nbsp;
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@if (otherLogins?.Count > 0)
+{
+    <h4 class="text-lg font-medium">Add another service to log in.</h4>
+    <hr class="my-4 border-slate-200"/>
+    <form class="form-horizontal" action="Account/Manage/LinkExternalLogin" method="post">
+        <AntiforgeryToken/>
+        <div>
+            <p class="flex flex-wrap gap-2">
+                @foreach (var provider in otherLogins)
+                {
+                    <button type="submit" class="btn bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium px-3 py-2 rounded-md" name="Provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                        <span class="material-symbols-outlined text-base mr-2">login</span>@provider.DisplayName
+                    </button>
+                }
+            </p>
+        </div>
+    </form>
+}
+
+@code {
+    public const string LinkLoginCallbackAction = "LinkLoginCallback";
+
+    private ApplicationUser user = default!;
+    private IList<UserLoginInfo>? currentLogins;
+    private IList<AuthenticationScheme>? otherLogins;
+    private bool showRemoveButton;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private string? LoginProvider { get; set; }
+
+    [SupplyParameterFromForm]
+    private string? ProviderKey { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Action { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        currentLogins = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetLoginsAsync(user));
+        otherLogins = (await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetExternalAuthenticationSchemesAsync()))
+            .Where(auth => currentLogins.All(ul => auth.Name != ul.LoginProvider))
+            .ToList();
+
+        string? passwordHash = null;
+        if (UserStore is IUserPasswordStore<ApplicationUser> userPasswordStore)
+        {
+            passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
+        }
+
+        showRemoveButton = passwordHash is not null || currentLogins.Count > 1;
+
+        if (HttpMethods.IsGet(HttpContext.Request.Method) && Action == LinkLoginCallbackAction)
+        {
+            await OnGetLinkLoginCallbackAsync();
+        }
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.RemoveLoginAsync(user, LoginProvider!, ProviderKey!));
+        if (!result.Succeeded)
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: The external login was not removed.", HttpContext);
+        }
+
+        await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.RefreshSignInAsync(user));
+        RedirectManager.RedirectToCurrentPageWithStatus("The external login was removed.", HttpContext);
+    }
+
+    private async Task OnGetLinkLoginCallbackAsync()
+    {
+        var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
+        var info = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.GetExternalLoginInfoAsync(userId));
+        if (info is null)
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: Could not load external login info.", HttpContext);
+        }
+
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.AddLoginAsync(user, info));
+        if (!result.Succeeded)
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: The external login was not added. External logins can only be associated with one account.", HttpContext);
+        }
+
+        // Clear the existing external cookie to ensure a clean login process
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+        RedirectManager.RedirectToCurrentPageWithStatus("The external login was added.", HttpContext);
+    }
+
+}
