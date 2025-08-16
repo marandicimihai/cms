@@ -28,6 +28,7 @@ public class ProjectService(
             {
                 var projects = await dbContext.Projects
                     .Where(p => p.OwnerId == userId)
+                    .OrderByDescending(p => p.LastUpdated)
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
                     .Take(cappedPageSize)
                     .AsNoTracking()
@@ -76,7 +77,6 @@ public class ProjectService(
         try
         {
             var project = projectDto.Adapt<Project>();
-            
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 await dbContext.Projects.AddAsync(project);
@@ -103,7 +103,7 @@ public class ProjectService(
                 return Result.NotFound();
 
             projectDto.Adapt(project);
-
+            project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 
             return Result.Success(project.Adapt<ProjectWithIdDto>());

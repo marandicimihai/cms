@@ -13,10 +13,9 @@ public partial class CreateProject : ComponentBase
     
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
-    
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
 
+    private string? projectUrl;
+    
     private StatusIndicator? statusIndicator;
     private string? statusText;
     private bool isLoading;
@@ -56,7 +55,7 @@ public partial class CreateProject : ComponentBase
             statusText = "The project was successfully created."; 
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
             
-            NavigationManager.NavigateTo($"/project/{result.Value.Id}");
+            projectUrl = $"/project/{result.Value.Id}";
         }
         catch
         {

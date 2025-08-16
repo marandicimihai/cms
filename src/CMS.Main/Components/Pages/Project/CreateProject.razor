@@ -12,35 +12,54 @@
     </div>
 
     <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4">
-        <EditForm Model="@ProjectDto" OnValidSubmit="@HandleValidSubmit" FormName="CreateProjectForm">
-            <DataAnnotationsValidator />
-            
-            <div class="mb-4">
-                <label for="name" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
-                    Project Name
-                </label>
-                <InputText id="name" 
-                           @bind-Value="ProjectDto.Name" 
-                           class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
-                           placeholder="Enter project name" />
-                <ValidationMessage For="@(() => ProjectDto.Name)" AdditionalAttributes="@(new Dictionary<string, object> { { "class", "text-rose-600 text-xs mt-1" } })" />
+        @if (projectUrl != null)
+        {
+            <div class="text-center">
+                <div class="mb-4">
+                    <span class="material-symbols-outlined icons-default text-4xl text-emerald-600 mb-2">check_circle</span>
+                </div>
+                <h2 class="text-lg font-medium text-slate-900 mb-2">Project Created Successfully!</h2>
+                <p class="text-sm text-slate-600 mb-6">Your project is ready. Click below to start working on it.</p>
+                <a href="@projectUrl" 
+                   class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   aria-label="Go to project page">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">arrow_forward</span>
+                    Go To Project Page
+                </a>
             </div>
+        }
+        else
+        {
+            <EditForm Model="@ProjectDto" OnValidSubmit="@HandleValidSubmit" FormName="CreateProjectForm">
+                <DataAnnotationsValidator />
+                
+                <div class="mb-4">
+                    <label for="name" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        Project Name
+                    </label>
+                    <InputText id="name" 
+                               @bind-Value="ProjectDto.Name" 
+                               class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
+                               placeholder="Enter project name" />
+                    <ValidationMessage For="@(() => ProjectDto.Name)" AdditionalAttributes="@(new Dictionary<string, object> { { "class", "text-rose-600 text-xs mt-1" } })" />
+                </div>
 
-            <div class="flex gap-2">
-                <button type="submit"
-                        class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled="@isLoading"
-                        aria-busy="@isLoading"
-                        aria-disabled="@isLoading">
-                    @if (isLoading) {
-                        <span class="material-symbols-outlined icons-default text-base animate-spin">progress_activity</span>
-                    }
-                    else {
-                        <span>Create Project</span>
-                    }
-                </button>
-            </div>
-        </EditForm>
+                <div class="flex gap-2">
+                    <button type="submit"
+                            class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled="@isLoading"
+                            aria-busy="@isLoading"
+                            aria-disabled="@isLoading">
+                        @if (isLoading) {
+                            <span class="material-symbols-outlined icons-default text-base animate-spin">progress_activity</span>
+                        }
+                        else {
+                            <span>Create Project</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        }
     </div>
 </div>
 
