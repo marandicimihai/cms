@@ -134,6 +134,7 @@ public partial class SideBar : ComponentBase
             var project = Projects.FirstOrDefault(p => p.Id == id);
             if (project != null)
                 Projects.Remove(project);
+            totalCount--;
         }
 
         StateHasChanged();

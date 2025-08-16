@@ -25,7 +25,7 @@ public static class DataConfiguration
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("MustOwnProject", policy =>
+            options.AddPolicy("ProjectPolicies.CanEditProject", policy =>
                 policy.Requirements.Add(new MustOwnProjectRequirement()));
         });
         services.AddScoped<IAuthorizationHandler, MustOwnProjectHandler>();

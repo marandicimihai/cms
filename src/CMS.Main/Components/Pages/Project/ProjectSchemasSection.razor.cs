@@ -117,7 +117,7 @@ public partial class ProjectSchemasSection : ComponentBase
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var authorizationResult = await AuthorizationService.AuthorizeAsync(user, ProjectId, "MustOwnProject");
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(user, ProjectId, "ProjectPolicies.CanEditProject");
 
         if (authorizationResult.Succeeded) return true;
 

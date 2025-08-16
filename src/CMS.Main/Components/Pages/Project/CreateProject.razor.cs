@@ -16,7 +16,7 @@ public partial class CreateProject : ComponentBase
     private string? statusText;
 
     [SupplyParameterFromForm]
-    private ProjectCreationDto ProjectDto { get; } = new();
+    private ProjectCreationDto ProjectDto { get; set; } = new();
 
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;

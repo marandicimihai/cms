@@ -1,6 +1,8 @@
 @page "/project/{ProjectId:guid}"
 @rendermode InteractiveServer
 
+@attribute [Authorize]
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="rounded-lg bg-white p-4 mb-4 border border-slate-200 shadow-sm max-w-screen-lg mx-auto">
@@ -30,4 +32,8 @@
         </div>
     </EditForm>
 </div>
-<ProjectSchemasSection Schemas="@ProjectDto.Schemas" ProjectId="@ProjectDto.Id"/>
+<AuthorizeView Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
+    <Authorized>
+        <ProjectSchemasSection Schemas="@ProjectDto.Schemas" ProjectId="@ProjectDto.Id"/>
+    </Authorized>
+</AuthorizeView>
