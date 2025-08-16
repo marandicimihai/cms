@@ -1,4 +1,5 @@
 ﻿@page "/Account/Manage/Disable2fa"
+
 @using CMS.Main.Data
 @using Microsoft.AspNetCore.Identity
 
@@ -19,18 +20,14 @@
     </p>
     <p class="text-sm">
         Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
-        used in an authenticator app you should <a href="Account/Manage/ResetAuthenticator"
-                                                   class="text-blue-600 hover:underline">reset your authenticator
-            keys.</a>
+        used in an authenticator app you should <a href="Account/Manage/ResetAuthenticator" class="text-blue-600 hover:underline">reset your authenticator keys.</a>
     </p>
 </div>
 
 <div>
     <form @formname="disable-2fa" @onsubmit="OnSubmitAsync" method="post">
         <AntiforgeryToken/>
-        <button class="btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md"
-                type="submit">Disable 2FA
-        </button>
+        <button class="btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md" type="submit">Disable 2FA</button>
     </form>
 </div>
 

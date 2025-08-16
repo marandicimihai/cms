@@ -1,8 +1,7 @@
 # 📐 App Style Guide
 
 **Purpose:**  
-This app prioritizes **functionality** and **fast navigation** with **compact layouts** that still maintain readability
-and breathing room.  
+This app prioritizes **functionality** and **fast navigation** with **compact layouts** that still maintain readability and breathing room.  
 Design choices aim for a professional, neutral, and modern look.
 
 ---
@@ -13,7 +12,6 @@ We use **Tailwind v4 default colors** for fast, consistent styling.
 Primary colors are from the **Slate**, **Blue**, and **Emerald** palettes.
 
 ### Brand Palette
-
 - **Primary (Interactive)**: `blue-600` — Buttons, links, highlights
 - **Primary Hover**: `blue-700`
 - **Success**: `emerald-600` — Confirmations, success states
@@ -30,12 +28,12 @@ Primary colors are from the **Slate**, **Blue**, and **Emerald** palettes.
 
 Text should be **clear and unintrusive**.
 
-| Element        | Class Example                     | Notes                         |
-|----------------|-----------------------------------|-------------------------------|
-| App Title / H1 | `text-2xl font-semibold`          | Minimal emphasis              |
-| Section Titles | `text-lg font-medium`             | Compact headers               |
-| Body Text      | `text-sm`                         | Default text size             |
-| Labels         | `text-xs uppercase tracking-wide` | Use for form and table labels |
+| Element          | Class Example                      | Notes |
+|------------------|------------------------------------|-------|
+| App Title / H1   | `text-2xl font-semibold`           | Minimal emphasis |
+| Section Titles   | `text-lg font-medium`              | Compact headers |
+| Body Text        | `text-sm`                          | Default text size |
+| Labels           | `text-xs uppercase tracking-wide`  | Use for form and table labels |
 
 ---
 
@@ -59,7 +57,6 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 ## 🧩 Components
 
 ### Buttons
-
 - Base: `inline-flex items-center justify-center rounded-md font-medium`
 - Sizes:
     - Small: `text-xs px-2.5 py-1.5`
@@ -71,14 +68,12 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 - **Icons:** Allowed and encouraged on buttons for clarity and visual cues.
 
 ### Inputs
-
 - Base: `block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500`
 - Sizes: Default `text-sm px-3 py-2`
 - Disabled: `bg-slate-100 text-slate-500 cursor-not-allowed`
 - **No icons on field labels.** Keep field labels clean and text-only for clarity and compactness.
 
 ### Cards / Panels
-
 - Base: `rounded-lg border border-slate-200 bg-white shadow-sm`
 - Padding: `p-4`
 - Compact layout: reduce padding to `p-3`
@@ -86,7 +81,6 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 ---
 
 ## ♿ Accessibility Rules
-
 - All interactive elements **must** have `aria-label` or visible text.
 - Ensure sufficient color contrast (use Tailwind’s `text-*` colors against `bg-*` for AAA where possible).
 - Focus states should always be visible (Tailwind's `focus:ring-*` utilities).
@@ -94,7 +88,6 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 ---
 
 ## 💡 Layout Principles
-
 - Use **max-w-screen-lg** for main content width.
 - Sidebars: min width `w-64` (256px).
 - Content sections separated by `mb-4` (16px).
@@ -103,7 +96,6 @@ Stick to Tailwind’s scale: `1` = `0.25rem` (4px).
 ---
 
 ## ### Icons
-
 - Use **Google Material Symbols** for all icons in the app.
 - Add the `icons-default` class to every icon for consistent sizing and alignment.
 - Add any new icon names to the `iconNames` array in `App.razor` for consistency and easy management.

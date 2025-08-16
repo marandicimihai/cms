@@ -1,4 +1,5 @@
 ﻿@page "/Account/Login"
+
 @using System.ComponentModel.DataAnnotations
 @using CMS.Main.Data
 @using Microsoft.AspNetCore.Authentication
@@ -18,50 +19,48 @@
             <h1 class="text-2xl font-semibold text-slate-900 text-center">Sign in to your account</h1>
             <p class="mt-2 text-center text-sm text-slate-600">
                 Or
-                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))"
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" 
                    class="font-medium text-blue-600 hover:text-blue-500">
                     create a new account
                 </a>
             </p>
         </div>
-
+        
         <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6">
             <StatusMessage Message="@errorMessage"/>
-
+            
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="validation-summary" role="alert"/>
-
+                
                 <div class="space-y-4">
                     <div>
-                        <label for="Input.Email"
-                               class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
                             Email
                         </label>
-                        <InputText @bind-Value="Input.Email"
-                                   id="Input.Email"
-                                   class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
-                                   autocomplete="username"
-                                   aria-required="true"
-                                   placeholder="name@example.com"/>
+                        <InputText @bind-Value="Input.Email" 
+                                  id="Input.Email" 
+                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  autocomplete="username" 
+                                  aria-required="true" 
+                                  placeholder="name@example.com"/>
                         <ValidationMessage For="() => Input.Email" class="validation-message"/>
                     </div>
-
+                    
                     <div>
-                        <label for="Input.Password"
-                               class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.Password" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
                             Password
                         </label>
-                        <InputText type="password"
-                                   @bind-Value="Input.Password"
-                                   id="Input.Password"
-                                   class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
-                                   autocomplete="current-password"
-                                   aria-required="true"
-                                   placeholder="password"/>
+                        <InputText type="password" 
+                                  @bind-Value="Input.Password" 
+                                  id="Input.Password" 
+                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  autocomplete="current-password" 
+                                  aria-required="true" 
+                                  placeholder="password"/>
                         <ValidationMessage For="() => Input.Password" class="validation-message"/>
                     </div>
-
+                    
                     <div>
                         <button type="submit"
                                 class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -71,32 +70,32 @@
                     </div>
                 </div>
             </EditForm>
-
+            
             <div class="mt-6 text-center space-y-2">
                 <div>
-                    <a href="Account/ForgotPassword"
+                    <a href="Account/ForgotPassword" 
                        class="text-sm text-blue-600 hover:text-blue-500">
                         Forgot your password?
                     </a>
                 </div>
                 <div>
-                    <a href="Account/ResendEmailConfirmation"
+                    <a href="Account/ResendEmailConfirmation" 
                        class="text-sm text-blue-600 hover:text-blue-500">
                         Resend email confirmation
                     </a>
                 </div>
             </div>
-
+            
             <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-slate-200"/>
+                        <div class="w-full border-t border-slate-200" />
                     </div>
                     <div class="relative flex justify-center text-sm">
                         <span class="px-2 bg-white text-slate-500">Or continue with</span>
                     </div>
                 </div>
-
+                
                 <div class="mt-6">
                     <ExternalLoginPicker/>
                 </div>
@@ -112,7 +111,7 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; } = new();
+    private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
@@ -128,7 +127,7 @@
 
     public async Task LoginUser()
     {
-        var result = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, false));
+        var result = await ConcurrencyHelper.ExecuteAsync(_ => SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false));
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
@@ -162,7 +161,7 @@
         public string Password { get; set; } = "";
 
         [Display(Name = "Remember me?")]
-        public bool RememberMe { get; } = true;
+        public bool RememberMe { get; set; } = true;
     }
 
 }
