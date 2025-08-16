@@ -4,6 +4,7 @@ using CMS.Main.Models;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Schema;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Main.Services;
 
@@ -12,6 +13,39 @@ public class SchemaService(
     ILogger<SchemaService> logger
 ) : ISchemaService
 {
+    public async Task<Result<SchemaWithIdDto>> GetSchemaByIdAsync(
+        string schemaId, 
+        Action<SchemaGetOptions>? optionsAction = null)
+    {
+        var options = new SchemaGetOptions();
+        optionsAction?.Invoke(options);
+        try
+        {
+            var schema = await dbHelper.ExecuteAsync(async dbContext =>
+                options.IncludeProperties
+                    ? await dbContext.Schemas
+                        .Include(s => s.Properties)
+                        .FirstOrDefaultAsync(s => s.Id == schemaId)
+                    : await dbContext.Schemas
+                        .FirstOrDefaultAsync(s => s.Id == schemaId)
+            );
+
+            if (schema is null)
+                return Result.NotFound();
+
+            var dto = schema.Adapt<SchemaWithIdDto>();
+            if (!options.IncludeProperties)
+                dto.Properties = [];
+
+            return Result.Success(dto);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when getting schema {schemaId}.", schemaId);
+            return Result.Error($"There was an error when getting schema {schemaId}.");
+        }
+    }
+
     public async Task<Result<SchemaWithIdDto>> CreateSchemaAsync(SchemaCreationDto schemaCreationDto)
     {
         try

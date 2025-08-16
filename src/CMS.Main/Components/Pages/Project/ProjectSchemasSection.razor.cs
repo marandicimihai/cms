@@ -31,6 +31,7 @@ public partial class ProjectSchemasSection : ComponentBase
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
 
+    [SupplyParameterFromForm]
     public SchemaCreationDto NewSchema { get; set; } = new();
     private bool IsAddFormVisible { get; set; }
 

@@ -36,11 +36,7 @@ public partial class ProjectPage : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         if (!await HasAccess())
-        {
-            statusText = "Could not load project. You do not have permission to access this project.";
-            showStatusOnRender = true;
             return;
-        }
 
         var result =
             await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeSchemas = true; });
@@ -123,6 +119,7 @@ public partial class ProjectPage : ComponentBase
 
         statusText = "Could not load project. You do not have permission to access this project.";
         statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+        showStatusOnRender = true;
 
         return false;
     }
