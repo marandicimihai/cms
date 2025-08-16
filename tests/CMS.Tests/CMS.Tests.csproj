@@ -16,9 +16,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
+    <PackageReference Include="Moq" Version="4.20.70" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/CMS.Main/CMS.Main.csproj" />
   </ItemGroup>
 </Project>
-
