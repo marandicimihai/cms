@@ -6,6 +6,7 @@ using Ardalis.Result;
 using CMS.Main.Data;
 using CMS.Main.Models;
 using CMS.Main.Services;
+using CMS.Main.Services.State;
 using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.Project;
 using Microsoft.EntityFrameworkCore;
@@ -28,8 +29,9 @@ public class ProjectServiceTests
 
         context = new ApplicationDbContext(options);
         var mockLogger = new Mock<ILogger<ProjectService>>();
+        var mockStateService = new Mock<ProjectStateService>();
         var dbHelper = new DbContextConcurrencyHelper(context);
-        projectService = new ProjectService(dbHelper, mockLogger.Object);
+        projectService = new ProjectService(dbHelper, mockStateService.Object, mockLogger.Object);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using CMS.Main.Data;
 using CMS.Main.Models;
+using CMS.Main.Services.State;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.Project;
@@ -11,6 +12,7 @@ namespace CMS.Main.Services;
 
 public class ProjectService(
     DbContextConcurrencyHelper dbHelper,
+    ProjectStateService projectStateService,
     ILogger<ProjectService> logger
 ) : IProjectService
 {
@@ -83,7 +85,10 @@ public class ProjectService(
                 await dbContext.SaveChangesAsync();
             });
 
-            return Result.Success(project.Adapt<ProjectWithIdDto>());
+            var adapted = project.Adapt<ProjectWithIdDto>();
+            projectStateService.NotifyCreated([adapted]);
+
+            return Result.Success(adapted);
         }
         catch (Exception ex)
         {
@@ -105,8 +110,11 @@ public class ProjectService(
             projectDto.Adapt(project);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
+            
+            var adapted = project.Adapt<ProjectWithIdDto>();
+            projectStateService.NotifyUpdated([adapted]);
 
-            return Result.Success(project.Adapt<ProjectWithIdDto>());
+            return Result.Success(adapted);
         }
         catch (Exception ex)
         {
@@ -130,6 +138,8 @@ public class ProjectService(
                 dbContext.Remove(project);
                 await dbContext.SaveChangesAsync();
             });
+            
+            projectStateService.NotifyDeleted([projectId]);
 
             return Result.Success();
         }

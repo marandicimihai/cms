@@ -54,7 +54,7 @@ public partial class CreateProject : ComponentBase
             
             statusText = "The project was successfully created."; 
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
-            
+
             projectUrl = $"/project/{result.Value.Id}";
         }
         catch
