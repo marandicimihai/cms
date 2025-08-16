@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 namespace CMS.Main.Services;
 
 public class IdentityEmailSender(
-    ILogger<IdentityEmailSender> logger, 
+    ILogger<IdentityEmailSender> logger,
     IFluentEmail fluentEmail
 ) : IEmailSender<ApplicationUser>
 {
@@ -27,7 +27,7 @@ public class IdentityEmailSender(
                 logger.LogError("There was an error when sending confirmation email to {userId}.", user.Id);
                 return;
             }
-            
+
             logger.LogInformation("Confirmation email sent to {userId}.", user.Id);
         }
         catch (Exception ex)
@@ -52,7 +52,7 @@ public class IdentityEmailSender(
                 logger.LogError("There was an error when sending password reset link email to {userId}.", user.Id);
                 return;
             }
-            
+
             logger.LogInformation("Password reset link email sent to {userId}.", user.Id);
         }
         catch (Exception ex)
@@ -69,7 +69,7 @@ public class IdentityEmailSender(
                 .To(email)
                 .Subject("Reset your password")
                 .UsingTemplateFromFile("Emails/Templates/ResetPasswordCode.cshtml",
-                    new ResetPasswordCodeModel { ResetCode = resetCode})
+                    new ResetPasswordCodeModel { ResetCode = resetCode })
                 .SendAsync();
 
             if (!result.Successful)
@@ -77,7 +77,7 @@ public class IdentityEmailSender(
                 logger.LogError("There was an error when sending password reset code email to {userId}.", user.Id);
                 return;
             }
-            
+
             logger.LogInformation("Password reset code email sent to {userId}.", user.Id);
         }
         catch (Exception ex)

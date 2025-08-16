@@ -12,12 +12,12 @@ public class ProjectStateService
     {
         ProjectsCreated?.Invoke(projects);
     }
-    
+
     public void NotifyUpdated(List<ProjectWithIdDto> projects)
     {
         ProjectsUpdated?.Invoke(projects);
     }
-    
+
     public void NotifyDeleted(List<string> projectIds)
     {
         ProjectsDeleted?.Invoke(projectIds);

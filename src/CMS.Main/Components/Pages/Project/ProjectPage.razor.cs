@@ -10,42 +10,41 @@ namespace CMS.Main.Components.Pages.Project;
 
 public partial class ProjectPage : ComponentBase
 {
+    private bool showStatusOnRender;
+
+    private StatusIndicator? statusIndicator;
+    private string? statusText;
+
     [Parameter]
     public Guid ProjectId { get; set; }
-    
+
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
-    
+
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
-    
+
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
-    
+
     [Inject]
     private IAuthorizationService AuthorizationService { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private ProjectUpdateDto ProjectDto { get; set; } = new();
 
-    private StatusIndicator? statusIndicator;
-    private string? statusText;
-    private bool showStatusOnRender;
-
     protected override async Task OnInitializedAsync()
     {
-        if (!await IsOwner())
+        if (!await HasAccess())
         {
             statusText = "Could not load project. You do not have permission to access this project.";
             showStatusOnRender = true;
             return;
         }
-        
-        var result = await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt =>
-        {
-            opt.IncludeSchemas = true;
-        });
-        
+
+        var result =
+            await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeSchemas = true; });
+
         if (result.IsSuccess)
         {
             ProjectDto = result.Value.Adapt<ProjectUpdateDto>();
@@ -69,7 +68,7 @@ public partial class ProjectPage : ComponentBase
 
     private async Task OnSaveName()
     {
-        if (!await IsOwner())
+        if (!await HasAccess())
             return;
 
         var result = await ProjectService.UpdateProjectAsync(ProjectDto);
@@ -88,16 +87,16 @@ public partial class ProjectPage : ComponentBase
 
     private async Task OnDeleteProject()
     {
-        if (!await IsOwner())
+        if (!await HasAccess())
             return;
 
         var confirmed = await ConfirmationService.ShowAsync(
-            title: "Delete Project",
-            message: "Are you sure you want to delete this project? This action cannot be undone.",
-            confirmText: "Delete",
-            cancelText: "Cancel"
+            "Delete Project",
+            "Are you sure you want to delete this project? This action cannot be undone.",
+            "Delete",
+            "Cancel"
         );
-                
+
         if (confirmed)
         {
             var result = await ProjectService.DeleteProjectAsync(ProjectDto.Id);
@@ -113,17 +112,18 @@ public partial class ProjectPage : ComponentBase
         }
     }
 
-    private async Task<bool> IsOwner()
+    private async Task<bool> HasAccess()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var authorizationResult = await AuthorizationService.AuthorizeAsync(user, ProjectId.ToString(), "MustOwnProject");
+        var authorizationResult =
+            await AuthorizationService.AuthorizeAsync(user, ProjectId.ToString(), "MustOwnProject");
 
         if (authorizationResult.Succeeded) return true;
-        
+
         statusText = "Could not load project. You do not have permission to access this project.";
         statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-        
+
         return false;
     }
 }

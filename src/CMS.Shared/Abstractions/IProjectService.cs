@@ -7,22 +7,22 @@ namespace CMS.Shared.Abstractions;
 public interface IProjectService
 {
     public const int MaxPageSize = 50;
-    
+
     Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
-        string userId, 
+        string userId,
         PaginationParams? paginationParams = null,
         Action<ProjectQueryOptions>? configureOptions = null);
 
     Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
         string projectId,
         Action<ProjectQueryOptions>? configureOptions = null);
-    
+
     Task<Result<ProjectWithIdDto>> CreateProjectAsync(
         ProjectCreationDto projectDto);
 
     Task<Result<ProjectWithIdDto>> UpdateProjectAsync(
         ProjectUpdateDto projectDto);
-    
+
     Task<Result> DeleteProjectAsync(
         string projectId);
 

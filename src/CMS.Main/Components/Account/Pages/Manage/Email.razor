@@ -1,5 +1,4 @@
 ﻿@page "/Account/Manage/Email"
-
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
@@ -19,7 +18,8 @@
 <StatusMessage Message="@message"/>
 <div class="row">
     <div class="col-xl-6">
-        <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
+        <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form"
+              method="post">
             <AntiforgeryToken/>
         </form>
         <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post">
@@ -28,24 +28,35 @@
             @if (isEmailConfirmed)
             {
                 <div class="form-floating mb-3 input-group">
-                    <input type="text" value="@email" id="email" class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your email" disabled/>
+                    <input type="text" value="@email" id="email"
+                           class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Enter your email" disabled/>
                     <label for="email" class="form-label text-xs uppercase tracking-wide">Email</label>
                 </div>
             }
             else
             {
                 <div class="form-floating mb-3">
-                    <input type="text" value="@email" id="email" class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500" placeholder="Enter your email" disabled/>
+                    <input type="text" value="@email" id="email"
+                           class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Enter your email" disabled/>
                     <label for="email" class="form-label text-xs uppercase tracking-wide">Email</label>
-                    <button type="submit" class="btn btn-link text-blue-600 hover:underline" form="send-verification-form">Send verification email</button>
+                    <button type="submit" class="btn btn-link text-blue-600 hover:underline"
+                            form="send-verification-form">Send verification email
+                    </button>
                 </div>
             }
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail" class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500" autocomplete="email" aria-required="true" placeholder="Enter a new email"/>
+                <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail"
+                           class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                           autocomplete="email" aria-required="true" placeholder="Enter a new email"/>
                 <label for="Input.NewEmail" class="form-label text-xs uppercase tracking-wide">New email</label>
                 <ValidationMessage For="() => Input.NewEmail" class="text-rose-600 text-xs"/>
             </div>
-            <button type="submit" class="w-100 btn bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium px-3 py-2 rounded-md">Change email</button>
+            <button type="submit"
+                    class="w-100 btn bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium px-3 py-2 rounded-md">
+                Change email
+            </button>
         </EditForm>
     </div>
 </div>
@@ -60,7 +71,7 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm(FormName = "change-email")]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,6 +89,7 @@
             message = "Your email is unchanged.";
             return;
         }
+
         var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
         var code = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail));
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -94,6 +106,7 @@
         {
             return;
         }
+
         var userId = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GetUserIdAsync(user));
         var code = await ConcurrencyHelper.ExecuteAsync(_ => UserManager.GenerateEmailConfirmationTokenAsync(user));
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

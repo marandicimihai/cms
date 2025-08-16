@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using CMS.Main.Components;
 using CMS.Main.Components.Account;
 using CMS.Main.Data;
@@ -9,6 +8,8 @@ using CMS.Main.Services.State;
 using CMS.Shared.Abstractions;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Microsoft.AspNetCore.Identity;
+using _Imports = CMS.Main.Client._Imports;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration config = builder.Configuration;
@@ -22,7 +23,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
-var connectionString = config.GetConnectionString("DefaultConnection") ?? 
+var connectionString = config.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.ConfigureDataServices(connectionString);
 
@@ -54,7 +55,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error", true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -67,7 +68,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(CMS.Main.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(_Imports).Assembly);
 
 app.UseFastEndpoints()
     .UseSwaggerGen();

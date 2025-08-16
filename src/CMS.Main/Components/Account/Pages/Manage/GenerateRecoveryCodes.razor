@@ -1,5 +1,4 @@
 ﻿@page "/Account/Manage/GenerateRecoveryCodes"
-
 @using CMS.Main.Data
 @using Microsoft.AspNetCore.Identity
 
@@ -19,20 +18,28 @@ else
 {
     <div class="max-w-screen-lg mx-auto p-4">
         <div class="mb-4">
-            <h1 class="text-2xl font-semibold text-slate-900">Generate two-factor authentication (2FA) recovery codes</h1>
+            <h1 class="text-2xl font-semibold text-slate-900">Generate two-factor authentication (2FA) recovery
+                codes</h1>
         </div>
         <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 max-w-md">
-            <div class="bg-amber-50 border border-amber-200 text-amber-700 text-sm p-3 rounded-md mb-4 flex items-center">
+            <div
+                class="bg-amber-50 border border-amber-200 text-amber-700 text-sm p-3 rounded-md mb-4 flex items-center">
                 <span class="material-symbols-outlined icons-default text-base mr-2">warning</span>
                 <div>
                     <strong>Put these codes in a safe place.</strong>
-                    <p>If you lose your device and don't have the recovery codes you will lose access to your account.</p>
-                    <p>Generating new recovery codes does not change the keys used in authenticator apps. If you wish to change the key used in an authenticator app you should <a href="Account/Manage/ResetAuthenticator" class="text-blue-600 hover:text-blue-500 underline">reset your authenticator keys</a>.</p>
+                    <p>If you lose your device and don't have the recovery codes you will lose access to your
+                        account.</p>
+                    <p>Generating new recovery codes does not change the keys used in authenticator apps. If you wish to
+                        change the key used in an authenticator app you should <a
+                            href="Account/Manage/ResetAuthenticator"
+                            class="text-blue-600 hover:text-blue-500 underline">reset your authenticator keys</a>.</p>
                 </div>
             </div>
             <form @formname="generate-recovery-codes" @onsubmit="OnSubmitAsync" method="post">
                 <AntiforgeryToken/>
-                <button class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" type="submit">
+                <button
+                    class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    type="submit">
                     <span class="material-symbols-outlined icons-default text-base mr-2">refresh</span>
                     Generate Recovery Codes
                 </button>

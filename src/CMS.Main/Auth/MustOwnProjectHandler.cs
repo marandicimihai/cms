@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Main.Auth;
 
-public class MustOwnProjectHandler(IProjectService projectService) : AuthorizationHandler<MustOwnProjectRequirement, string>
+public class MustOwnProjectHandler(IProjectService projectService)
+    : AuthorizationHandler<MustOwnProjectRequirement, string>
 {
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, MustOwnProjectRequirement requirement, string projectId)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+        MustOwnProjectRequirement requirement, string projectId)
     {
         if (context.User.Identity?.IsAuthenticated == true)
         {
@@ -14,7 +16,7 @@ public class MustOwnProjectHandler(IProjectService projectService) : Authorizati
             if (!string.IsNullOrEmpty(userId))
             {
                 var ownershipResult = await projectService.OwnsProject(userId, projectId);
-                
+
                 if (ownershipResult is { IsSuccess: true, Value: true })
                 {
                     context.Succeed(requirement);
@@ -22,7 +24,7 @@ public class MustOwnProjectHandler(IProjectService projectService) : Authorizati
                 }
             }
         }
-        
+
         context.Fail();
     }
 }

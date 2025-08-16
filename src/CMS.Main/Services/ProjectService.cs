@@ -34,10 +34,7 @@ public class ProjectService(
             {
                 var query = dbContext.Projects
                     .Where(p => p.OwnerId == userId);
-                if (options.IncludeSchemas)
-                {
-                    query = query.Include(p => p.Schemas);
-                }
+                if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
                 var projects = await query
                     .OrderByDescending(p => p.LastUpdated)
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
@@ -46,20 +43,17 @@ public class ProjectService(
                     .ToListAsync();
 
                 var paginationMetadata = new PaginationMetadata(
-                    TotalCount: await dbContext.Projects.CountAsync(p => p.OwnerId == userId),
-                    CurrentPage: cappedPageNumber,
-                    PageSize: cappedPageSize,
-                    MaxPageSize: IProjectService.MaxPageSize
+                    await dbContext.Projects.CountAsync(p => p.OwnerId == userId),
+                    cappedPageNumber,
+                    cappedPageSize,
+                    IProjectService.MaxPageSize
                 );
 
                 var dtos = projects.Adapt<List<ProjectWithIdDto>>();
                 if (!options.IncludeSchemas)
-                {
                     foreach (var dto in dtos)
-                    {
                         dto.Schemas = [];
-                    }
-                }
+
                 return (dtos, paginationMetadata);
             });
 
@@ -83,20 +77,14 @@ public class ProjectService(
             var result = await dbHelper.ExecuteAsync(async dbContext =>
             {
                 var query = dbContext.Projects.AsQueryable();
-                if (options.IncludeSchemas)
-                {
-                    query = query.Include(p => p.Schemas);
-                }
+                if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
                 var project = await query.FirstOrDefaultAsync(p => p.Id == projectId);
                 return project;
             });
             if (result is null)
                 return Result.NotFound();
             var dto = result.Adapt<ProjectWithIdDto>();
-            if (!options.IncludeSchemas)
-            {
-                dto.Schemas = [];
-            }
+            if (!options.IncludeSchemas) dto.Schemas = [];
             return Result.Success(dto);
         }
         catch (Exception ex)
@@ -145,7 +133,7 @@ public class ProjectService(
             projectDto.Adapt(project);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
-            
+
             var adapted = project.Adapt<ProjectWithIdDto>();
             projectStateService.NotifyUpdated([adapted]);
 
@@ -164,16 +152,16 @@ public class ProjectService(
         {
             var project = await dbHelper.ExecuteAsync(async dbContext =>
                 await dbContext.Projects.FindAsync(projectId));
-            
+
             if (project is null)
                 return Result.NotFound();
-            
+
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 dbContext.Remove(project);
                 await dbContext.SaveChangesAsync();
             });
-            
+
             projectStateService.NotifyDeleted([projectId]);
 
             return Result.Success();
@@ -196,8 +184,10 @@ public class ProjectService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an error when checking ownership of project {projectId} for user {userId}.", projectId, userId);
-            return Result.Error($"There was an error when checking ownership of project {projectId} for user {userId}.");
+            logger.LogError(ex, "There was an error when checking ownership of project {projectId} for user {userId}.",
+                projectId, userId);
+            return Result.Error(
+                $"There was an error when checking ownership of project {projectId} for user {userId}.");
         }
     }
 }

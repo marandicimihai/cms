@@ -1,7 +1,4 @@
-﻿@using CMS.Main.Services
-@using CMS.Main.Components.Shared
-
-@inject ConfirmationService ConfirmationService
+﻿@inject ConfirmationService ConfirmationService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -29,11 +26,11 @@
 </html>
 
 @code {
-    
+
     private readonly string[] iconNames =
     [
         "menu",
-        "add", 
+        "add",
         "email",
         "lock",
         "login",
@@ -55,9 +52,9 @@
         "person",
         "logout",
         "help",
-        "arrow_forward",
+        "arrow_forward"
     ];
-    
+
     private string IconNamesSorted => string.Join(',', iconNames.OrderBy(x => x));
 
 }

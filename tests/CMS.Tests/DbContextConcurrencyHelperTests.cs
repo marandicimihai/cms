@@ -14,7 +14,7 @@ public class DbContextConcurrencyHelperTests
     private static ApplicationDbContext CreateInMemoryContext(string name)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: name)
+            .UseInMemoryDatabase(name)
             .Options;
         return new ApplicationDbContext(options);
     }
@@ -103,12 +103,15 @@ public class DbContextConcurrencyHelperTests
 
         var order = new ConcurrentQueue<int>();
 
-        Task<int> Enqueue(int id) => helper.ExecuteAsync(async _ =>
+        Task<int> Enqueue(int id)
         {
-            order.Enqueue(id);
-            await Task.Delay(10);
-            return id;
-        });
+            return helper.ExecuteAsync(async _ =>
+            {
+                order.Enqueue(id);
+                await Task.Delay(10);
+                return id;
+            });
+        }
 
         var tasks = new[] { Enqueue(1), Enqueue(2), Enqueue(3) };
         var results = await Task.WhenAll(tasks);

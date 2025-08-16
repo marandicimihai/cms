@@ -24,7 +24,7 @@ public class ProjectServiceTests
     public ProjectServiceTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
         context = new ApplicationDbContext(options);
@@ -84,9 +84,7 @@ public class ProjectServiceTests
         var userId = Guid.NewGuid().ToString();
         var projects = new List<Project>();
         for (var i = 0; i < 15; i++)
-        {
             projects.Add(new Project { Id = Guid.NewGuid().ToString(), Name = $"Project {i + 1}", OwnerId = userId });
-        }
 
         await context.Projects.AddRangeAsync(projects);
         await context.SaveChangesAsync();
@@ -334,7 +332,8 @@ public class ProjectServiceTests
     [InlineData(-1, 1)] // Negative page number
     [InlineData(1, 0)] // Page size too low
     [InlineData(1, -1)] // Negative page size
-    public async Task GetProjectsForUserAsync_WithInvalidPaginationParams_ClampsToValidValues(int pageNumber, int pageSize)
+    public async Task GetProjectsForUserAsync_WithInvalidPaginationParams_ClampsToValidValues(int pageNumber,
+        int pageSize)
     {
         // Arrange
         var userId = Guid.NewGuid().ToString();
@@ -359,7 +358,7 @@ public class ProjectServiceTests
         // Arrange
         var userId1 = Guid.NewGuid().ToString();
         var userId2 = Guid.NewGuid().ToString();
-        
+
         var projects = new List<Project>
         {
             new() { Id = Guid.NewGuid().ToString(), Name = "User1 Project 1", OwnerId = userId1 },
@@ -391,7 +390,8 @@ public class ProjectServiceTests
         );
         await context.SaveChangesAsync();
 
-        var result = await projectService.GetProjectsForUserAsync(userId, new PaginationParams(1,1), opt => { opt.IncludeSchemas = true; });
+        var result = await projectService.GetProjectsForUserAsync(userId, new PaginationParams(1, 1),
+            opt => { opt.IncludeSchemas = true; });
         Assert.True(result.IsSuccess);
         var dto = result.Value.Item1.First();
         Assert.NotNull(dto.Schemas);
@@ -401,7 +401,8 @@ public class ProjectServiceTests
     [Fact]
     public async Task GetProjectByIdAsync_WithIncludeSchemas_IncludesSchemas()
     {
-        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
+        var project = new Project
+            { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
         await context.Projects.AddAsync(project);
         await context.Schemas.AddRangeAsync(
             new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id },
@@ -427,7 +428,7 @@ public class ProjectServiceTests
         );
         await context.SaveChangesAsync();
 
-        var result = await projectService.GetProjectsForUserAsync(userId, new PaginationParams(1,1));
+        var result = await projectService.GetProjectsForUserAsync(userId, new PaginationParams(1, 1));
         Assert.True(result.IsSuccess);
         Assert.Single(result.Value.Item1);
         Assert.NotNull(result.Value.Item1.First().Schemas);
@@ -437,9 +438,11 @@ public class ProjectServiceTests
     [Fact]
     public async Task GetProjectByIdAsync_WithoutIncludeSchemas_HasEmptySchemasList()
     {
-        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
+        var project = new Project
+            { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
         await context.Projects.AddAsync(project);
-        await context.Schemas.AddAsync(new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id });
+        await context.Schemas.AddAsync(new Schema
+            { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id });
         await context.SaveChangesAsync();
 
         var result = await projectService.GetProjectByIdAsync(project.Id);

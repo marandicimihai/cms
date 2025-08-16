@@ -15,7 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<Project>()
             .HasMany(p => p.Schemas)
             .WithOne(s => s.Project);
-        
+
         base.OnModelCreating(builder);
     }
 }

@@ -12,17 +12,17 @@ namespace CMS.Main.Components.Layout;
 [Authorize]
 public partial class SideBar : ComponentBase
 {
+    private readonly int pageSize = 20;
+    private bool isLoadingMore;
+    private int totalCount;
+
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
-    
+
     [Inject]
     private ProjectStateService ProjectStateService { get; set; } = default!;
 
     private List<ProjectWithIdDto> Projects { get; set; } = [];
-
-    private readonly int pageSize = 20;
-    private int totalCount;
-    private bool isLoadingMore;
     private bool HasMoreProjects => Projects.Count < totalCount;
 
     protected override async Task OnInitializedAsync()
@@ -78,15 +78,14 @@ public partial class SideBar : ComponentBase
                 var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (!string.IsNullOrEmpty(userId))
                 {
-                    var result = await ProjectService.GetProjectsForUserAsync(userId, new PaginationParams(Projects.Count / pageSize + 1, pageSize));
+                    var result = await ProjectService.GetProjectsForUserAsync(userId,
+                        new PaginationParams(Projects.Count / pageSize + 1, pageSize));
                     if (result.IsSuccess)
                     {
                         var newProjects = result.Value.Item1;
                         foreach (var p in newProjects)
-                        {
                             if (Projects.All(existing => existing.Id != p.Id))
                                 Projects.Add(p);
-                        }
                         totalCount = result.Value.Item2.TotalCount;
                     }
                 }
@@ -96,6 +95,7 @@ public partial class SideBar : ComponentBase
         {
             // ignored
         }
+
         isLoadingMore = false;
         StateHasChanged();
     }
@@ -106,7 +106,7 @@ public partial class SideBar : ComponentBase
         Projects = Projects.OrderByDescending(p => p.LastUpdated).ToList();
         StateHasChanged();
     }
-    
+
     private void ProjectsUpdated(List<ProjectWithIdDto> projects)
     {
         foreach (var updatedProject in projects)
@@ -122,10 +122,11 @@ public partial class SideBar : ComponentBase
                 Projects.Add(updatedProject);
             }
         }
+
         Projects = Projects.OrderByDescending(p => p.LastUpdated).ToList();
         StateHasChanged();
     }
-    
+
     private void OnProjectsDeleted(List<string> projectIds)
     {
         foreach (var id in projectIds)
@@ -134,6 +135,7 @@ public partial class SideBar : ComponentBase
             if (project != null)
                 Projects.Remove(project);
         }
+
         StateHasChanged();
     }
 }

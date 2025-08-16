@@ -1,5 +1,4 @@
 ﻿@page "/Account/LoginWith2fa"
-
 @using System.ComponentModel.DataAnnotations
 @using CMS.Main.Data
 @using Microsoft.AspNetCore.Identity
@@ -27,20 +26,25 @@
                 <ValidationSummary class="validation-summary" role="alert"/>
                 <div class="space-y-4">
                     <div>
-                        <label for="Input.TwoFactorCode" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.TwoFactorCode"
+                               class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
                             Authenticator code
                         </label>
-                        <InputText @bind-Value="Input.TwoFactorCode" id="Input.TwoFactorCode" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" autocomplete="off"/>
+                        <InputText @bind-Value="Input.TwoFactorCode" id="Input.TwoFactorCode"
+                                   class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
+                                   autocomplete="off"/>
                         <ValidationMessage For="() => Input.TwoFactorCode" class="validation-message"/>
                     </div>
                     <div class="flex items-center">
-                        <InputCheckbox @bind-Value="Input.RememberMachine" id="remember-machine" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"/>
+                        <InputCheckbox @bind-Value="Input.RememberMachine" id="remember-machine"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"/>
                         <label for="remember-machine" class="ml-2 text-sm text-slate-900">
                             Remember this machine
                         </label>
                     </div>
                     <div>
-                        <button type="submit" class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit"
+                                class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <span class="material-symbols-outlined icons-default text-base mr-2">login</span>
                             Log in
                         </button>
@@ -50,7 +54,8 @@
             <div class="mt-6 text-center">
                 <p class="text-sm text-slate-600">
                     Don't have access to your authenticator device?
-                    <a href="Account/LoginWithRecoveryCode?ReturnUrl=@ReturnUrl" class="text-blue-600 hover:text-blue-500">Log in with a recovery code</a>.
+                    <a href="Account/LoginWithRecoveryCode?ReturnUrl=@ReturnUrl"
+                       class="text-blue-600 hover:text-blue-500">Log in with a recovery code</a>.
                 </p>
             </div>
         </div>
@@ -62,7 +67,7 @@
     private ApplicationUser user = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }

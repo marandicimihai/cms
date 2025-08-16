@@ -19,10 +19,10 @@ public class SchemaService(
             // Check if project exists
             var project = await dbHelper.ExecuteAsync(async dbContext =>
                 await dbContext.Projects.FindAsync(schemaCreationDto.ProjectId));
-            
+
             if (project is null)
                 return Result.NotFound($"Project {schemaCreationDto.ProjectId} was not found.");
-            
+
             var schema = schemaCreationDto.Adapt<Schema>();
 
             await dbHelper.ExecuteAsync(async dbContext =>
@@ -35,8 +35,35 @@ public class SchemaService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an error when creating the schema for project {projectId}.", schemaCreationDto.ProjectId);
-            return Result.Error($"There was an error when creating the schema for project {schemaCreationDto.ProjectId}.");
+            logger.LogError(ex, "There was an error when creating the schema for project {projectId}.",
+                schemaCreationDto.ProjectId);
+            return Result.Error(
+                $"There was an error when creating the schema for project {schemaCreationDto.ProjectId}.");
+        }
+    }
+
+    public async Task<Result> DeleteSchemaAsync(string schemaId)
+    {
+        try
+        {
+            var schema = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Schemas.FindAsync(schemaId));
+
+            if (schema is null)
+                return Result.NotFound($"Schema {schemaId} was not found.");
+
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                dbContext.Remove(schema);
+                await dbContext.SaveChangesAsync();
+            });
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when deleting schema {schemaId}.", schemaId);
+            return Result.Error($"There was an error when deleting schema {schemaId}.");
         }
     }
 }

@@ -1,29 +1,47 @@
 ﻿@using CMS.Main.Data
 @using Microsoft.AspNetCore.Identity
-
 @inject SignInManager<ApplicationUser> SignInManager
 
 <ul class="flex flex-col gap-2">
     <li>
-        <NavLink class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150" href="Account/Manage" Match="NavLinkMatch.All" aria-label="Profile">Profile</NavLink>
+        <NavLink
+            class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150"
+            href="Account/Manage" Match="NavLinkMatch.All" aria-label="Profile">Profile
+        </NavLink>
     </li>
     <li>
-        <NavLink class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150" href="Account/Manage/Email" aria-label="Email">Email</NavLink>
+        <NavLink
+            class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150"
+            href="Account/Manage/Email" aria-label="Email">Email
+        </NavLink>
     </li>
     <li>
-        <NavLink class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150" href="Account/Manage/ChangePassword" aria-label="Password">Password</NavLink>
+        <NavLink
+            class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150"
+            href="Account/Manage/ChangePassword" aria-label="Password">Password
+        </NavLink>
     </li>
     @if (hasExternalLogins)
     {
         <li>
-            <NavLink class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150" href="Account/Manage/ExternalLogins" aria-label="External logins">External logins</NavLink>
+            <NavLink
+                class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150"
+                href="Account/Manage/ExternalLogins" aria-label="External logins">External logins
+            </NavLink>
         </li>
     }
     <li>
-        <NavLink class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150" href="Account/Manage/TwoFactorAuthentication" aria-label="Two-factor authentication">Two-factor authentication</NavLink>
+        <NavLink
+            class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150"
+            href="Account/Manage/TwoFactorAuthentication" aria-label="Two-factor authentication">Two-factor
+            authentication
+        </NavLink>
     </li>
     <li>
-        <NavLink class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150" href="Account/Manage/PersonalData" aria-label="Personal data">Personal data</NavLink>
+        <NavLink
+            class="inline-flex items-center justify-start w-full bg-slate-200 text-slate-900 text-sm font-medium px-3 py-2 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-150"
+            href="Account/Manage/PersonalData" aria-label="Personal data">Personal data
+        </NavLink>
     </li>
 </ul>
 
