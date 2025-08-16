@@ -378,4 +378,73 @@ public class ProjectServiceTests
         Assert.Equal(2, result.Value.Item1.Count);
         Assert.All(result.Value.Item1, p => Assert.Equal(userId1, p.OwnerId));
     }
+
+    [Fact]
+    public async Task GetProjectsForUserAsync_WithIncludeSchemas_IncludesSchemas()
+    {
+        var userId = Guid.NewGuid().ToString();
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = userId };
+        await context.Projects.AddAsync(project);
+        await context.Schemas.AddRangeAsync(
+            new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id },
+            new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaB", ProjectId = project.Id }
+        );
+        await context.SaveChangesAsync();
+
+        var result = await projectService.GetProjectsForUserAsync(userId, new PaginationParams(1,1), opt => { opt.IncludeSchemas = true; });
+        Assert.True(result.IsSuccess);
+        var dto = result.Value.Item1.First();
+        Assert.NotNull(dto.Schemas);
+        Assert.Equal(2, dto.Schemas!.Count);
+    }
+
+    [Fact]
+    public async Task GetProjectByIdAsync_WithIncludeSchemas_IncludesSchemas()
+    {
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        await context.Schemas.AddRangeAsync(
+            new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id },
+            new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaB", ProjectId = project.Id }
+        );
+        await context.SaveChangesAsync();
+
+        var result = await projectService.GetProjectByIdAsync(project.Id, opt => { opt.IncludeSchemas = true; });
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value.Schemas);
+        Assert.Equal(2, result.Value.Schemas!.Count);
+    }
+
+    [Fact]
+    public async Task GetProjectsForUserAsync_WithoutIncludeSchemas_HasEmptySchemasList()
+    {
+        var userId = Guid.NewGuid().ToString();
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = userId };
+        await context.Projects.AddAsync(project);
+        await context.Schemas.AddRangeAsync(
+            new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id },
+            new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaB", ProjectId = project.Id }
+        );
+        await context.SaveChangesAsync();
+
+        var result = await projectService.GetProjectsForUserAsync(userId, new PaginationParams(1,1));
+        Assert.True(result.IsSuccess);
+        Assert.Single(result.Value.Item1);
+        Assert.NotNull(result.Value.Item1.First().Schemas);
+        Assert.Empty(result.Value.Item1.First().Schemas);
+    }
+
+    [Fact]
+    public async Task GetProjectByIdAsync_WithoutIncludeSchemas_HasEmptySchemasList()
+    {
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        await context.Schemas.AddAsync(new Schema { Id = Guid.NewGuid().ToString(), Name = "SchemaA", ProjectId = project.Id });
+        await context.SaveChangesAsync();
+
+        var result = await projectService.GetProjectByIdAsync(project.Id);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value.Schemas);
+        Assert.Empty(result.Value.Schemas);
+    }
 }

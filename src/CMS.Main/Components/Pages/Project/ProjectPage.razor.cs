@@ -40,7 +40,12 @@ public partial class ProjectPage : ComponentBase
             showStatusOnRender = true;
             return;
         }
-        var result = await ProjectService.GetProjectByIdAsync(ProjectId.ToString());
+        
+        var result = await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt =>
+        {
+            opt.IncludeSchemas = true;
+        });
+        
         if (result.IsSuccess)
         {
             ProjectDto = result.Value.Adapt<ProjectUpdateDto>();

@@ -38,6 +38,7 @@ builder.Services
     .AddScoped<DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
     .AddScoped<IProjectService, ProjectService>()
+    .AddScoped<ISchemaService, SchemaService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>();
 

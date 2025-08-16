@@ -10,10 +10,12 @@ public interface IProjectService
     
     Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
         string userId, 
-        PaginationParams? paginationParams = null);
+        PaginationParams? paginationParams = null,
+        Action<ProjectQueryOptions>? configureOptions = null);
 
     Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
-        string projectId);
+        string projectId,
+        Action<ProjectQueryOptions>? configureOptions = null);
     
     Task<Result<ProjectWithIdDto>> CreateProjectAsync(
         ProjectCreationDto projectDto);
