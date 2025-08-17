@@ -5,8 +5,8 @@ namespace CMS.Main.Emails;
 
 public static class FluentEmailConfiguration
 {
-    public static IServiceCollection ConfigureFluentEmail(this IServiceCollection services, 
-        IConfiguration configuration, 
+    public static IServiceCollection ConfigureFluentEmail(this IServiceCollection services,
+        IConfiguration configuration,
         IHostEnvironment hostEnvironment)
     {
         var emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>();
@@ -16,16 +16,12 @@ public static class FluentEmailConfiguration
             .AddRazorRenderer();
 
         if (hostEnvironment.IsDevelopment())
-        {
             fluentBuilder.AddSmtpSender(new SmtpClient(smtp.Host, smtp.Port)
             {
-                EnableSsl = false,
+                EnableSsl = false
             });
-        }
         else
-        {
             fluentBuilder.AddSmtpSender(smtp.Host, smtp.Port, smtp.Username, smtp.Password);
-        }
 
         return services;
     }

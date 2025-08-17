@@ -1,3 +1,5 @@
+@rendermode InteractiveServer
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <aside class="hidden md:block w-64 border-r border-slate-200 bg-white overflow-y-auto">
@@ -5,7 +7,7 @@
         <nav class="space-y-1 mb-3">
             <SideBarButton Href="/new" Icon="add">Create Project</SideBarButton>
         </nav>
-        
+
         <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500 mb-3">Projects</h2>
         <nav class="space-y-1">
             @foreach (var project in Projects)
@@ -14,5 +16,24 @@
                 <SideBarButton Href="@uri" Match="NavLinkMatch.Prefix">@project.Name</SideBarButton>
             }
         </nav>
+        @if (HasMoreProjects)
+        {
+            <div class="mt-4 flex">
+                <button
+                    class="w-full inline-flex items-center justify-center text-slate-600 hover:bg-slate-100 text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent"
+                    @onclick="LoadMoreProjectsAsync"
+                    aria-label="Load more projects"
+                    disabled="@isLoadingMore">
+                    @if (isLoadingMore)
+                    {
+                        <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
+                    }
+                    else
+                    {
+                        <span class="flex-1 text-center">Load More</span>
+                    }
+                </button>
+            </div>
+        }
     </div>
 </aside>

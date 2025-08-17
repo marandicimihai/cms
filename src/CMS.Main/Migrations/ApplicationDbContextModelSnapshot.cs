@@ -92,6 +92,9 @@ namespace CMS.Main.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -104,6 +107,56 @@ namespace CMS.Main.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("CMS.Main.Models.Schema", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Schemas");
+                });
+
+            modelBuilder.Entity("CMS.Main.Models.SchemaProperty", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<string[]>("Options")
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("SchemaId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchemaId");
+
+                    b.ToTable("SchemaProperties");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -238,6 +291,28 @@ namespace CMS.Main.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CMS.Main.Models.Schema", b =>
+                {
+                    b.HasOne("CMS.Main.Models.Project", "Project")
+                        .WithMany("Schemas")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("CMS.Main.Models.SchemaProperty", b =>
+                {
+                    b.HasOne("CMS.Main.Models.Schema", "Schema")
+                        .WithMany("Properties")
+                        .HasForeignKey("SchemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schema");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -287,6 +362,16 @@ namespace CMS.Main.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CMS.Main.Models.Project", b =>
+                {
+                    b.Navigation("Schemas");
+                });
+
+            modelBuilder.Entity("CMS.Main.Models.Schema", b =>
+                {
+                    b.Navigation("Properties");
                 });
 #pragma warning restore 612, 618
         }

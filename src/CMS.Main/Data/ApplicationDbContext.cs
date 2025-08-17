@@ -8,4 +8,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<Project> Projects { get; set; }
+    public DbSet<Schema> Schemas { get; set; }
+    public DbSet<SchemaProperty> SchemaProperties { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.Entity<Project>()
+            .HasMany(p => p.Schemas)
+            .WithOne(s => s.Project);
+
+        builder.Entity<Schema>()
+            .HasMany(s => s.Properties)
+            .WithOne(p => p.Schema);
+
+        base.OnModelCreating(builder);
+    }
 }

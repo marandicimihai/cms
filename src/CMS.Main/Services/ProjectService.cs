@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using CMS.Main.Data;
 using CMS.Main.Models;
+using CMS.Main.Services.State;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.Project;
@@ -11,36 +12,49 @@ namespace CMS.Main.Services;
 
 public class ProjectService(
     DbContextConcurrencyHelper dbHelper,
+    ProjectStateService projectStateService,
     ILogger<ProjectService> logger
 ) : IProjectService
 {
     public async Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
-        string userId, 
-        PaginationParams? paginationParams = null)
+        string userId,
+        PaginationParams? paginationParams = null,
+        Action<ProjectQueryOptions>? configureOptions = null)
     {
         paginationParams ??= new PaginationParams(1, 10);
         var cappedPageSize = Math.Clamp(paginationParams.PageSize, 1, IProjectService.MaxPageSize);
         var cappedPageNumber = Math.Max(paginationParams.PageNumber, 1);
 
+        var options = new ProjectQueryOptions();
+        configureOptions?.Invoke(options);
+
         try
         {
             var result = await dbHelper.ExecuteAsync(async dbContext =>
             {
-                var projects = await dbContext.Projects
-                    .Where(p => p.OwnerId == userId)
+                var query = dbContext.Projects
+                    .Where(p => p.OwnerId == userId);
+                if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
+                var projects = await query
+                    .OrderByDescending(p => p.LastUpdated)
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
                     .Take(cappedPageSize)
                     .AsNoTracking()
                     .ToListAsync();
 
                 var paginationMetadata = new PaginationMetadata(
-                    TotalCount: await dbContext.Projects.CountAsync(p => p.OwnerId == userId),
-                    CurrentPage: cappedPageNumber,
-                    PageSize: cappedPageSize,
-                    MaxPageSize: IProjectService.MaxPageSize
+                    await dbContext.Projects.CountAsync(p => p.OwnerId == userId),
+                    cappedPageNumber,
+                    cappedPageSize,
+                    IProjectService.MaxPageSize
                 );
 
-                return (projects.Adapt<List<ProjectWithIdDto>>(), paginationMetadata);
+                var dtos = projects.Adapt<List<ProjectWithIdDto>>();
+                if (!options.IncludeSchemas)
+                    foreach (var dto in dtos)
+                        dto.Schemas = [];
+
+                return (dtos, paginationMetadata);
             });
 
             return Result.Success(result);
@@ -52,14 +66,26 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(string projectId)
+    public async Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
+        string projectId,
+        Action<ProjectQueryOptions>? configureOptions = null)
     {
+        var options = new ProjectQueryOptions();
+        configureOptions?.Invoke(options);
         try
         {
             var result = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(projectId));
-            
-            return result is null ? Result.NotFound() : Result.Success(result.Adapt<ProjectWithIdDto>());
+            {
+                var query = dbContext.Projects.AsQueryable();
+                if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
+                var project = await query.FirstOrDefaultAsync(p => p.Id == projectId);
+                return project;
+            });
+            if (result is null)
+                return Result.NotFound();
+            var dto = result.Adapt<ProjectWithIdDto>();
+            if (!options.IncludeSchemas) dto.Schemas = [];
+            return Result.Success(dto);
         }
         catch (Exception ex)
         {
@@ -76,14 +102,16 @@ public class ProjectService(
         try
         {
             var project = projectDto.Adapt<Project>();
-            
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 await dbContext.Projects.AddAsync(project);
                 await dbContext.SaveChangesAsync();
             });
 
-            return Result.Success(project.Adapt<ProjectWithIdDto>());
+            var adapted = project.Adapt<ProjectWithIdDto>();
+            projectStateService.NotifyCreated([adapted]);
+
+            return Result.Success(adapted);
         }
         catch (Exception ex)
         {
@@ -103,10 +131,13 @@ public class ProjectService(
                 return Result.NotFound();
 
             projectDto.Adapt(project);
-
+            project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 
-            return Result.Success(project.Adapt<ProjectWithIdDto>());
+            var adapted = project.Adapt<ProjectWithIdDto>();
+            projectStateService.NotifyUpdated([adapted]);
+
+            return Result.Success(adapted);
         }
         catch (Exception ex)
         {
@@ -121,15 +152,17 @@ public class ProjectService(
         {
             var project = await dbHelper.ExecuteAsync(async dbContext =>
                 await dbContext.Projects.FindAsync(projectId));
-            
+
             if (project is null)
                 return Result.NotFound();
-            
+
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 dbContext.Remove(project);
                 await dbContext.SaveChangesAsync();
             });
+
+            projectStateService.NotifyDeleted([projectId]);
 
             return Result.Success();
         }
@@ -137,6 +170,24 @@ public class ProjectService(
         {
             logger.LogError(ex, "There was an error when deleting project {projectId}.", projectId);
             return Result.Error($"There was an error when deleting project {projectId}.");
+        }
+    }
+
+    public async Task<Result<bool>> OwnsProject(string userId, string projectId)
+    {
+        try
+        {
+            var project = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Projects.FindAsync(projectId));
+
+            return project is null ? Result.NotFound() : Result.Success(project.OwnerId == userId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an error when checking ownership of project {projectId} for user {userId}.",
+                projectId, userId);
+            return Result.Error(
+                $"There was an error when checking ownership of project {projectId} for user {userId}.");
         }
     }
 }
