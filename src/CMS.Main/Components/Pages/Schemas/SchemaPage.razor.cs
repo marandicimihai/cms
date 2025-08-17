@@ -60,7 +60,7 @@ public partial class SchemaPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             pendingStatusError = true;
         }
     }
@@ -150,7 +150,7 @@ public partial class SchemaPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
         }
         
@@ -190,7 +190,7 @@ public partial class SchemaPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
         }
     }

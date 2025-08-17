@@ -1,21 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using CMS.Shared.DTOs.Schema;
+using CMS.Shared.DTOs.SchemaProperty;
 
 namespace CMS.Shared.DTOs.Entry;
 
-public class EntryBaseDto : IDisposable
+public class EntryBaseDto
 {
     [Required]
     [StringLength(36)]
     public string SchemaId { get; set; } = default!;
     public SchemaWithIdDto Schema { get; set; } = default!;
-
-    [Required]
-    public JsonDocument Data { get; set; } = default!;
-
-    public void Dispose()
-    {
-        Data?.Dispose();
-    }
+    
+    public Dictionary<SchemaPropertyWithIdDto, object?> Properties { get; set; } = new();
 }

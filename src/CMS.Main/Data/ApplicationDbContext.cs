@@ -26,12 +26,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<Entry>()
             .HasOne(s => s.Schema);
 
-        builder.Entity<Entry>()
-            .Property(e => e.Data)
-            .HasConversion(
-                v => v.RootElement.GetRawText(),
-                v => (string.IsNullOrEmpty(v) ? null : JsonDocument.Parse(v, new JsonDocumentOptions()))! 
-            );
+        // In memory db doesn't have support for json columns
+        var provider = Database.ProviderName;
+        if (provider != null && !provider.Contains("Npgsql"))
+        {
+            builder.Entity<Entry>()
+                .Property(e => e.Data)
+                .HasConversion(
+                    v => v.RootElement.GetRawText(),
+                    v => (string.IsNullOrEmpty(v) ? null : JsonDocument.Parse(v, new JsonDocumentOptions()))!
+                );
+        }
 
         base.OnModelCreating(builder);
     }

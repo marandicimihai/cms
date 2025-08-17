@@ -1,7 +1,9 @@
 using CMS.Main.Client.Components;
 using CMS.Main.Components.Shared;
 using CMS.Shared.Abstractions;
+using CMS.Shared.DTOs.Entry;
 using CMS.Shared.DTOs.Schema;
+using CMS.Shared.DTOs.SchemaProperty;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -29,8 +31,13 @@ public partial class EntriesPage : ComponentBase
     private ISchemaService SchemaService { get; set; } = default!;
     
     [Inject]
+    private IEntryService EntryService { get; set; } = default!;
+    
+    [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
 
+    private DynamicEntryForm? entryForm;
+    
     private StatusIndicator? statusIndicator;
     private string? statusText;
     private bool pendingStatusError;
@@ -62,7 +69,7 @@ public partial class EntriesPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             pendingStatusError = true;
         }
     }
@@ -93,10 +100,31 @@ public partial class EntriesPage : ComponentBase
         return false;
     }
 
-    private async Task OnEntrySubmit(DynamicEntryForm.DynamicEntryResult arg)
+    private async Task OnEntrySubmit(Dictionary<SchemaPropertyWithIdDto, object?> entry)
     {
         if (!await HasAccess())
             return;
+
+        var creationDto = new EntryCreationDto
+        {
+            SchemaId = SchemaId.ToString(),
+            Properties = entry
+        };
+
+        var result = await EntryService.AddEntryAsync(creationDto);
+
+        if (result.IsSuccess)
+        {
+            statusText = "Entry created successfully.";
+            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            showForm = false;
+            entryForm?.Reset();
+        }
+        else
+        {
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
+            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+        }
     }
 
     private void ToggleAddForm()

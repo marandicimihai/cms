@@ -68,18 +68,17 @@ public partial class ProjectSchemasSection : ComponentBase
 
         if (!result.IsSuccess)
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-            IsCreatingSchema = false;
-            StateHasChanged();
-            return;
         }
-
-        statusText = "Successfully created schema.";
-        statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
-        IsAddFormVisible = false;
-        NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
-        Schemas.Add(result.Value);
+        else
+        {
+            statusText = "Successfully created schema.";
+            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            IsAddFormVisible = false;
+            NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
+            Schemas.Add(result.Value);    
+        }
 
         IsCreatingSchema = false;
         StateHasChanged();

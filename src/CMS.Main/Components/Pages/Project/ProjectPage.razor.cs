@@ -47,7 +47,7 @@ public partial class ProjectPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             showStatusOnRender = true;
         }
     }
@@ -76,7 +76,7 @@ public partial class ProjectPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.First();
+            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
         }
     }
@@ -102,7 +102,7 @@ public partial class ProjectPage : ComponentBase
             }
             else
             {
-                statusText = result.Errors.First();
+                statusText = result.Errors.FirstOrDefault() ?? "There was an error";
                 statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
             }
         }

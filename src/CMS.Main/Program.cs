@@ -41,6 +41,7 @@ builder.Services
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()
+    .AddScoped<IEntryService, EntryService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>();
 

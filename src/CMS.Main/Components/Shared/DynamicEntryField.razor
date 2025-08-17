@@ -1,0 +1,174 @@
+@using Ardalis.Result
+@using CMS.Shared.DTOs.SchemaProperty
+
+<div class="flex flex-col gap-1">
+    <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@SchemaProperty.Id">@SchemaProperty.Name</label>
+    @switch (SchemaProperty.Type)
+    {
+        case SchemaPropertyType.Text:
+            <input id="field-@SchemaProperty.Id" type="text" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@BindConverter.FormatValue(Value)" @oninput="OnTextChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" aria-describedby="@(HasError ? ErrorId : null)" />
+            break;
+        case SchemaPropertyType.Integer:
+            <input id="field-@SchemaProperty.Id" type="number" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@BindConverter.FormatValue(Value)" @oninput="OnIntChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" aria-describedby="@(HasError ? ErrorId : null)" />
+            break;
+        case SchemaPropertyType.Decimal:
+            <input id="field-@SchemaProperty.Id" type="number" step="any" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@BindConverter.FormatValue(Value)" @oninput="OnDecimalChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" aria-describedby="@(HasError ? ErrorId : null)" />
+            break;
+        case SchemaPropertyType.Boolean:
+            <div class="flex items-center gap-2 py-2">
+                <input id="field-@SchemaProperty.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@(Value is true)" @onchange="OnBoolChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" aria-describedby="@(HasError ? ErrorId : null)" />
+                <span class="text-sm text-slate-700">@(Value is true ? "True" : "False")</span>
+            </div>
+            break;
+        case SchemaPropertyType.DateTime:
+            <input id="field-@SchemaProperty.Id" type="datetime-local" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@FormatDateTimeLocal(Value)" @onchange="OnDateTimeChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" aria-describedby="@(HasError ? ErrorId : null)" />
+            break;
+        case SchemaPropertyType.Enum:
+            <select id="field-@SchemaProperty.Id" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@BindConverter.FormatValue(Value)" @onchange="OnEnumChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" aria-describedby="@(HasError ? ErrorId : null)">
+                <option value="">-- select --</option>
+                @if (SchemaProperty.Options != null)
+                {
+                    foreach (var opt in SchemaProperty.Options)
+                    {
+                        <option value="@opt">@opt</option>
+                    }
+                }
+            </select>
+            break;
+        default:
+            <div class="text-rose-600 text-sm">Unsupported type: @SchemaProperty.Type</div>
+            break;
+    }
+    @if (HasError)
+    {
+        <span id="@ErrorId" class="text-rose-600 text-xs mt-1" role="alert">@ValidationMessage</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SchemaPropertyWithIdDto SchemaProperty { get; set; } = default!;
+
+    private object? Value { get; set; }
+    private string? ValidationMessage { get; set; }
+    private bool HasError => !string.IsNullOrEmpty(ValidationMessage);
+    private string ErrorId => $"field-{SchemaProperty.Id}-error";
+
+    protected override void OnInitialized()
+    {
+        Value = SchemaProperty.Type switch
+        {
+            SchemaPropertyType.Boolean => false,
+            _ => null
+        };
+    }
+
+    private void OnTextChanged(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString();
+        Validate();
+    }
+    private void OnIntChanged(ChangeEventArgs e)
+    {
+        var str = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(str))
+        {
+            Value = null;
+        }
+        else if (int.TryParse(str, out var i))
+        {
+            Value = i;
+        }
+        else
+        {
+            Value = str;
+        }
+        Validate();
+    }
+    private void OnDecimalChanged(ChangeEventArgs e)
+    {
+        var str = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(str))
+        {
+            Value = null;
+        }
+        else if (decimal.TryParse(str, out var d))
+        {
+            Value = d;
+        }
+        else
+        {
+            Value = str;
+        }
+        Validate();
+    }
+    private void OnBoolChanged(ChangeEventArgs e)
+    {
+        Value = e.Value is bool b ? b : (e.Value?.ToString() == "true");
+        Validate();
+    }
+    private void OnDateTimeChanged(ChangeEventArgs e)
+    {
+        var str = e.Value?.ToString();
+        if (DateTime.TryParse(str, out var dt))
+        {
+            // Treat input as local, convert to UTC for storage
+            var local = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+            Value = local.ToUniversalTime();
+        }
+        else
+        {
+            Value = str;
+        }
+        Validate();
+    }
+    private void OnEnumChanged(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString();
+        Validate();
+    }
+    private string? FormatDateTimeLocal(object? value)
+    {
+        // Convert UTC value to local for display
+        if (value is DateTime utcDt)
+            return utcDt.ToLocalTime().ToString("yyyy-MM-ddTHH:mm");
+        return null;
+    }
+    private void Validate()
+    {
+        ValidationMessage = null;
+
+        var value = Value;
+        var validationResult = PropertyValidationExtensions.ValidateProperty(SchemaProperty, ref value);
+        if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
+        {
+            ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
+        }
+    }
+
+    public void Reset()
+    {
+        Value = SchemaProperty.Type switch
+        {
+            SchemaPropertyType.Boolean => false,
+            _ => null
+        };
+        ValidationMessage = null;
+    }
+
+    public (SchemaPropertyWithIdDto, object?) GetPropertyAndValue()
+    {
+        if (SchemaProperty.Type == SchemaPropertyType.DateTime && Value is DateTime dt)
+        {
+            // Always return ISO 8601 UTC string for DateTime
+            return (SchemaProperty, dt.ToUniversalTime().ToString("o"));
+        }
+        return (SchemaProperty, Value);
+    }
+
+    public bool IsValid()
+    {
+        Validate();
+        return !HasError;
+    }
+}
