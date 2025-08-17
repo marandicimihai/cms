@@ -1,4 +1,5 @@
 using CMS.Main.Client.Components;
+using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Schema;
 using CMS.Shared.DTOs.SchemaProperty;
@@ -29,6 +30,9 @@ public partial class SchemaPage : ComponentBase
     
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
+    
+    [Inject]
+    private ConfirmationService ConfirmationService { get; set; } = default!;
 
     private StatusIndicator? statusIndicator;
     private string? statusText;
@@ -119,6 +123,9 @@ public partial class SchemaPage : ComponentBase
 
     private async Task HandleCreatePropertySubmit()
     {
+        if (!await HasAccess())
+            return;
+        
         if (NewProperty.Type == SchemaPropertyType.Enum)
         {
             var options = string.IsNullOrWhiteSpace(OptionsCsv)
@@ -154,5 +161,36 @@ public partial class SchemaPage : ComponentBase
             Options = null
         };
         StateHasChanged();
+    }
+
+    private async Task OnDeletePropertyClicked(SchemaPropertyWithIdDto property)
+    {
+        if (!await HasAccess())
+            return;
+        
+        var isConfirmed = await ConfirmationService.ShowAsync(
+            title: "Delete Schema Property",
+            message: $"Are you sure you want to delete the property '{property.Name}'? This action cannot be undone and may result in the loss of data.",
+            confirmText: "Delete",
+            cancelText: "Cancel"
+            );
+
+        if (!isConfirmed)
+            return;
+        
+        var result = await PropertyService.DeleteSchemaPropertyAsync(property.Id);
+
+        if (result.IsSuccess)
+        {
+            statusText = "Successfully deleted schema property.";
+            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            
+            Schema.Properties.Remove(property);
+        }
+        else
+        {
+            statusText = result.Errors.First();
+            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+        }
     }
 }

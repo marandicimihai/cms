@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Ardalis.Result;
 using CMS.Main.Data;
 using CMS.Main.Models;
@@ -38,6 +39,31 @@ public class SchemaPropertyService(
         {
             logger.LogError(ex, "Error creating schema property for schema {schemaId}", creationDto.SchemaId);
             return Result.Error($"Error creating schema property for schema {creationDto.SchemaId}");
+        }
+    }
+
+    public async Task<Result> DeleteSchemaPropertyAsync(string propertyId)
+    {
+        try
+        {
+            var property = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.SchemaProperties.FindAsync(propertyId));
+
+            if (property is null)
+                return Result.NotFound();
+
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                dbContext.Remove(property);
+                await dbContext.SaveChangesAsync();
+            });
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting schema property {propertyId}", propertyId);
+            return Result.Error($"Error deleting schema property {propertyId}");
         }
     }
 }
