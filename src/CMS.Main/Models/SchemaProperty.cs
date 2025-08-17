@@ -16,6 +16,7 @@ public class SchemaProperty
     
     [Required]
     [Length(3, 100)]
+    [RegularExpression("^[A-Za-z][A-Za-z0-9_]*[A-Za-z]$", ErrorMessage = "Name must start and end with a letter, and only contain letters, numbers, and underscores in between.")]
     public string Name { get; set; } = default!;
     
     [Required]

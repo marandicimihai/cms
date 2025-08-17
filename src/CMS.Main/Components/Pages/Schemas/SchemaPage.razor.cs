@@ -6,6 +6,7 @@ using CMS.Shared.DTOs.SchemaProperty;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Text.Json;
 
 namespace CMS.Main.Components.Pages.Schemas;
 
@@ -191,6 +192,30 @@ public partial class SchemaPage : ComponentBase
         {
             statusText = result.Errors.First();
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+        }
+    }
+
+    private string ExampleJson
+    {
+        get
+        {
+            if (Schema?.Properties == null || Schema.Properties.Count == 0)
+                return "{\n}";
+            var dict = new Dictionary<string, object?>();
+            foreach (var p in Schema.Properties)
+            {
+                dict[p.Name] = p.Type switch
+                {
+                    SchemaPropertyType.Text => $"Sample {p.Name}",
+                    SchemaPropertyType.Integer => 123,
+                    SchemaPropertyType.Boolean => true,
+                    SchemaPropertyType.DateTime => DateTime.UtcNow.ToString("o"),
+                    SchemaPropertyType.Decimal => 123.45m,
+                    SchemaPropertyType.Enum => (p.Options != null && p.Options.Length > 0) ? p.Options[0] : "ExampleOption",
+                    _ => null
+                };
+            }
+            return JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }
