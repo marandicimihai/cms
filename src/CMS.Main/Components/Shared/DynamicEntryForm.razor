@@ -1,0 +1,66 @@
+@using CMS.Shared.DTOs.SchemaProperty
+
+<EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4">
+        @if (Properties != null)
+        {
+            foreach (var prop in Properties)
+            {
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs uppercase tracking-wide text-slate-600" for="@prop.Id">@prop.Name</label>
+                    @switch (prop.Type)
+                    {
+                        case SchemaPropertyType.Text:
+                            <input id="@prop.Id" type="text" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@GetString(prop.Id)" @onchange="e => SetString(e, prop.Id)" />
+                            break;
+                        case SchemaPropertyType.Integer:
+                            <input id="@prop.Id" type="number" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@GetString(prop.Id)" @onchange="e => SetString(e, prop.Id)" />
+                            break;
+                        case SchemaPropertyType.Boolean:
+                            <div class="flex items-center gap-2 py-2">
+                                <input id="@prop.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@GetBool(prop.Id)" @onchange="e => SetBool(e, prop.Id)" />
+                                <span class="text-sm text-slate-700">@(GetBool(prop.Id) ? "True" : "False")</span>
+                            </div>
+                            break;
+                        case SchemaPropertyType.DateTime:
+                            <input id="@prop.Id" type="datetime-local" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@GetString(prop.Id)" @onchange="e => SetString(e, prop.Id)" />
+                            break;
+                        case SchemaPropertyType.Decimal:
+                            <input id="@prop.Id" type="number" step="any" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@GetString(prop.Id)" @onchange="e => SetString(e, prop.Id)" />
+                            break;
+                        case SchemaPropertyType.Enum:
+                            <select id="@prop.Id" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" value="@GetString(prop.Id)" @onchange="e => SetString(e, prop.Id)">
+                                <option value="">-- select --</option>
+                                @if (prop.Options != null)
+                                {
+                                    foreach (var opt in prop.Options)
+                                    {
+                                        <option value="@opt" selected="@(GetString(prop.Id) == opt)">@opt</option>
+                                    }
+                                }
+                            </select>
+                            break;
+                        default:
+                            <div class="text-rose-600 text-sm">Unsupported type: @prop.Type</div>
+                            break;
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-sm text-slate-600">No properties.</div>
+        }
+    </div>
+
+    <div class="flex gap-2 justify-start mt-2">
+        <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2">
+            <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
+            Submit
+        </button>
+        <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2" @onclick="HandleCancel" aria-label="Cancel">
+            <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
+            Cancel
+        </button>
+    </div>
+</EditForm>

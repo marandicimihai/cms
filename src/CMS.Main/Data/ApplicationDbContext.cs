@@ -1,6 +1,7 @@
 using CMS.Main.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace CMS.Main.Data;
 
@@ -24,6 +25,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<Entry>()
             .HasOne(s => s.Schema);
+
+        builder.Entity<Entry>()
+            .Property(e => e.Data)
+            .HasConversion(
+                v => v.RootElement.GetRawText(),
+                v => (string.IsNullOrEmpty(v) ? null : JsonDocument.Parse(v, new JsonDocumentOptions()))! 
+            );
 
         base.OnModelCreating(builder);
     }
