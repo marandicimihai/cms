@@ -363,6 +363,9 @@
   .max-w-\[200px\] {
     max-width: 200px;
   }
+  .max-w-\[240px\] {
+    max-width: 240px;
+  }
   .max-w-md {
     max-width: var(--container-md);
   }
@@ -819,6 +822,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-rose-700);
+      }
+    }
+  }
+  .hover\:bg-slate-50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-slate-50);
       }
     }
   }

@@ -4,6 +4,7 @@ using CMS.Main.Data;
 using CMS.Main.Models;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Entry;
+using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.SchemaProperty;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,85 @@ public class EntryService(
     ILogger<EntryService> logger
 ) : IEntryService
 {
-    public async Task<Result<EntryWithIdDto>> AddEntryAsync(EntryCreationDto creationDto)
+    public async Task<Result<(List<EntryWithIdDto>, PaginationMetadata)>> GetEntriesForSchema(
+        string schemaId, 
+        PaginationParams? paginationParams = null)
+    {
+        paginationParams ??= new PaginationParams(1, 10);
+        var cappedPageSize = Math.Clamp(paginationParams.PageSize, 1, IEntryService.MaxPageSize);
+        var cappedPageNumber = Math.Max(paginationParams.PageNumber, 1);
+        
+        try
+        {
+            var schema = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Schemas
+                    .AsNoTracking()
+                    .Include(s => s.Properties)
+                    .FirstOrDefaultAsync(s => s.Id == schemaId));
+            
+            if (schema is null) 
+                return Result.NotFound();
+
+            var (entries, paginationMetadata) = await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                var entries = await dbContext.Entries
+                    .Where(e => e.SchemaId == schemaId)
+                    // .OrderBy something
+                    .Skip((cappedPageNumber - 1) * cappedPageSize)
+                    .Take(cappedPageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var paginationMetadata = new PaginationMetadata(
+                    await dbContext.Entries.CountAsync(e => e.SchemaId == schemaId),
+                    cappedPageNumber,
+                    cappedPageSize,
+                    IProjectService.MaxPageSize
+                );
+                
+                return (entries, paginationMetadata);
+            });
+
+            var dtos = new List<EntryWithIdDto>();
+            var adaptedProperties = schema.Properties.Adapt<List<SchemaPropertyWithIdDto>>();
+            
+            // Populate properties
+            foreach (var entry in entries)
+            {
+                var dto = entry.Adapt<EntryWithIdDto>();
+                dtos.Add(dto);
+                foreach (var property in adaptedProperties)
+                {
+                    if (entry.Data.RootElement.TryGetProperty(property.Name, out var value))
+                    {
+                        dto.Properties[property] = value.ValueKind switch
+                        {
+                            JsonValueKind.Null => null,
+                            JsonValueKind.String => value.GetString(),
+                            JsonValueKind.False => false,
+                            JsonValueKind.True => true,
+                            JsonValueKind.Number => value.TryGetInt32(out var intValue) ? intValue : value.GetDecimal(),
+                            _ => null
+                        };
+                    }
+                    else
+                    {
+                        dto.Properties[property] = null;
+                    }
+                }
+            }
+            
+            return Result.Success((dtos, paginationMetadata));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting entries for schema {schemaId}", schemaId);
+            return Result.Error($"Error getting entries for schema {schemaId}");
+        }
+    }
+
+    public async Task<Result<EntryWithIdDto>> AddEntryAsync(
+        EntryCreationDto creationDto)
     {
         try
         {
@@ -37,7 +116,7 @@ public class EntryService(
 
             foreach (var property in creationDto.Properties)
             {
-                var name = property.Key.Name.Trim();
+                var name = property.Key.Name;
 
                 // If property does not exist in schema, skip it
                 var schemaProp = schema.Properties.FirstOrDefault(p => p.Name == name);

@@ -2,6 +2,7 @@ using CMS.Main.Client.Components;
 using CMS.Main.Components.Shared;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Entry;
+using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.Schema;
 using CMS.Shared.DTOs.SchemaProperty;
 using Microsoft.AspNetCore.Authorization;
@@ -35,8 +36,13 @@ public partial class EntriesPage : ComponentBase
     
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
+    
+    private List<EntryWithIdDto> Entries { get; set; } = [];
 
     private DynamicEntryForm? entryForm;
+
+    // Used later for loading more entries
+    private int totalCount;
     
     private StatusIndicator? statusIndicator;
     private string? statusText;
@@ -70,6 +76,22 @@ public partial class EntriesPage : ComponentBase
         else
         {
             statusText = result.Errors.FirstOrDefault() ?? "There was an error";
+            pendingStatusError = true;
+            return;
+        }
+        
+        var entriesResult = await EntryService.GetEntriesForSchema(
+            SchemaId.ToString(),
+            new PaginationParams(1, 100));
+
+        if (entriesResult.IsSuccess)
+        {
+            (Entries, var pagination) = entriesResult.Value;
+            totalCount = pagination.TotalCount;
+        }
+        else
+        {
+            statusText = entriesResult.Errors.FirstOrDefault() ?? "There was an error";
             pendingStatusError = true;
         }
     }
@@ -115,10 +137,16 @@ public partial class EntriesPage : ComponentBase
 
         if (result.IsSuccess)
         {
+            if (result.Value is not null)
+            {
+                Entries.Insert(0, result.Value);
+            }
             statusText = "Entry created successfully.";
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
             showForm = false;
+            
             entryForm?.Reset();
+            StateHasChanged();
         }
         else
         {
@@ -131,4 +159,35 @@ public partial class EntriesPage : ComponentBase
     {
         showForm = !showForm;
     }
+
+    private object? GetEntryPropertyValue(EntryWithIdDto entry, string propertyName)
+    {
+        foreach (var kv in entry.Properties)
+        {
+            if (kv.Key.Name == propertyName)
+                return kv.Value;
+        }
+        return null;
+    }
+
+    private RenderFragment FormatCell(object? value) => builder =>
+    {
+        switch (value)
+        {
+            case null:
+                builder.AddContent(0, "null");
+                return;
+            case string s:
+            {
+                builder.AddContent(0, DateTime.TryParse(s, out var dt) ? dt.ToLocalTime().ToString("g") : s);
+                return;
+            }
+            case bool b:
+                builder.AddContent(0, b.ToString().ToLowerInvariant());
+                return;
+            default:
+                builder.AddContent(0, value.ToString());
+                break;
+        }
+    };
 }

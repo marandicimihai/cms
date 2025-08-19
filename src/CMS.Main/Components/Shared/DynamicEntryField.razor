@@ -104,7 +104,7 @@
     }
     private void OnBoolChanged(ChangeEventArgs e)
     {
-        Value = e.Value is bool b ? b : (e.Value?.ToString() == "true");
+        Value = e.Value is bool b ? b : e.Value?.ToString() == "true";
         Validate();
     }
     private void OnDateTimeChanged(ChangeEventArgs e)

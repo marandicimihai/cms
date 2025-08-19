@@ -57,12 +57,30 @@ else
         </tr>
         </thead>
         <tbody>
-        @{
-            var colCount = Schema.Properties?.Count ?? 1;
+        @if (Entries.Any() && Schema.Properties?.Any() == true)
+        {
+            @foreach (var entry in Entries)
+            {
+                <tr class="border-t border-slate-200 hover:bg-slate-50">
+                    @foreach (var prop in Schema.Properties)
+                    {
+                        var cellValue = GetEntryPropertyValue(entry, prop.Name);
+                        <td class="px-3 py-2 text-slate-700 truncate max-w-[240px]" title="@(cellValue?.ToString())">
+                            @FormatCell(cellValue)
+                        </td>
+                    }
+                </tr>
+            }
         }
-        <tr>
-            <td class="px-3 py-4 text-slate-600 text-sm" colspan="@colCount">No entries yet.</td>
-        </tr>
+        else
+        {
+            var colCount = Schema.Properties?.Count ?? 1;
+            <tr>
+                <td class="px-3 py-4 text-slate-600 text-sm" colspan="@colCount">No entries yet.</td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>
+
+
