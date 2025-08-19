@@ -18,8 +18,12 @@ public class EntryService(
 {
     public async Task<Result<(List<EntryWithIdDto>, PaginationMetadata)>> GetEntriesForSchema(
         string schemaId, 
-        PaginationParams? paginationParams = null)
+        PaginationParams? paginationParams = null,
+        Action<EntryGetOptions>? configureOptions = null)
     {
+        var options = new EntryGetOptions();
+        configureOptions?.Invoke(options);
+        
         paginationParams ??= new PaginationParams(1, 10);
         var cappedPageSize = Math.Clamp(paginationParams.PageSize, 1, IEntryService.MaxPageSize);
         var cappedPageNumber = Math.Max(paginationParams.PageNumber, 1);
@@ -37,9 +41,25 @@ public class EntryService(
 
             var (entries, paginationMetadata) = await dbHelper.ExecuteAsync(async dbContext =>
             {
-                var entries = await dbContext.Entries
+                var query = dbContext.Entries
                     .Where(e => e.SchemaId == schemaId)
-                    // .OrderBy something
+                    .AsQueryable();
+
+                switch (options.SortingOption)
+                {
+                    case EntrySortingOption.CreatedAt:
+                        query = options.Descending
+                            ? query.OrderByDescending(e => e.CreatedAt)
+                            : query.OrderBy(e => e.CreatedAt);
+                        break;
+                    case EntrySortingOption.UpdatedAt:
+                        query = options.Descending
+                            ? query.OrderByDescending(e => e.UpdatedAt)
+                            : query.OrderBy(e => e.UpdatedAt);
+                        break;
+                }
+                    
+                var entries = await query
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
                     .Take(cappedPageSize)
                     .AsNoTracking()

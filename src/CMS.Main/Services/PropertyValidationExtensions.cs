@@ -13,22 +13,22 @@ public static class PropertyValidationExtensions
         switch (property.Type)
         {
             case SchemaPropertyType.Text:
-                value = value is string s ? s.Trim() : null;
+                value = value is string s && !string.IsNullOrWhiteSpace(s) ? s : null;
                 break;
             case SchemaPropertyType.Integer:
-                value = value is int i ? i : 0;
+                value = value is int i ? i : null;
                 break;
             case SchemaPropertyType.Boolean:
-                value = value is true;
+                value = value is bool b ? b : null;
                 break;
             case SchemaPropertyType.DateTime:
                 if (value is DateTime dt)
                     value = dt.ToUniversalTime().ToString("o");
                 else
-                    value = DateTime.MinValue.ToUniversalTime().ToString("o");
+                    value = null;
                 break;
             case SchemaPropertyType.Decimal:
-                value = value is decimal d ? d : 0.0M;
+                value = value is decimal d ? d : null;
                 break;
             case SchemaPropertyType.Enum:
                 if (property.Options != null && value is string enumVal)
@@ -42,9 +42,14 @@ public static class PropertyValidationExtensions
                 }
                 else
                 {
-                    return Result.Invalid(new ValidationError($"Enum value missing or options not defined for property '{property.Name}'."));
+                    value = null;
                 }
                 break;
+        }
+        
+        if (property.IsRequired && value == null)
+        {
+            return Result.Invalid(new ValidationError($"Property '{property.Name}' is required."));
         }
         
         return Result.Success();

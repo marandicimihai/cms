@@ -82,7 +82,12 @@ public partial class EntriesPage : ComponentBase
         
         var entriesResult = await EntryService.GetEntriesForSchema(
             SchemaId.ToString(),
-            new PaginationParams(1, 100));
+            new PaginationParams(1, 100),
+            opt =>
+            {
+                opt.SortingOption = EntrySortingOption.CreatedAt;
+                opt.Descending = true;
+            });
 
         if (entriesResult.IsSuccess)
         {
@@ -102,9 +107,9 @@ public partial class EntriesPage : ComponentBase
         {
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
             pendingStatusError = false;
+            StateHasChanged();
         }
     }
-
     
     private async Task<bool> HasAccess()
     {
@@ -179,7 +184,11 @@ public partial class EntriesPage : ComponentBase
                 return;
             case string s:
             {
-                builder.AddContent(0, DateTime.TryParse(s, out var dt) ? dt.ToLocalTime().ToString("g") : s);
+                var display = DateTime.TryParse(s, out var dt) ? dt.ToLocalTime().ToString("g") : s;
+                builder.OpenElement(0, "span");
+                builder.AddAttribute(1, "class", "whitespace-pre");
+                builder.AddContent(2, display);
+                builder.CloseElement();
                 return;
             }
             case bool b:

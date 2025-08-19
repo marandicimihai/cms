@@ -24,4 +24,6 @@ public class SchemaProperty
     
     // For enums
     public string[]? Options { get; set; }
+    
+    public bool IsRequired { get; set; } = false;
 }

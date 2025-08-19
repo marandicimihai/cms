@@ -71,6 +71,7 @@ public partial class SchemaPage : ComponentBase
         {
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
             pendingStatusError = false;
+            StateHasChanged();
         }
     }
 
