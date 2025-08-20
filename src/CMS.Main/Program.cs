@@ -10,11 +10,14 @@ using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using _Imports = CMS.Main.Client._Imports;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
+TypeAdapterConfig.GlobalSettings.Default.PreserveReference(true);
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration config = builder.Configuration;
@@ -41,7 +44,7 @@ builder.Services
 
 // ? Custom Services
 builder.Services
-    .AddScoped<DbContextConcurrencyHelper>()
+    .AddScoped<IDbContextConcurrencyHelper, DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
     .AddScoped<EntryStateService>()
     .AddScoped<AuthorizationHelperService>()

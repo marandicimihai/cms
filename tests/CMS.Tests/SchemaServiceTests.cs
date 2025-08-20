@@ -7,6 +7,7 @@ using CMS.Main.Models;
 using CMS.Main.Services;
 using CMS.Shared.DTOs.Schema;
 using CMS.Shared.DTOs.SchemaProperty;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -21,6 +22,7 @@ public class SchemaServiceTests
 
     public SchemaServiceTests()
     {
+        TypeAdapterConfig.GlobalSettings.Default.PreserveReference(true);
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;

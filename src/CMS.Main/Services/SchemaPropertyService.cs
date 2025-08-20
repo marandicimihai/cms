@@ -9,7 +9,7 @@ using Mapster;
 namespace CMS.Main.Services;
 
 public class SchemaPropertyService(
-    DbContextConcurrencyHelper dbHelper,
+    IDbContextConcurrencyHelper dbHelper,
     ILogger<SchemaPropertyService> logger
 ) : ISchemaPropertyService
 {
@@ -39,6 +39,29 @@ public class SchemaPropertyService(
         {
             logger.LogError(ex, "Error creating schema property for schema {schemaId}", creationDto.SchemaId);
             return Result.Error($"Error creating schema property for schema {creationDto.SchemaId}");
+        }
+    }
+
+    public async Task<Result<SchemaPropertyWithIdDto>> UpdateSchemaPropertyAsync(SchemaPropertyUpdateDto updateDto)
+    {
+        try
+        {
+            var property = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.SchemaProperties.FindAsync(updateDto.Id));
+
+            if (property is null)
+                return Result.NotFound();
+
+            updateDto.Adapt(property);
+
+            await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
+
+            return Result.Success(property.Adapt<SchemaPropertyWithIdDto>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating schema property {propertyId}", updateDto.Id);
+            return Result.Error($"Error updating schema property {updateDto.Id}");
         }
     }
 

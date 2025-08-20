@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CMS.Main.Services;
 
 public class EntryService(
-    DbContextConcurrencyHelper dbHelper,
+    IDbContextConcurrencyHelper dbHelper,
     ILogger<EntryService> logger
 ) : IEntryService
 {

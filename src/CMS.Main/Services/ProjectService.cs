@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CMS.Main.Services;
 
 public class ProjectService(
-    DbContextConcurrencyHelper dbHelper,
+    IDbContextConcurrencyHelper dbHelper,
     ProjectStateService projectStateService,
     ILogger<ProjectService> logger
 ) : IProjectService
@@ -170,25 +170,6 @@ public class ProjectService(
         {
             logger.LogError(ex, "There was an error when deleting project {projectId}.", projectId);
             return Result.Error($"There was an error when deleting project {projectId}.");
-        }
-    }
-
-    public async Task<Result<bool>> OwnsProject(string userId, string projectId)
-    {
-        try
-        {
-            var project = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(projectId));
-
-            // Returns false even if the project was not found
-            return Result.Success(project?.OwnerId == userId);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an error when checking ownership of project {projectId} for user {userId}.",
-                projectId, userId);
-            return Result.Error(
-                $"There was an error when checking ownership of project {projectId} for user {userId}.");
         }
     }
 }

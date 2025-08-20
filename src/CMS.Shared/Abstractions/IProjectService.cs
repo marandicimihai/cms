@@ -25,6 +25,4 @@ public interface IProjectService
 
     Task<Result> DeleteProjectAsync(
         string projectId);
-
-    Task<Result<bool>> OwnsProject(string userId, string projectId);
 }

@@ -23,6 +23,13 @@
                 </td>
                 <td class="px-3 py-2 text-sm text-slate-900 text-right">
                     <button type="button"
+                            class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-xs px-2.5 py-1.5 mr-2 focus:ring-2 focus:ring-blue-500"
+                            aria-label="Edit property"
+                            @onclick="() => OnEditProperty.InvokeAsync(prop)">
+                        <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
+                        Edit
+                    </button>
+                    <button type="button"
                             class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500"
                             aria-label="Delete property"
                             @onclick="() => OnDeletePropertyClicked(prop)">

@@ -45,7 +45,7 @@ public partial class EntriesPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
             queuedStatusMessage = "You do not have access to this project or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
@@ -80,7 +80,7 @@ public partial class EntriesPage : ComponentBase
 
     private async Task OnEntrySubmit(Dictionary<SchemaPropertyWithIdDto, object?> entry)
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
             statusIndicator?.Show("You do not have access to this project or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);

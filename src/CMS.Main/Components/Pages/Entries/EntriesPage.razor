@@ -3,13 +3,11 @@
 
 @attribute [Authorize]
 
-<NavLink class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1 mb-2" href="@($"/project/{ProjectId}")" aria-label="Back to project">
-    <span class="material-symbols-outlined icons-default text-base mr-1">arrow_back</span>
-    Back to Project
-</NavLink>
-
 <AuthorizeView Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
     <Authorized>
+        
+        <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>
+
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-lg font-medium text-slate-900">Entries</h1>
             @if (!showForm)
@@ -25,15 +23,16 @@
         {
             <div class="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 <h2 class="text-sm font-medium text-slate-900 mb-3">New Entry</h2>
-                <DynamicEntryForm @ref="entryForm" Properties="Schema.Properties" OnValidSubmit="OnEntrySubmit" OnCancel="ToggleAddForm" />
+                <DynamicEntryForm @ref="entryForm" Properties="Schema.Properties" OnValidSubmit="OnEntrySubmit" OnCancel="ToggleAddForm"/>
             </div>
         }
-        
-        <StatusIndicator @ref="statusIndicator" />
-        
+
+        <StatusIndicator @ref="statusIndicator"/>
+
         <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties"/>
     </Authorized>
     <NotAuthorized>
-        <StatusIndicator @ref="statusIndicator" />
+        <BackButton />
+        <StatusIndicator @ref="statusIndicator"/>
     </NotAuthorized>
 </AuthorizeView>

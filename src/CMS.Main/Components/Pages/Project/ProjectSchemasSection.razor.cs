@@ -55,7 +55,7 @@ public partial class ProjectSchemasSection : ComponentBase
 
     public async Task HandleAddSchema()
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId))
+        if (!await AuthHelper.CanEditProject(ProjectId))
         {
             statusIndicator?.Show("You do not have access to this project or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
@@ -89,7 +89,7 @@ public partial class ProjectSchemasSection : ComponentBase
 
     private async Task OnDeleteSchemaAsync(SchemaWithIdDto schema)
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId))
+        if (!await AuthHelper.CanEditProject(ProjectId))
         {
             statusIndicator?.Show("You do not have access to this project or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);

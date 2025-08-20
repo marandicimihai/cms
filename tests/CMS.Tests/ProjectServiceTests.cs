@@ -29,9 +29,9 @@ public class ProjectServiceTests
 
         context = new ApplicationDbContext(options);
         var mockLogger = new Mock<ILogger<ProjectService>>();
-        var mockStateService = new Mock<ProjectStateService>();
+        var mockStateService = new ProjectStateService();
         var dbHelper = new DbContextConcurrencyHelper(context);
-        projectService = new ProjectService(dbHelper, mockStateService.Object, mockLogger.Object);
+        projectService = new ProjectService(dbHelper, mockStateService, mockLogger.Object);
     }
 
     [Fact]
@@ -274,58 +274,6 @@ public class ProjectServiceTests
 
         // Assert
         Assert.True(result.IsNotFound());
-    }
-
-    [Fact]
-    public async Task OwnsProject_WhenUserOwnsProject_ReturnsTrue()
-    {
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var projectId = Guid.NewGuid().ToString();
-        var project = new Project { Id = projectId, Name = "Test Project", OwnerId = userId };
-        await context.Projects.AddAsync(project);
-        await context.SaveChangesAsync();
-
-        // Act
-        var result = await projectService.OwnsProject(userId, projectId);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value);
-    }
-
-    [Fact]
-    public async Task OwnsProject_WhenUserDoesNotOwnProject_ReturnsFalse()
-    {
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var differentUserId = Guid.NewGuid().ToString();
-        var projectId = Guid.NewGuid().ToString();
-        var project = new Project { Id = projectId, Name = "Test Project", OwnerId = differentUserId };
-        await context.Projects.AddAsync(project);
-        await context.SaveChangesAsync();
-
-        // Act
-        var result = await projectService.OwnsProject(userId, projectId);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.False(result.Value);
-    }
-
-    [Fact]
-    public async Task OwnsProject_WithNonExistentProject_ReturnsFalse()
-    {
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var nonExistentProjectId = Guid.NewGuid().ToString();
-
-        // Act
-        var result = await projectService.OwnsProject(userId, nonExistentProjectId);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.False(result.Value);
     }
 
     [Theory]

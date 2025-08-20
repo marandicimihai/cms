@@ -1,7 +1,6 @@
 using System.Text.Json;
 using CMS.Main.Client.Components;
 using CMS.Main.Client.Services;
-using CMS.Main.Client.Services.State;
 using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Schema;
@@ -14,6 +13,9 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
 {
     [Parameter, EditorRequired]
     public SchemaWithIdDto Schema { get; set; } = default!;
+    
+    [Parameter]
+    public EventCallback<SchemaPropertyWithIdDto> OnEditProperty { get; set; }
 
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
@@ -28,9 +30,9 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
     
     private async Task OnDeletePropertyClicked(SchemaPropertyWithIdDto property)
     {
-        if (!await AuthHelper.CanAccessProject(Schema.ProjectId))
+        if (!await AuthHelper.CanEditSchema(Schema.Id))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+            statusIndicator?.Show("You do not have access to this schema or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
             return;
         }

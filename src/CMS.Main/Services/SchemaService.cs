@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CMS.Main.Services;
 
 public class SchemaService(
-    DbContextConcurrencyHelper dbHelper,
+    IDbContextConcurrencyHelper dbHelper,
     ILogger<SchemaService> logger
 ) : ISchemaService
 {
@@ -22,13 +22,21 @@ public class SchemaService(
         try
         {
             var schema = await dbHelper.ExecuteAsync(async dbContext =>
-                options.IncludeProperties
-                    ? await dbContext.Schemas
-                        .Include(s => s.Properties)
-                        .FirstOrDefaultAsync(s => s.Id == schemaId)
-                    : await dbContext.Schemas
-                        .FirstOrDefaultAsync(s => s.Id == schemaId)
-            );
+            {
+                var query = dbContext.Schemas.AsQueryable();
+
+                if (options.IncludeProperties)
+                {
+                    query = query.Include(s => s.Properties);
+                }
+
+                if (options.IncludeProject)
+                {
+                    query = query.Include(s => s.Project);
+                }
+
+                return await query.FirstOrDefaultAsync(s => s.Id == schemaId);
+            });
 
             if (schema is null)
                 return Result.NotFound();

@@ -35,7 +35,7 @@ public partial class ProjectPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
             queuedStatusMessage = "You do not have access to this project or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
@@ -68,7 +68,7 @@ public partial class ProjectPage : ComponentBase
 
     private async Task OnSaveName()
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
             statusIndicator?.Show("You do not have access to this project or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
@@ -91,7 +91,7 @@ public partial class ProjectPage : ComponentBase
 
     private async Task OnDeleteProject()
     {
-        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
             statusIndicator?.Show("You do not have access to this project or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
