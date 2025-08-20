@@ -16,10 +16,6 @@
         @if (!isCreatePropertyFormVisible)
         {
             <div class="flex items-center gap-2">
-                <NavLink class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" href="@($"/project/{ProjectId}/schema/{SchemaId}/entries?from=schema")" aria-label="View Entries">
-                    <span class="material-symbols-outlined icons-default text-base mr-2">arrow_forward</span>
-                    View Entries
-                </NavLink>
                 <button
                     class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
                     aria-label="Create Property" @onclick="ShowCreatePropertyForm">

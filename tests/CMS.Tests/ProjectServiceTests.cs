@@ -314,7 +314,7 @@ public class ProjectServiceTests
     }
 
     [Fact]
-    public async Task OwnsProject_WithNonExistentProject_ReturnsNotFound()
+    public async Task OwnsProject_WithNonExistentProject_ReturnsFalse()
     {
         // Arrange
         var userId = Guid.NewGuid().ToString();
@@ -324,7 +324,8 @@ public class ProjectServiceTests
         var result = await projectService.OwnsProject(userId, nonExistentProjectId);
 
         // Assert
-        Assert.True(result.IsNotFound());
+        Assert.True(result.IsSuccess);
+        Assert.False(result.Value);
     }
 
     [Theory]

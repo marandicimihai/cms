@@ -10,7 +10,7 @@ namespace CMS.Main.Components.Layout;
 
 [StreamRendering]
 [Authorize]
-public partial class SideBar : ComponentBase
+public partial class SideBar : ComponentBase, IDisposable
 {
     private readonly int pageSize = 20;
     private bool isLoadingMore;
@@ -138,5 +138,13 @@ public partial class SideBar : ComponentBase
         }
 
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ProjectStateService.ProjectsCreated -= ProjectsCreated;
+        ProjectStateService.ProjectsUpdated -= ProjectsUpdated;
+        ProjectStateService.ProjectsDeleted -= OnProjectsDeleted;
+        GC.SuppressFinalize(this);
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using CMS.Main.Components;
 using CMS.Main.Components.Account;
 using CMS.Main.Data;
@@ -10,6 +11,9 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Identity;
 using _Imports = CMS.Main.Client._Imports;
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration config = builder.Configuration;
@@ -38,6 +42,7 @@ builder.Services
 builder.Services
     .AddScoped<DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
+    .AddScoped<EntryStateService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()

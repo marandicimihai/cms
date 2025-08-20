@@ -1,14 +1,13 @@
 using CMS.Main.Client.Components;
 using CMS.Main.Components.Shared;
+using CMS.Main.Services.State;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Entry;
-using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.Schema;
 using CMS.Shared.DTOs.SchemaProperty;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace CMS.Main.Components.Pages.Entries;
 
@@ -33,16 +32,11 @@ public partial class EntriesPage : ComponentBase
     
     [Inject]
     private IEntryService EntryService { get; set; } = default!;
-    
+
     [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
-    
-    private List<EntryWithIdDto> Entries { get; set; } = [];
+    private EntryStateService EntryStateService { get; set; } = default!;
 
     private DynamicEntryForm? entryForm;
-
-    // Used later for loading more entries
-    private int totalCount;
     
     private StatusIndicator? statusIndicator;
     private string? statusText;
@@ -50,17 +44,8 @@ public partial class EntriesPage : ComponentBase
 
     private bool showForm;
 
-    private string navigationSource = "schema";
-    
     protected override async Task OnInitializedAsync()
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var query = QueryHelpers.ParseQuery(uri.Query);
-        if (query.TryGetValue("from", out var fromVal))
-        {
-            navigationSource = fromVal.ToString();
-        }
-
         if (!await HasAccess())
             return;
 
@@ -76,27 +61,6 @@ public partial class EntriesPage : ComponentBase
         else
         {
             statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-            pendingStatusError = true;
-            return;
-        }
-        
-        var entriesResult = await EntryService.GetEntriesForSchema(
-            SchemaId.ToString(),
-            new PaginationParams(1, 100),
-            opt =>
-            {
-                opt.SortingOption = EntrySortingOption.CreatedAt;
-                opt.Descending = true;
-            });
-
-        if (entriesResult.IsSuccess)
-        {
-            (Entries, var pagination) = entriesResult.Value;
-            totalCount = pagination.TotalCount;
-        }
-        else
-        {
-            statusText = entriesResult.Errors.FirstOrDefault() ?? "There was an error";
             pendingStatusError = true;
         }
     }
@@ -142,10 +106,8 @@ public partial class EntriesPage : ComponentBase
 
         if (result.IsSuccess)
         {
-            if (result.Value is not null)
-            {
-                Entries.Insert(0, result.Value);
-            }
+            EntryStateService.NotifyCreated([result.Value]);
+            
             statusText = "Entry created successfully.";
             statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
             showForm = false;
@@ -164,39 +126,4 @@ public partial class EntriesPage : ComponentBase
     {
         showForm = !showForm;
     }
-
-    private object? GetEntryPropertyValue(EntryWithIdDto entry, string propertyName)
-    {
-        foreach (var kv in entry.Properties)
-        {
-            if (kv.Key.Name == propertyName)
-                return kv.Value;
-        }
-        return null;
-    }
-
-    private RenderFragment FormatCell(object? value) => builder =>
-    {
-        switch (value)
-        {
-            case null:
-                builder.AddContent(0, "null");
-                return;
-            case string s:
-            {
-                var display = DateTime.TryParse(s, out var dt) ? dt.ToLocalTime().ToString("g") : s;
-                builder.OpenElement(0, "span");
-                builder.AddAttribute(1, "class", "whitespace-pre");
-                builder.AddContent(2, display);
-                builder.CloseElement();
-                return;
-            }
-            case bool b:
-                builder.AddContent(0, b.ToString().ToLowerInvariant());
-                return;
-            default:
-                builder.AddContent(0, value.ToString());
-                break;
-        }
-    };
 }

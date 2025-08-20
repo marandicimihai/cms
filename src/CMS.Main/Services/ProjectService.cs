@@ -180,7 +180,8 @@ public class ProjectService(
             var project = await dbHelper.ExecuteAsync(async dbContext =>
                 await dbContext.Projects.FindAsync(projectId));
 
-            return project is null ? Result.NotFound() : Result.Success(project.OwnerId == userId);
+            // Returns false even if the project was not found
+            return Result.Success(project?.OwnerId == userId);
         }
         catch (Exception ex)
         {

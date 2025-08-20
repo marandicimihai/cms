@@ -1,0 +1,59 @@
+<StatusIndicator @ref="statusIndicator">@statusText</StatusIndicator>
+
+<div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-x-auto">
+    <table class="min-w-full text-sm">
+        <thead class="bg-slate-100">
+        <tr>
+            <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">ID</th>
+            @if (Properties.Any())
+            {
+                @foreach (var prop in Properties)
+                {
+                    <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">@prop.Name</th>
+                }
+                <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">Created At</th>
+                <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">Updated At</th>
+            }
+            else
+            {
+                <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">No Properties</th>
+                <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">Created At</th>
+                <th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium">Updated At</th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @if (Entries.Any() && Properties.Any())
+        {
+            @foreach (var entry in Entries)
+            {
+                <tr class="border-t border-slate-200 hover:bg-slate-50">
+                    <td class="px-3 py-2 text-slate-700 font-mono text-xs whitespace-nowrap" title="@entry.Id">@entry.Id</td>
+                    @foreach (var prop in Properties)
+                    {
+                        var cellValue = GetEntryPropertyValue(entry, prop.Name);
+                        <td class="px-3 py-2 text-slate-700 truncate max-w-[240px]" title="@(cellValue?.ToString())">
+                            @FormatCell(cellValue)
+                        </td>
+                    }
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap" title="@(entry.CreatedAt.ToString("O"))">
+                        @FormatCell(entry.CreatedAt)
+                    </td>
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap" title="@(entry.UpdatedAt.ToString("O"))">
+                        @FormatCell(entry.UpdatedAt)
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            var colCount = (Properties?.Count ?? 1) + 3;
+            <tr>
+                <td class="px-3 py-4 text-slate-600 text-sm" colspan="@colCount">No entries yet.</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="hidden whitespace-pre"></div>
