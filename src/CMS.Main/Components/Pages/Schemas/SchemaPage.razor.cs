@@ -12,7 +12,7 @@ public partial class SchemaPage : ComponentBase
     [Parameter]
     public Guid SchemaId { get; set; }
 
-    private SchemaWithIdDto Schema { get; set; } = new();
+    private SchemaDto Schema { get; set; } = new();
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;

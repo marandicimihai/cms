@@ -10,7 +10,7 @@ public class EntryBaseDto
     [Required]
     [StringLength(36)]
     public string SchemaId { get; set; } = default!;
-    public SchemaWithIdDto Schema { get; set; } = default!;
+    public SchemaDto Schema { get; set; } = default!;
     
     public Dictionary<SchemaPropertyDto, object?> Properties { get; set; } = new();
 }

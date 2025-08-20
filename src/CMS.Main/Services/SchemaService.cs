@@ -13,7 +13,7 @@ public class SchemaService(
     ILogger<SchemaService> logger
 ) : ISchemaService
 {
-    public async Task<Result<SchemaWithIdDto>> GetSchemaByIdAsync(
+    public async Task<Result<SchemaDto>> GetSchemaByIdAsync(
         string schemaId, 
         Action<SchemaGetOptions>? optionsAction = null)
     {
@@ -41,7 +41,7 @@ public class SchemaService(
             if (schema is null)
                 return Result.NotFound();
 
-            var dto = schema.Adapt<SchemaWithIdDto>();
+            var dto = schema.Adapt<SchemaDto>();
             if (!options.IncludeProperties)
                 dto.Properties = [];
 
@@ -54,18 +54,21 @@ public class SchemaService(
         }
     }
 
-    public async Task<Result<SchemaWithIdDto>> CreateSchemaAsync(SchemaCreationDto schemaCreationDto)
+    public async Task<Result<SchemaDto>> CreateSchemaAsync(SchemaDto dto)
     {
         try
         {
-            // Check if project exists
+            // Check if the project exists
             var project = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(schemaCreationDto.ProjectId));
+                await dbContext.Projects.FindAsync(dto.ProjectId));
 
             if (project is null)
-                return Result.NotFound($"Project {schemaCreationDto.ProjectId} was not found.");
+                return Result.NotFound($"Project {dto.ProjectId} was not found.");
 
-            var schema = schemaCreationDto.Adapt<Schema>();
+            var schema = dto.Adapt<Schema>(new TypeAdapterConfig()
+                .NewConfig<SchemaDto, Schema>()
+                .Ignore(s => s.Id)
+                .Config);
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -73,14 +76,14 @@ public class SchemaService(
                 await dbContext.SaveChangesAsync();
             });
 
-            return Result.Success(schema.Adapt<SchemaWithIdDto>());
+            return Result.Success(schema.Adapt<SchemaDto>());
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error when creating the schema for project {projectId}.",
-                schemaCreationDto.ProjectId);
+                dto.ProjectId);
             return Result.Error(
-                $"There was an error when creating the schema for project {schemaCreationDto.ProjectId}.");
+                $"There was an error when creating the schema for project {dto.ProjectId}.");
         }
     }
 

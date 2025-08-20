@@ -8,5 +8,5 @@ public class ProjectWithIdDto : ProjectBaseDto
 
     public DateTime LastUpdated { get; set; }
 
-    public List<SchemaWithIdDto> Schemas { get; set; } = [];
+    public List<SchemaDto> Schemas { get; set; } = [];
 }

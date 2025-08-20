@@ -5,12 +5,12 @@ namespace CMS.Shared.Abstractions;
 
 public interface ISchemaService
 {
-    Task<Result<SchemaWithIdDto>> GetSchemaByIdAsync(
+    Task<Result<SchemaDto>> GetSchemaByIdAsync(
         string schemaId,
         Action<SchemaGetOptions>? optionsAction = null);
 
-    Task<Result<SchemaWithIdDto>> CreateSchemaAsync(
-        SchemaCreationDto schemaCreationDto);
+    Task<Result<SchemaDto>> CreateSchemaAsync(
+        SchemaDto dto);
 
     Task<Result> DeleteSchemaAsync(
         string schemaId);

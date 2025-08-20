@@ -12,7 +12,7 @@ namespace CMS.Main.Components.Pages.Schemas;
 public partial class ViewSchemaPropertiesTable : ComponentBase
 {
     [Parameter, EditorRequired]
-    public SchemaWithIdDto Schema { get; set; } = default!;
+    public SchemaDto Schema { get; set; } = default!;
     
     [Parameter]
     public EventCallback<SchemaPropertyDto> OnEditProperty { get; set; }
