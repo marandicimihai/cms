@@ -23,18 +23,13 @@ public partial class PropertyUpdateForm : ComponentBase
 
     public bool FormVisible { get; private set; }
 
-    private SchemaPropertyUpdateDto PropertyDto { get; set; } = new()
-    {
-        Name = string.Empty,
-        Type = SchemaPropertyType.Text,
-        Options = null
-    };
+    private SchemaPropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
     private SchemaPropertyType[] PropertyTypes { get; } = Enum.GetValues<SchemaPropertyType>();
     
     private StatusIndicator? statusIndicator;
 
-    public void ShowForm(SchemaPropertyUpdateDto propertyDto)
+    public void ShowForm(SchemaPropertyDto propertyDto)
     {
         PropertyDto = propertyDto;
         FormVisible = true;

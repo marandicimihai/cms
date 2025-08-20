@@ -8,5 +8,5 @@ public class SchemaWithIdDto : SchemaBaseDto
     public string Id { get; set; } = default!;
 
     public ProjectWithIdDto Project { get; set; } = default!;
-    public List<SchemaPropertyWithIdDto> Properties { get; set; } = [];
+    public List<SchemaPropertyDto> Properties { get; set; } = [];
 }

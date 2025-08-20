@@ -33,15 +33,14 @@ public class SchemaPropertyServiceTests
     [Fact]
     public async Task CreateSchemaPropertyAsync_NotFound_WhenSchemaMissing()
     {
-        var dto = new SchemaPropertyCreationDto
+        var dto = new SchemaPropertyDto
         {
+            Id = Guid.NewGuid().ToString(),
             SchemaId = Guid.NewGuid().ToString(),
             Name = "Title",
             Type = SchemaPropertyType.Text
         };
-
         var result = await propertyService.CreateSchemaPropertyAsync(dto);
-
         Assert.True(result.IsNotFound());
     }
 
@@ -54,15 +53,14 @@ public class SchemaPropertyServiceTests
         await context.Schemas.AddAsync(schema);
         await context.SaveChangesAsync();
 
-        var dto = new SchemaPropertyCreationDto
+        var dto = new SchemaPropertyDto
         {
+            Id = Guid.NewGuid().ToString(),
             SchemaId = schema.Id,
             Name = "Title",
             Type = SchemaPropertyType.Text
         };
-
         var result = await propertyService.CreateSchemaPropertyAsync(dto);
-
         Assert.True(result.IsSuccess);
         Assert.Equal("Title", result.Value.Name);
         Assert.NotNull(await context.SchemaProperties.FindAsync(result.Value.Id));
@@ -95,40 +93,16 @@ public class SchemaPropertyServiceTests
     [Fact]
     public async Task UpdateSchemaPropertyAsync_NotFound_WhenMissing()
     {
-        var updateDto = new SchemaPropertyUpdateDto
+        var updateDto = new SchemaPropertyDto
         {
             Id = Guid.NewGuid().ToString(),
+            SchemaId = Guid.NewGuid().ToString(),
             Name = "Updated",
             Type = SchemaPropertyType.Text
         };
         var result = await propertyService.UpdateSchemaPropertyAsync(updateDto);
         Assert.True(result.IsNotFound());
     }
-
-    // [Fact]
-    // public async Task UpdateSchemaPropertyAsync_Success_WhenExists()
-    // {
-    //     var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
-    //     await context.Projects.AddAsync(project);
-    //     var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
-    //     await context.Schemas.AddAsync(schema);
-    //     var property = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-    //     await context.SchemaProperties.AddAsync(property);
-    //     await context.SaveChangesAsync();
-    //
-    //     var updateDto = new SchemaPropertyUpdateDto
-    //     {
-    //         Id = property.Id,
-    //         Name = "UpdatedTitle",
-    //         Type = property.Type
-    //     };
-    //     var result = await propertyService.UpdateSchemaPropertyAsync(updateDto);
-    //     Assert.True(result.IsSuccess);
-    //     Assert.Equal("UpdatedTitle", result.Value.Name);
-    //     var updated = await context.SchemaProperties.FirstOrDefaultAsync(p => p.Id == property.Id);
-    //     Assert.NotNull(updated); // Ensure updated is not null
-    //     Assert.Equal("UpdatedTitle", updated.Name);
-    // }
 
     [Fact]
     public async Task UpdateSchemaPropertyAsync_Success_WhenNoChange()
@@ -141,9 +115,10 @@ public class SchemaPropertyServiceTests
         await context.SchemaProperties.AddAsync(property);
         await context.SaveChangesAsync();
 
-        var updateDto = new SchemaPropertyUpdateDto
+        var updateDto = new SchemaPropertyDto
         {
             Id = property.Id,
+            SchemaId = property.SchemaId,
             Name = property.Name,
             Type = property.Type
         };
@@ -164,9 +139,10 @@ public class SchemaPropertyServiceTests
         brokenDbHelper.Setup(h => h.ExecuteAsync(It.IsAny<Func<ApplicationDbContext, Task>>()))
             .ThrowsAsync(new Exception("DB error"));
         var brokenService = new SchemaPropertyService(brokenDbHelper.Object, mockLogger.Object);
-        var updateDto = new SchemaPropertyUpdateDto
+        var updateDto = new SchemaPropertyDto
         {
             Id = Guid.NewGuid().ToString(),
+            SchemaId = Guid.NewGuid().ToString(),
             Name = "Updated",
             Type = SchemaPropertyType.Text
         };

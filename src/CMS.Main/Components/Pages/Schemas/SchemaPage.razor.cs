@@ -64,7 +64,7 @@ public partial class SchemaPage : ComponentBase
         }
     }
     
-    private void TriggerEditProperty(SchemaPropertyWithIdDto property)
+    private void TriggerEditProperty(SchemaPropertyDto property)
     {
         
     }

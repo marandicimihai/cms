@@ -15,7 +15,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
     public SchemaWithIdDto Schema { get; set; } = default!;
     
     [Parameter]
-    public EventCallback<SchemaPropertyWithIdDto> OnEditProperty { get; set; }
+    public EventCallback<SchemaPropertyDto> OnEditProperty { get; set; }
 
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
@@ -28,7 +28,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
 
     private StatusIndicator? statusIndicator;
     
-    private async Task OnDeletePropertyClicked(SchemaPropertyWithIdDto property)
+    private async Task OnDeletePropertyClicked(SchemaPropertyDto property)
     {
         if (!await AuthHelper.CanEditSchema(Schema.Id))
         {

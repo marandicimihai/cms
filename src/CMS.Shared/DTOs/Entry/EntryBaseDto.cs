@@ -12,5 +12,5 @@ public class EntryBaseDto
     public string SchemaId { get; set; } = default!;
     public SchemaWithIdDto Schema { get; set; } = default!;
     
-    public Dictionary<SchemaPropertyWithIdDto, object?> Properties { get; set; } = new();
+    public Dictionary<SchemaPropertyDto, object?> Properties { get; set; } = new();
 }

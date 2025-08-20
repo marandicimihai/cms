@@ -8,10 +8,10 @@ public partial class DynamicEntryForm : ComponentBase
     private object Model { get; set; } = new();
 
     [Parameter]
-    public List<SchemaPropertyWithIdDto> Properties { get; set; } = [];
+    public List<SchemaPropertyDto> Properties { get; set; } = [];
     
     [Parameter] 
-    public EventCallback<Dictionary<SchemaPropertyWithIdDto, object?>> OnValidSubmit { get; set; }
+    public EventCallback<Dictionary<SchemaPropertyDto, object?>> OnValidSubmit { get; set; }
     
     [Parameter] 
     public EventCallback OnCancel { get; set; }
@@ -48,7 +48,7 @@ public partial class DynamicEntryForm : ComponentBase
         if (!isValid)
             return;
         
-        var propertiesAndValues = new Dictionary<SchemaPropertyWithIdDto, object?>();
+        var propertiesAndValues = new Dictionary<SchemaPropertyDto, object?>();
         
         foreach (var field in Fields)
         {

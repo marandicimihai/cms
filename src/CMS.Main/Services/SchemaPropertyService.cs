@@ -13,18 +13,21 @@ public class SchemaPropertyService(
     ILogger<SchemaPropertyService> logger
 ) : ISchemaPropertyService
 {
-    public async Task<Result<SchemaPropertyWithIdDto>> CreateSchemaPropertyAsync(
-        SchemaPropertyCreationDto creationDto)
+    public async Task<Result<SchemaPropertyDto>> CreateSchemaPropertyAsync(
+        SchemaPropertyDto dto)
     {
         try
         {
             var schema = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Schemas.FindAsync(creationDto.SchemaId));
+                await dbContext.Schemas.FindAsync(dto.SchemaId));
 
             if (schema is null)
                 return Result.NotFound();
-            
-            var property = creationDto.Adapt<SchemaProperty>();
+
+            var property = dto.Adapt<SchemaProperty>(new TypeAdapterConfig()
+                .NewConfig<SchemaPropertyDto, SchemaProperty>()
+                .Ignore(p => p.Id)
+                .Config);
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -32,36 +35,41 @@ public class SchemaPropertyService(
                 await dbContext.SaveChangesAsync();
             });
 
-            var resultDto = property.Adapt<SchemaPropertyWithIdDto>();
+            var resultDto = property.Adapt<SchemaPropertyDto>();
             return Result.Success(resultDto);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating schema property for schema {schemaId}", creationDto.SchemaId);
-            return Result.Error($"Error creating schema property for schema {creationDto.SchemaId}");
+            logger.LogError(ex, "Error creating schema property for schema {schemaId}", dto.SchemaId);
+            return Result.Error($"Error creating schema property for schema {dto.SchemaId}");
         }
     }
 
-    public async Task<Result<SchemaPropertyWithIdDto>> UpdateSchemaPropertyAsync(SchemaPropertyUpdateDto updateDto)
+    public async Task<Result<SchemaPropertyDto>> UpdateSchemaPropertyAsync(SchemaPropertyDto dto)
     {
         try
         {
             var property = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.SchemaProperties.FindAsync(updateDto.Id));
+                await dbContext.SchemaProperties.FindAsync(dto.Id));
 
             if (property is null)
                 return Result.NotFound();
 
-            updateDto.Adapt(property);
+            dto.Adapt(property, new TypeAdapterConfig()
+                .NewConfig<SchemaPropertyDto, SchemaProperty>()
+                .Ignore(p => p.Id)
+                .Ignore(p => p.SchemaId)
+                .Ignore(p => p.Type)
+                .Config);
 
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 
-            return Result.Success(property.Adapt<SchemaPropertyWithIdDto>());
+            return Result.Success(property.Adapt<SchemaPropertyDto>());
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error updating schema property {propertyId}", updateDto.Id);
-            return Result.Error($"Error updating schema property {updateDto.Id}");
+            logger.LogError(ex, "Error updating schema property {propertyId}", dto.Id);
+            return Result.Error($"Error updating schema property {dto.Id}");
         }
     }
 

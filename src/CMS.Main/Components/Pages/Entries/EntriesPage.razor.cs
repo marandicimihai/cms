@@ -78,7 +78,7 @@ public partial class EntriesPage : ComponentBase
         }
     }
 
-    private async Task OnEntrySubmit(Dictionary<SchemaPropertyWithIdDto, object?> entry)
+    private async Task OnEntrySubmit(Dictionary<SchemaPropertyDto, object?> entry)
     {
         if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {

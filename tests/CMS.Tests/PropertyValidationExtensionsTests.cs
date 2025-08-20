@@ -9,8 +9,8 @@ namespace CMS.Tests;
 
 public class PropertyValidationExtensionsTests
 {
-    private static SchemaPropertyWithIdDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)
-        => new SchemaPropertyWithIdDto
+    private static SchemaPropertyDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)
+        => new SchemaPropertyDto
         {
             Id = Guid.NewGuid().ToString(),
             SchemaId = Guid.NewGuid().ToString(),

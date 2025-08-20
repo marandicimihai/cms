@@ -14,7 +14,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     public string SchemaId { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public List<SchemaPropertyWithIdDto> Properties { get; set; } = default!;
+    public List<SchemaPropertyDto> Properties { get; set; } = default!;
     
     [Inject]
     private IEntryService EntryService { get; set; } = default!;

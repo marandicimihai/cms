@@ -12,7 +12,7 @@ public static class PropertyValidationExtensions
     /// <param name="value">Is an object which usually holds a string value from user inputs and is then parsed
     /// to the required type</param>
     /// </summary>
-    public static Result ValidateProperty(SchemaPropertyWithIdDto property, ref object? value)
+    public static Result ValidateProperty(SchemaPropertyDto property, ref object? value)
     {
         switch (property.Type)
         {

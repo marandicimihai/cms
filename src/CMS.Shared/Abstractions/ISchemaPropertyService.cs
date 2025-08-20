@@ -5,11 +5,11 @@ namespace CMS.Shared.Abstractions;
 
 public interface ISchemaPropertyService
 {
-    Task<Result<SchemaPropertyWithIdDto>> CreateSchemaPropertyAsync(
-        SchemaPropertyCreationDto creationDto);
+    Task<Result<SchemaPropertyDto>> CreateSchemaPropertyAsync(
+        SchemaPropertyDto dto);
 
-    Task<Result<SchemaPropertyWithIdDto>> UpdateSchemaPropertyAsync(
-        SchemaPropertyUpdateDto updateDto);
+    Task<Result<SchemaPropertyDto>> UpdateSchemaPropertyAsync(
+        SchemaPropertyDto dto);
     
     Task<Result> DeleteSchemaPropertyAsync(
             string propertyId);

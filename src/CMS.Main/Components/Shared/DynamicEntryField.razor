@@ -71,7 +71,7 @@
 
 @code {
     [Parameter, EditorRequired]
-    public SchemaPropertyWithIdDto SchemaProperty { get; set; } = default!;
+    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
 
     private object? Value { get; set; }
     private object? TempValue { get; set; }
@@ -170,7 +170,7 @@
         ValidationMessage = null;
     }
 
-    public (SchemaPropertyWithIdDto, object?) GetPropertyAndValue()
+    public (SchemaPropertyDto, object?) GetPropertyAndValue()
     {
         if (SchemaProperty.Type == SchemaPropertyType.DateTime && Value is DateTime dt)
         {

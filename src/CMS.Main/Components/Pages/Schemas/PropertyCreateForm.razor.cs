@@ -23,12 +23,7 @@ public partial class PropertyCreateForm : ComponentBase
 
     public bool FormVisible { get; private set; }
 
-    private SchemaPropertyCreationDto PropertyDto { get; set; } = new()
-    {
-        Name = string.Empty,
-        Type = SchemaPropertyType.Text,
-        Options = null
-    };
+    private SchemaPropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
     private SchemaPropertyType[] PropertyTypes { get; } = Enum.GetValues<SchemaPropertyType>();
     
@@ -49,7 +44,7 @@ public partial class PropertyCreateForm : ComponentBase
 
     private void ResetForm()
     {
-        PropertyDto = new SchemaPropertyCreationDto
+        PropertyDto = new SchemaPropertyDto
         {
             SchemaId = Schema.Id,
             Name = string.Empty,

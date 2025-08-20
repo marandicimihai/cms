@@ -76,7 +76,7 @@ public class EntryService(
             });
 
             var dtos = new List<EntryWithIdDto>();
-            var adaptedProperties = schema.Properties.Adapt<List<SchemaPropertyWithIdDto>>();
+            var adaptedProperties = schema.Properties.Adapt<List<SchemaPropertyDto>>();
             
             // Populate properties
             foreach (var entry in entries)
@@ -130,7 +130,7 @@ public class EntryService(
             var entry = creationDto.Adapt<Entry>();
 
             var dictStringObject = new Dictionary<string, object?>();
-            var dictSchemaPropertyObject = new Dictionary<SchemaPropertyWithIdDto, object?>();
+            var dictSchemaPropertyObject = new Dictionary<SchemaPropertyDto, object?>();
             
             var validationErrors = new List<ValidationError>();
 

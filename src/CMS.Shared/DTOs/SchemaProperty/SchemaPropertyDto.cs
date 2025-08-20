@@ -2,8 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CMS.Shared.DTOs.SchemaProperty;
 
-public class SchemaPropertyBaseDto
+public class SchemaPropertyDto
 {
+    public string Id { get; set; } = default!;
+    
     [Required]
     [StringLength(36)]
     public string SchemaId { get; set; } = default!;
