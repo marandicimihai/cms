@@ -87,13 +87,13 @@ public partial class EntriesPage : ComponentBase
             return;
         }
 
-        var creationDto = new EntryCreationDto
+        var dto = new EntryDto
         {
             SchemaId = SchemaId.ToString(),
             Properties = entry
         };
 
-        var result = await EntryService.AddEntryAsync(creationDto);
+        var result = await EntryService.AddEntryAsync(dto);
 
         if (result.IsSuccess)
         {

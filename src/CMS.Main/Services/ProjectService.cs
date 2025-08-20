@@ -94,14 +94,14 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectDto>> CreateProjectAsync(ProjectDto projectDto)
+    public async Task<Result<ProjectDto>> CreateProjectAsync(ProjectDto dto)
     {
-        if (!Guid.TryParse(projectDto.OwnerId, out _))
+        if (!Guid.TryParse(dto.OwnerId, out _))
             return Result.Invalid(new ValidationError("OwnerID must be a valid GUID."));
 
         try
         {
-            var project = projectDto.Adapt<Project>();
+            var project = dto.Adapt<Project>();
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 await dbContext.Projects.AddAsync(project);
@@ -119,22 +119,22 @@ public class ProjectService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an error when creating a project for user {ownerId}.", projectDto.OwnerId);
-            return Result.Error($"There was an error when creating a project for user {projectDto.OwnerId}.");
+            logger.LogError(ex, "There was an error when creating a project for user {ownerId}.", dto.OwnerId);
+            return Result.Error($"There was an error when creating a project for user {dto.OwnerId}.");
         }
     }
 
-    public async Task<Result<ProjectDto>> UpdateProjectAsync(ProjectDto projectDto)
+    public async Task<Result<ProjectDto>> UpdateProjectAsync(ProjectDto dto)
     {
         try
         {
             var project = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(projectDto.Id));
+                await dbContext.Projects.FindAsync(dto.Id));
 
             if (project is null)
                 return Result.NotFound();
 
-            projectDto.Adapt(project, new TypeAdapterConfig()
+            dto.Adapt(project, new TypeAdapterConfig()
                 .NewConfig<ProjectDto, Project>()
                 .Ignore(p => p.Id)
                 .Ignore(p => p.LastUpdated)
@@ -149,8 +149,8 @@ public class ProjectService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an error when updating project {projectId}.", projectDto.Id);
-            return Result.Error($"There was an error when updating project {projectDto.Id}.");
+            logger.LogError(ex, "There was an error when updating project {projectId}.", dto.Id);
+            return Result.Error($"There was an error when updating project {dto.Id}.");
         }
     }
 

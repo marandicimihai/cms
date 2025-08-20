@@ -18,10 +18,10 @@ public interface IProjectService
         Action<ProjectQueryOptions>? configureOptions = null);
 
     Task<Result<ProjectDto>> CreateProjectAsync(
-        ProjectDto projectDto);
+        ProjectDto dto);
 
     Task<Result<ProjectDto>> UpdateProjectAsync(
-        ProjectDto projectDto);
+        ProjectDto dto);
 
     Task<Result> DeleteProjectAsync(
         string projectId);

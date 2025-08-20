@@ -16,7 +16,7 @@ public class EntryService(
     ILogger<EntryService> logger
 ) : IEntryService
 {
-    public async Task<Result<(List<EntryWithIdDto>, PaginationMetadata)>> GetEntriesForSchema(
+    public async Task<Result<(List<EntryDto>, PaginationMetadata)>> GetEntriesForSchema(
         string schemaId, 
         PaginationParams? paginationParams = null,
         Action<EntryGetOptions>? configureOptions = null)
@@ -75,13 +75,13 @@ public class EntryService(
                 return (entries, paginationMetadata);
             });
 
-            var dtos = new List<EntryWithIdDto>();
+            var dtos = new List<EntryDto>();
             var adaptedProperties = schema.Properties.Adapt<List<SchemaPropertyDto>>();
             
             // Populate properties
             foreach (var entry in entries)
             {
-                var dto = entry.Adapt<EntryWithIdDto>();
+                var dto = entry.Adapt<EntryDto>();
                 dtos.Add(dto);
                 foreach (var property in adaptedProperties)
                 {
@@ -113,8 +113,8 @@ public class EntryService(
         }
     }
 
-    public async Task<Result<EntryWithIdDto>> AddEntryAsync(
-        EntryCreationDto creationDto)
+    public async Task<Result<EntryDto>> AddEntryAsync(
+        EntryDto dto)
     {
         try
         {
@@ -122,19 +122,24 @@ public class EntryService(
                 await dbContext.Schemas
                     .AsNoTracking()
                     .Include(s => s.Properties)
-                    .FirstOrDefaultAsync(s => s.Id == creationDto.SchemaId));
+                    .FirstOrDefaultAsync(s => s.Id == dto.SchemaId));
             
             if (schema is null) 
                 return Result.NotFound();
             
-            var entry = creationDto.Adapt<Entry>();
+            var entry = dto.Adapt<Entry>(new TypeAdapterConfig()
+                .NewConfig<EntryDto, Entry>()
+                .Ignore(e => e.Id)
+                .Ignore(e => e.CreatedAt)
+                .Ignore(e => e.UpdatedAt)
+                .Config);
 
             var dictStringObject = new Dictionary<string, object?>();
             var dictSchemaPropertyObject = new Dictionary<SchemaPropertyDto, object?>();
             
             var validationErrors = new List<ValidationError>();
 
-            foreach (var property in creationDto.Properties)
+            foreach (var property in dto.Properties)
             {
                 var name = property.Key.Name;
 
@@ -171,15 +176,15 @@ public class EntryService(
                 await dbContext.SaveChangesAsync();
             });
 
-            var adaptedEntry = entry.Adapt<EntryWithIdDto>();
+            var adaptedEntry = entry.Adapt<EntryDto>();
             adaptedEntry.Properties = dictSchemaPropertyObject;
 
             return Result.Success(adaptedEntry);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating entry for schema {schemaId}", creationDto.SchemaId);
-            return Result.Error($"Error creating entry for schema {creationDto.SchemaId}");
+            logger.LogError(ex, "Error creating entry for schema {schemaId}", dto.SchemaId);
+            return Result.Error($"Error creating entry for schema {dto.SchemaId}");
         }
     }
 }

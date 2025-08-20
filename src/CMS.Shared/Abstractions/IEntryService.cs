@@ -8,11 +8,11 @@ public interface IEntryService
 {
     public const int MaxPageSize = 100;
     
-    Task<Result<(List<EntryWithIdDto>, PaginationMetadata)>> GetEntriesForSchema(
+    Task<Result<(List<EntryDto>, PaginationMetadata)>> GetEntriesForSchema(
         string schemaId,
         PaginationParams? paginationParams = null,
         Action<EntryGetOptions>? configureOptions = null);
     
-    Task<Result<EntryWithIdDto>> AddEntryAsync(
-        EntryCreationDto creationDto);
+    Task<Result<EntryDto>> AddEntryAsync(
+        EntryDto dto);
 }

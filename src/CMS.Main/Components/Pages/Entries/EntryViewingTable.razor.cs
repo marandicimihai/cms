@@ -22,7 +22,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     [Inject]
     private EntryStateService EntryStateService { get; set; } = default!;
     
-    private List<EntryWithIdDto> Entries { get; set; } = [];
+    private List<EntryDto> Entries { get; set; } = [];
     
     private StatusIndicator? statusIndicator;
     
@@ -67,12 +67,12 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
     }
     
-    private void EntriesCreated(List<EntryWithIdDto> created)
+    private void EntriesCreated(List<EntryDto> created)
     {
         Entries.InsertRange(0, created);
     }
     
-    private object? GetEntryPropertyValue(EntryWithIdDto entry, string propertyName)
+    private object? GetEntryPropertyValue(EntryDto entry, string propertyName)
     {
         foreach (var kv in entry.Properties)
         {
