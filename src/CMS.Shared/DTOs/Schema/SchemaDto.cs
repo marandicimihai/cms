@@ -15,7 +15,7 @@ public class SchemaDto
     [Required]
     [StringLength(36)]
     public string ProjectId { get; set; } = default!;
-    public ProjectWithIdDto Project { get; set; } = default!;
+    public ProjectDto Project { get; set; } = default!;
     
     public List<SchemaPropertyDto> Properties { get; set; } = [];
 }

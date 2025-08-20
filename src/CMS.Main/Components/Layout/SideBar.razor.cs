@@ -22,7 +22,7 @@ public partial class SideBar : ComponentBase, IDisposable
     [Inject]
     private ProjectStateService ProjectStateService { get; set; } = default!;
 
-    private List<ProjectWithIdDto> Projects { get; set; } = [];
+    private List<ProjectDto> Projects { get; set; } = [];
     private bool HasMoreProjects => Projects.Count < totalCount;
 
     protected override async Task OnInitializedAsync()
@@ -100,14 +100,14 @@ public partial class SideBar : ComponentBase, IDisposable
         StateHasChanged();
     }
 
-    private void ProjectsCreated(List<ProjectWithIdDto> projects)
+    private void ProjectsCreated(List<ProjectDto> projects)
     {
         Projects.AddRange(projects);
         Projects = Projects.OrderByDescending(p => p.LastUpdated).ToList();
         StateHasChanged();
     }
 
-    private void ProjectsUpdated(List<ProjectWithIdDto> projects)
+    private void ProjectsUpdated(List<ProjectDto> projects)
     {
         foreach (var updatedProject in projects)
         {

@@ -155,7 +155,7 @@ public class ProjectServiceTests
     {
         // Arrange
         var ownerId = Guid.NewGuid().ToString();
-        var projectDto = new ProjectCreationDto
+        var projectDto = new ProjectDto
         {
             Name = "New Project",
             OwnerId = ownerId
@@ -180,7 +180,7 @@ public class ProjectServiceTests
     public async Task CreateProjectAsync_WithInvalidOwnerId_ReturnsInvalid()
     {
         // Arrange
-        var projectDto = new ProjectCreationDto
+        var projectDto = new ProjectDto
         {
             Name = "New Project",
             OwnerId = "invalid-guid"
@@ -204,7 +204,7 @@ public class ProjectServiceTests
         await context.Projects.AddAsync(project);
         await context.SaveChangesAsync();
 
-        var updateDto = new ProjectUpdateDto
+        var updateDto = new ProjectDto
         {
             Id = projectId,
             Name = "Updated Name",
@@ -229,7 +229,7 @@ public class ProjectServiceTests
     {
         // Arrange
         var nonExistentId = Guid.NewGuid().ToString();
-        var updateDto = new ProjectUpdateDto
+        var updateDto = new ProjectDto
         {
             Id = nonExistentId,
             Name = "Updated Name",

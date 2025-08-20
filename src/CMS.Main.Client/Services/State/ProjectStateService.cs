@@ -4,16 +4,16 @@ namespace CMS.Main.Client.Services.State;
 
 public class ProjectStateService
 {
-    public event Action<List<ProjectWithIdDto>>? ProjectsCreated;
-    public event Action<List<ProjectWithIdDto>>? ProjectsUpdated;
+    public event Action<List<ProjectDto>>? ProjectsCreated;
+    public event Action<List<ProjectDto>>? ProjectsUpdated;
     public event Action<List<string>>? ProjectsDeleted;
 
-    public void NotifyCreated(List<ProjectWithIdDto> projects)
+    public void NotifyCreated(List<ProjectDto> projects)
     {
         ProjectsCreated?.Invoke(projects);
     }
 
-    public void NotifyUpdated(List<ProjectWithIdDto> projects)
+    public void NotifyUpdated(List<ProjectDto> projects)
     {
         ProjectsUpdated?.Invoke(projects);
     }

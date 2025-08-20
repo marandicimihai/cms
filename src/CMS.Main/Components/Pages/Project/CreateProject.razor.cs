@@ -13,7 +13,7 @@ public partial class CreateProject : ComponentBase
     private string? projectUrl;
 
     [SupplyParameterFromForm]
-    private ProjectCreationDto ProjectDto { get; set; } = new();
+    private ProjectDto ProjectDto { get; set; } = new();
 
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;

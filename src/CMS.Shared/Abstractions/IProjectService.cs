@@ -8,20 +8,20 @@ public interface IProjectService
 {
     public const int MaxPageSize = 50;
 
-    Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
+    Task<Result<(List<ProjectDto>, PaginationMetadata)>> GetProjectsForUserAsync(
         string userId,
         PaginationParams? paginationParams = null,
         Action<ProjectQueryOptions>? configureOptions = null);
 
-    Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
+    Task<Result<ProjectDto>> GetProjectByIdAsync(
         string projectId,
         Action<ProjectQueryOptions>? configureOptions = null);
 
-    Task<Result<ProjectWithIdDto>> CreateProjectAsync(
-        ProjectCreationDto projectDto);
+    Task<Result<ProjectDto>> CreateProjectAsync(
+        ProjectDto projectDto);
 
-    Task<Result<ProjectWithIdDto>> UpdateProjectAsync(
-        ProjectUpdateDto projectDto);
+    Task<Result<ProjectDto>> UpdateProjectAsync(
+        ProjectDto projectDto);
 
     Task<Result> DeleteProjectAsync(
         string projectId);

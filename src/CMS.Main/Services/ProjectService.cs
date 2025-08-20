@@ -16,7 +16,7 @@ public class ProjectService(
     ILogger<ProjectService> logger
 ) : IProjectService
 {
-    public async Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
+    public async Task<Result<(List<ProjectDto>, PaginationMetadata)>> GetProjectsForUserAsync(
         string userId,
         PaginationParams? paginationParams = null,
         Action<ProjectQueryOptions>? configureOptions = null)
@@ -49,7 +49,7 @@ public class ProjectService(
                     IProjectService.MaxPageSize
                 );
 
-                var dtos = projects.Adapt<List<ProjectWithIdDto>>();
+                var dtos = projects.Adapt<List<ProjectDto>>();
                 if (!options.IncludeSchemas)
                     foreach (var dto in dtos)
                         dto.Schemas = [];
@@ -66,7 +66,7 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
+    public async Task<Result<ProjectDto>> GetProjectByIdAsync(
         string projectId,
         Action<ProjectQueryOptions>? configureOptions = null)
     {
@@ -83,7 +83,7 @@ public class ProjectService(
             });
             if (result is null)
                 return Result.NotFound();
-            var dto = result.Adapt<ProjectWithIdDto>();
+            var dto = result.Adapt<ProjectDto>();
             if (!options.IncludeSchemas) dto.Schemas = [];
             return Result.Success(dto);
         }
@@ -94,7 +94,7 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> CreateProjectAsync(ProjectCreationDto projectDto)
+    public async Task<Result<ProjectDto>> CreateProjectAsync(ProjectDto projectDto)
     {
         if (!Guid.TryParse(projectDto.OwnerId, out _))
             return Result.Invalid(new ValidationError("OwnerID must be a valid GUID."));
@@ -108,7 +108,11 @@ public class ProjectService(
                 await dbContext.SaveChangesAsync();
             });
 
-            var adapted = project.Adapt<ProjectWithIdDto>();
+            var adapted = project.Adapt<ProjectDto>(new TypeAdapterConfig()
+                .NewConfig<ProjectDto, Project>()
+                .Ignore(p => p.Id)
+                .Ignore(p => p.LastUpdated)
+                .Config);
             projectStateService.NotifyCreated([adapted]);
 
             return Result.Success(adapted);
@@ -120,7 +124,7 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> UpdateProjectAsync(ProjectUpdateDto projectDto)
+    public async Task<Result<ProjectDto>> UpdateProjectAsync(ProjectDto projectDto)
     {
         try
         {
@@ -130,11 +134,15 @@ public class ProjectService(
             if (project is null)
                 return Result.NotFound();
 
-            projectDto.Adapt(project);
+            projectDto.Adapt(project, new TypeAdapterConfig()
+                .NewConfig<ProjectDto, Project>()
+                .Ignore(p => p.Id)
+                .Ignore(p => p.LastUpdated)
+                .Config);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 
-            var adapted = project.Adapt<ProjectWithIdDto>();
+            var adapted = project.Adapt<ProjectDto>();
             projectStateService.NotifyUpdated([adapted]);
 
             return Result.Success(adapted);

@@ -26,7 +26,7 @@ public partial class ProjectPage : ComponentBase
     private ConfirmationService ConfirmationService { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private ProjectUpdateDto ProjectDto { get; set; } = new();
+    private ProjectDto ProjectDto { get; set; } = new();
 
     private StatusIndicator? statusIndicator;
 
@@ -47,7 +47,7 @@ public partial class ProjectPage : ComponentBase
 
         if (result.IsSuccess)
         {
-            ProjectDto = result.Value.Adapt<ProjectUpdateDto>();
+            ProjectDto = result.Value;
         }
         else
         {
