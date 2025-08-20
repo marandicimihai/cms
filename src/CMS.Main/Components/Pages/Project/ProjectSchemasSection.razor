@@ -13,7 +13,7 @@
             </button>
         }
     </div>
-    <StatusIndicator @ref="statusIndicator">@statusText</StatusIndicator>
+    <StatusIndicator @ref="statusIndicator" />
     @if (IsAddFormVisible)
     {
         <EditForm Model="NewSchema" OnValidSubmit="HandleAddSchema" class="mb-4">

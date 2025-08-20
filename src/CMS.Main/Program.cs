@@ -1,11 +1,12 @@
 using System.Globalization;
+using CMS.Main.Client.Services;
+using CMS.Main.Client.Services.State;
 using CMS.Main.Components;
 using CMS.Main.Components.Account;
 using CMS.Main.Data;
 using CMS.Main.Emails;
 using CMS.Main.Emails.Config;
 using CMS.Main.Services;
-using CMS.Main.Services.State;
 using CMS.Shared.Abstractions;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -43,6 +44,7 @@ builder.Services
     .AddScoped<DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
     .AddScoped<EntryStateService>()
+    .AddScoped<AuthorizationHelperService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()

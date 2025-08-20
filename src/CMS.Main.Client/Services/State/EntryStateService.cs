@@ -1,6 +1,6 @@
 using CMS.Shared.DTOs.Entry;
 
-namespace CMS.Main.Services.State;
+namespace CMS.Main.Client.Services.State;
 
 public class EntryStateService
 {

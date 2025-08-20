@@ -1,4 +1,6 @@
 using CMS.Main.Client.Components;
+using CMS.Main.Client.Services;
+using CMS.Main.Client.Services.State;
 using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Schema;
@@ -10,9 +12,6 @@ namespace CMS.Main.Components.Pages.Project;
 
 public partial class ProjectSchemasSection : ComponentBase
 {
-    private StatusIndicator? statusIndicator;
-    private string? statusText;
-
     [Parameter]
     public List<SchemaWithIdDto> Schemas { get; set; } = [];
 
@@ -23,13 +22,12 @@ public partial class ProjectSchemasSection : ComponentBase
     private ISchemaService SchemaService { get; set; } = default!;
 
     [Inject]
-    private IAuthorizationService AuthorizationService { get; set; } = default!;
-
-    [Inject]
-    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
-
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
+    
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
+    
+    private StatusIndicator? statusIndicator;
 
     [SupplyParameterFromForm]
     public SchemaCreationDto NewSchema { get; set; } = new();
@@ -57,8 +55,12 @@ public partial class ProjectSchemasSection : ComponentBase
 
     public async Task HandleAddSchema()
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         IsCreatingSchema = true;
         StateHasChanged();
@@ -68,13 +70,14 @@ public partial class ProjectSchemasSection : ComponentBase
 
         if (!result.IsSuccess)
         {
-            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                StatusIndicator.StatusSeverity.Error);
         }
         else
         {
-            statusText = "Successfully created schema.";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            statusIndicator?.Show("Successfully created schema.",
+                StatusIndicator.StatusSeverity.Success);
+
             IsAddFormVisible = false;
             NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
             Schemas.Add(result.Value);    
@@ -86,8 +89,12 @@ public partial class ProjectSchemasSection : ComponentBase
 
     private async Task OnDeleteSchemaAsync(SchemaWithIdDto schema)
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         var confirmed = await ConfirmationService.ShowAsync(
             "Delete Schema",
@@ -101,29 +108,15 @@ public partial class ProjectSchemasSection : ComponentBase
 
             if (result.IsSuccess)
             {
-                statusText = "Schema deleted successfully.";
-                statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+                statusIndicator?.Show("Schema deleted successfully.",
+                    StatusIndicator.StatusSeverity.Success);
                 Schemas.Remove(schema);
             }
             else
             {
-                statusText = result.Errors.First();
-                statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+                statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                    StatusIndicator.StatusSeverity.Error);
             }
         }
-    }
-
-    private async Task<bool> HasAccess()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var authorizationResult = await AuthorizationService.AuthorizeAsync(user, ProjectId, "ProjectPolicies.CanEditProject");
-
-        if (authorizationResult.Succeeded) return true;
-
-        statusText = "Could not load project. You do not have permission to access this project.";
-        statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-
-        return false;
     }
 }

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using CMS.Main.Services.State;
+using CMS.Main.Client.Services.State;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Pagination;
 using CMS.Shared.DTOs.Project;

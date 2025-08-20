@@ -1,5 +1,5 @@
 using CMS.Main.Client.Components;
-using CMS.Main.Services.State;
+using CMS.Main.Client.Services.State;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Entry;
 using CMS.Shared.DTOs.Pagination;
@@ -25,17 +25,18 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private List<EntryWithIdDto> Entries { get; set; } = [];
     
     private StatusIndicator? statusIndicator;
-    private string? statusText;
-    private bool pendingStatusError;
     
     // Used later for loading more entries
     private int totalCount;
+
+    private string? queuedStatusMessage;
+    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
 
     protected override async Task OnInitializedAsync()
     {
         EntryStateService.EntriesCreated += EntriesCreated;
         
-        var entriesResult = await EntryService.GetEntriesForSchema(
+        var result = await EntryService.GetEntriesForSchema(
             SchemaId,
             new PaginationParams(1, 100),
             opt =>
@@ -44,28 +45,28 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
                 opt.Descending = true;
             });
 
-        if (entriesResult.IsSuccess)
+        if (result.IsSuccess)
         {
-            (Entries, var pagination) = entriesResult.Value;
+            (Entries, var pagination) = result.Value;
             totalCount = pagination.TotalCount;
         }
         else
         {
-            statusText = entriesResult.Errors.FirstOrDefault() ?? "There was an error";
-            pendingStatusError = true;
-        }
-    }
-    
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (pendingStatusError)
-        {
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-            pendingStatusError = false;
-            StateHasChanged();
+            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (queuedStatusMessage != null && queuedStatusSeverity != null)
+        {
+            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
+            queuedStatusMessage = null;
+            queuedStatusSeverity = null;
+        }
+    }
+    
     private void EntriesCreated(List<EntryWithIdDto> created)
     {
         Entries.InsertRange(0, created);

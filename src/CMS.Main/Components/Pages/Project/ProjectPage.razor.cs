@@ -1,20 +1,15 @@
 using CMS.Main.Client.Components;
+using CMS.Main.Client.Services;
 using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Project;
 using Mapster;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Project;
 
 public partial class ProjectPage : ComponentBase
 {
-    private bool showStatusOnRender;
-
-    private StatusIndicator? statusIndicator;
-    private string? statusText;
-
     [Parameter]
     public Guid ProjectId { get; set; }
 
@@ -25,18 +20,27 @@ public partial class ProjectPage : ComponentBase
     private IProjectService ProjectService { get; set; } = default!;
 
     [Inject]
-    private ConfirmationService ConfirmationService { get; set; } = default!;
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
 
     [Inject]
-    private IAuthorizationService AuthorizationService { get; set; } = default!;
+    private ConfirmationService ConfirmationService { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private ProjectUpdateDto ProjectDto { get; set; } = new();
 
+    private StatusIndicator? statusIndicator;
+
+    private string? queuedStatusMessage;
+    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
+
     protected override async Task OnInitializedAsync()
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        {
+            queuedStatusMessage = "You do not have access to this project or it does not exist.";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
+        }
 
         var result =
             await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeSchemas = true; });
@@ -47,44 +51,52 @@ public partial class ProjectPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-            showStatusOnRender = true;
+            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (showStatusOnRender && statusIndicator != null)
+        if (queuedStatusMessage != null && queuedStatusSeverity != null)
         {
-            statusIndicator.Show(StatusIndicator.StatusSeverity.Error);
-            showStatusOnRender = false;
-            StateHasChanged();
+            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
+            queuedStatusMessage = null;
+            queuedStatusSeverity = null;
         }
     }
 
     private async Task OnSaveName()
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         var result = await ProjectService.UpdateProjectAsync(ProjectDto);
 
         if (result.IsSuccess)
         {
-            statusText = "Project updated successfully.";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            statusIndicator?.Show("Project updated successfully.",
+                StatusIndicator.StatusSeverity.Success);
         }
         else
         {
-            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                StatusIndicator.StatusSeverity.Error);
         }
     }
 
     private async Task OnDeleteProject()
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         var confirmed = await ConfirmationService.ShowAsync(
             "Delete Project",
@@ -102,25 +114,9 @@ public partial class ProjectPage : ComponentBase
             }
             else
             {
-                statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-                statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+                statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                    StatusIndicator.StatusSeverity.Error);
             }
         }
-    }
-
-    private async Task<bool> HasAccess()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var authorizationResult =
-            await AuthorizationService.AuthorizeAsync(user, ProjectId.ToString(), "ProjectPolicies.CanEditProject");
-
-        if (authorizationResult.Succeeded) return true;
-
-        statusText = "Could not load project. You do not have permission to access this project.";
-        statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-        showStatusOnRender = true;
-
-        return false;
     }
 }

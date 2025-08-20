@@ -8,29 +8,32 @@
     Back to Project
 </NavLink>
 
-<div class="flex items-center justify-between mb-4">
-    <h1 class="text-lg font-medium text-slate-900">Entries</h1>
-    @if (!showForm)
-    {
-        <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2" @onclick="ToggleAddForm">
-            <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
-            Add Entry
-        </button>
-    }
-</div>
-
-@if (showForm)
-{
-    <div class="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 class="text-sm font-medium text-slate-900 mb-3">New Entry</h2>
-        <DynamicEntryForm @ref="entryForm" Properties="Schema.Properties" OnValidSubmit="OnEntrySubmit" OnCancel="ToggleAddForm" />
-    </div>
-}
-
-<StatusIndicator @ref="statusIndicator">@statusText</StatusIndicator>
-
 <AuthorizeView Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
     <Authorized>
-        <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-lg font-medium text-slate-900">Entries</h1>
+            @if (!showForm)
+            {
+                <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2" @onclick="ToggleAddForm">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
+                    Add Entry
+                </button>
+            }
+        </div>
+
+        @if (showForm)
+        {
+            <div class="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                <h2 class="text-sm font-medium text-slate-900 mb-3">New Entry</h2>
+                <DynamicEntryForm @ref="entryForm" Properties="Schema.Properties" OnValidSubmit="OnEntrySubmit" OnCancel="ToggleAddForm" />
+            </div>
+        }
+        
+        <StatusIndicator @ref="statusIndicator" />
+        
+        <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties"/>
     </Authorized>
+    <NotAuthorized>
+        <StatusIndicator @ref="statusIndicator" />
+    </NotAuthorized>
 </AuthorizeView>

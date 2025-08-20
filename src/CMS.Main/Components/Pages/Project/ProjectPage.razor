@@ -3,37 +3,38 @@
 
 @attribute [Authorize]
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
-
-<div class="rounded-lg bg-white p-4 mb-4 border border-slate-200 shadow-sm max-w-screen-lg mx-auto">
-    <h2 class="text-lg font-medium mb-3">Edit project properties:</h2>
-    <StatusIndicator @ref="statusIndicator">@statusText</StatusIndicator>
-    <EditForm Model="ProjectDto" OnValidSubmit="OnSaveName" class="flex flex-col gap-2">
-        <div class="flex flex-col gap-2 flex-1">
-            <label for="ProjectDto_Name" class="text-xs uppercase tracking-wide text-slate-600">Project Name</label>
-            <InputText @bind-Value="ProjectDto.Name" id="ProjectDto_Name"
-                       class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
-                       placeholder="Enter project name" aria-label="Project Name"/>
-            <ValidationMessage For="() => ProjectDto.Name" class="text-rose-600 text-xs"/>
-        </div>
-        <div class="flex gap-2">
-            <button
-                class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2"
-                type="submit" aria-label="Save project name">
-                <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
-                Save
-            </button>
-            <button
-                class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-sm px-3 py-2"
-                @onclick="OnDeleteProject" aria-label="Delete project" type="button">
-                <span class="material-symbols-outlined icons-default text-base mr-2">delete</span>
-                Delete Project
-            </button>
-        </div>
-    </EditForm>
-</div>
-<AuthorizeView Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
+<AuthorizeView Context="authContext" Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
     <Authorized>
+        <div class="rounded-lg bg-white p-4 mb-4 border border-slate-200 shadow-sm max-w-screen-lg mx-auto">
+            <h2 class="text-lg font-medium mb-3">Edit project properties:</h2>
+            <StatusIndicator @ref="statusIndicator"/>
+            <EditForm Model="ProjectDto" OnValidSubmit="OnSaveName" class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 flex-1">
+                    <label for="ProjectDto_Name" class="text-xs uppercase tracking-wide text-slate-600">Project Name</label>
+                    <InputText @bind-Value="ProjectDto.Name" id="ProjectDto_Name"
+                               class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Enter project name" aria-label="Project Name"/>
+                    <ValidationMessage For="() => ProjectDto.Name" class="text-rose-600 text-xs"/>
+                </div>
+                <div class="flex gap-2">
+                    <button
+                        class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2"
+                        type="submit" aria-label="Save project name">
+                        <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
+                        Save
+                    </button>
+                    <button
+                        class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-sm px-3 py-2"
+                        @onclick="OnDeleteProject" aria-label="Delete project" type="button">
+                        <span class="material-symbols-outlined icons-default text-base mr-2">delete</span>
+                        Delete Project
+                    </button>
+                </div>
+            </EditForm>
+        </div>
         <ProjectSchemasSection Schemas="@ProjectDto.Schemas" ProjectId="@ProjectDto.Id"/>
     </Authorized>
+    <NotAuthorized>
+        <StatusIndicator @ref="statusIndicator"/>
+    </NotAuthorized>
 </AuthorizeView>

@@ -9,9 +9,9 @@
                 class="flex items-center justify-between rounded-md shadow px-4 py-2 mb-4 bg-emerald-100 text-emerald-900"
                 role="status">
                 <span class="text-sm font-medium">
-                    @ChildContent
+                    @message
                 </span>
-                <button type="button" @onclick="Hide" aria-label="Close"
+                <button type="button" @onclick="() => Hide()" aria-label="Close"
                         class="ml-2 p-1 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="material-symbols-outlined icons-default text-base">close</span>
                 </button>
@@ -21,9 +21,9 @@
             <div class="flex items-center justify-between rounded-md shadow px-4 py-2 mb-4 bg-amber-100 text-amber-900"
                  role="status">
                 <span class="text-sm font-medium">
-                    @ChildContent
+                    @message
                 </span>
-                <button type="button" @onclick="Hide" aria-label="Close"
+                <button type="button" @onclick="() => Hide()" aria-label="Close"
                         class="ml-2 p-1 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="material-symbols-outlined icons-default text-base">close</span>
                 </button>
@@ -33,9 +33,9 @@
             <div class="flex items-center justify-between rounded-md shadow px-4 py-2 mb-4 bg-rose-100 text-rose-900"
                  role="status">
                 <span class="text-sm font-medium">
-                    @ChildContent
+                    @message
                 </span>
-                <button type="button" @onclick="Hide" aria-label="Close"
+                <button type="button" @onclick="() => Hide()" aria-label="Close"
                         class="ml-2 p-1 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="material-symbols-outlined icons-default text-base">close</span>
                 </button>
@@ -45,9 +45,9 @@
             <div class="flex items-center justify-between rounded-md shadow px-4 py-2 mb-4 bg-blue-100 text-blue-900"
                  role="status">
                 <span class="text-sm font-medium">
-                    @ChildContent
+                    @message
                 </span>
-                <button type="button" @onclick="Hide" aria-label="Close"
+                <button type="button" @onclick="() => Hide()" aria-label="Close"
                         class="ml-2 p-1 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="material-symbols-outlined icons-default text-base">close</span>
                 </button>
@@ -70,15 +70,16 @@
     private StatusSeverity severity = StatusSeverity.Info;
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    [Parameter]
     public EventCallback OnClose { get; set; }
 
-    public void Show(StatusSeverity newSeverity = StatusSeverity.Info)
+    private string? message;
+
+    public void Show(string newMessage, StatusSeverity newSeverity = StatusSeverity.Info)
     {
         severity = newSeverity;
+        message = newMessage;
         visible = true;
+        StateHasChanged();
     }
 
     public void Hide()
@@ -86,11 +87,6 @@
         visible = false;
         if (OnClose.HasDelegate)
             OnClose.InvokeAsync();
-    }
-
-    public void Toggle()
-    {
-        visible = !visible;
     }
 
 }

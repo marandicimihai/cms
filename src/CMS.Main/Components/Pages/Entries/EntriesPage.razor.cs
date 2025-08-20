@@ -1,6 +1,7 @@
 using CMS.Main.Client.Components;
+using CMS.Main.Client.Services;
+using CMS.Main.Client.Services.State;
 using CMS.Main.Components.Shared;
-using CMS.Main.Services.State;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Entry;
 using CMS.Shared.DTOs.Schema;
@@ -22,10 +23,7 @@ public partial class EntriesPage : ComponentBase
     private SchemaWithIdDto Schema { get; set; } = new();
     
     [Inject]
-    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
-    
-    [Inject]
-    private IAuthorizationService AuthorizationService { get; set; } = default!;
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
     
     [Inject]
     private ISchemaService SchemaService { get; set; } = default!;
@@ -39,15 +37,20 @@ public partial class EntriesPage : ComponentBase
     private DynamicEntryForm? entryForm;
     
     private StatusIndicator? statusIndicator;
-    private string? statusText;
-    private bool pendingStatusError;
 
     private bool showForm;
 
+    private string? queuedStatusMessage;
+    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
+
     protected override async Task OnInitializedAsync()
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        {
+            queuedStatusMessage = "You do not have access to this project or it does not exist.";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
+        }
 
         var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
         {
@@ -60,41 +63,29 @@ public partial class EntriesPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-            pendingStatusError = true;
+            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (pendingStatusError)
+        if (queuedStatusMessage != null && queuedStatusSeverity != null)
         {
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-            pendingStatusError = false;
-            StateHasChanged();
+            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
+            queuedStatusMessage = null;
+            queuedStatusSeverity = null;
         }
-    }
-    
-    private async Task<bool> HasAccess()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var authorizationResult =
-            await AuthorizationService.AuthorizeAsync(user, ProjectId.ToString(), "ProjectPolicies.CanEditProject");
-
-        if (authorizationResult.Succeeded) return true;
-
-        statusText = "Could not load project. You do not have permission to access this project.";
-        statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-        pendingStatusError = true;
-
-        return false;
     }
 
     private async Task OnEntrySubmit(Dictionary<SchemaPropertyWithIdDto, object?> entry)
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanAccessProject(ProjectId.ToString()))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         var creationDto = new EntryCreationDto
         {
@@ -108,8 +99,8 @@ public partial class EntriesPage : ComponentBase
         {
             EntryStateService.NotifyCreated([result.Value]);
             
-            statusText = "Entry created successfully.";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            statusIndicator?.Show("Entry created successfully.",
+                StatusIndicator.StatusSeverity.Success);
             showForm = false;
             
             entryForm?.Reset();
@@ -117,8 +108,8 @@ public partial class EntriesPage : ComponentBase
         }
         else
         {
-            statusText = result.Errors.FirstOrDefault() ?? "There was an error";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                StatusIndicator.StatusSeverity.Error);
         }
     }
 
