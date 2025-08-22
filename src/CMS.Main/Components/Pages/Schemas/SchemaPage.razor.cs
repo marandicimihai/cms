@@ -24,7 +24,11 @@ public partial class SchemaPage : ComponentBase
     private ISchemaPropertyService PropertyService { get; set; } = default!;
 
     private PropertyCreateForm? createForm;
+    private PropertyUpdateForm? updateForm;
     private StatusIndicator? statusIndicator;
+    
+    private bool createFormVisible;
+    private bool updateFormVisible;
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
@@ -63,9 +67,28 @@ public partial class SchemaPage : ComponentBase
             queuedStatusSeverity = null;
         }
     }
-    
-    private void TriggerEditProperty(SchemaPropertyDto property)
+
+    private void ShowCreateForm()
     {
-        
+        createForm?.ResetForm();
+        createFormVisible = true;
+        updateFormVisible = false;
+    }
+    
+    private void HideCreateForm()
+    {
+        createFormVisible = false;
+    }
+    
+    private void ShowUpdateForm(SchemaPropertyDto property)
+    {
+        updateForm?.SetModel(property);
+        updateFormVisible = true;
+        createFormVisible = false;
+    }
+    
+    private void HideUpdateForm()
+    {
+        updateFormVisible = false;
     }
 }

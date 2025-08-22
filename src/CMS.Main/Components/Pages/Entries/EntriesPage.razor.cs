@@ -15,9 +15,6 @@ namespace CMS.Main.Components.Pages.Entries;
 public partial class EntriesPage : ComponentBase
 {
     [Parameter]
-    public Guid ProjectId { get; set; }
-    
-    [Parameter]
     public Guid SchemaId { get; set; }
     
     private SchemaDto Schema { get; set; } = new();
@@ -45,7 +42,7 @@ public partial class EntriesPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
             queuedStatusMessage = "You do not have access to this project or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
@@ -80,7 +77,7 @@ public partial class EntriesPage : ComponentBase
 
     private async Task OnEntrySubmit(Dictionary<SchemaPropertyDto, object?> entry)
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
             statusIndicator?.Show("You do not have access to this project or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);

@@ -91,11 +91,19 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
                 return;
             case string s:
             {
-                var display = DateTime.TryParse(s, out var dt) ? dt.ToLocalTime().ToString("g") : s;
-                builder.OpenElement(0, "span");
-                builder.AddAttribute(1, "class", "whitespace-pre");
-                builder.AddContent(2, display);
-                builder.CloseElement();
+                // Always parse as UTC and convert to local time
+                if (DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out var dt))
+                {
+                    var display = dt.ToLocalTime().ToString("g");
+                    builder.OpenElement(0, "span");
+                    builder.AddAttribute(1, "class", "whitespace-pre");
+                    builder.AddContent(2, display);
+                    builder.CloseElement();
+                }
+                else
+                {
+                    builder.AddContent(0, s);
+                }
                 return;
             }
             case bool b:

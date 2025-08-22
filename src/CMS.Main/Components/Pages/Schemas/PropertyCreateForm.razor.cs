@@ -13,7 +13,16 @@ public partial class PropertyCreateForm : ComponentBase
     public SchemaDto Schema { get; set; } = default!;
 
     [Parameter]
-    public EventCallback OnHide { get; set; }
+    public EventCallback OnSuccess { get; set; }
+    
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    
+    [Parameter]
+    public StatusIndicator? StatusIndicator { get; set; }
+    
+    [Parameter]
+    public bool Visible { get; set; } = true;
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -21,28 +30,11 @@ public partial class PropertyCreateForm : ComponentBase
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
 
-    public bool FormVisible { get; private set; }
-
     private SchemaPropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
     private SchemaPropertyType[] PropertyTypes { get; } = Enum.GetValues<SchemaPropertyType>();
-    
-    private StatusIndicator? statusIndicator;
 
-    public void ShowForm()
-    {
-        ResetForm();
-        FormVisible = true;
-    }
-
-    private async Task HideForm()
-    {
-        FormVisible = false;
-        statusIndicator?.Hide();
-        await OnHide.InvokeAsync();
-    }
-
-    private void ResetForm()
+    public void ResetForm()
     {
         PropertyDto = new SchemaPropertyDto
         {
@@ -72,7 +64,7 @@ public partial class PropertyCreateForm : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(Schema.Id))
         {
-            statusIndicator?.Show("You do not have access to this schema or it does not exist.",
+            StatusIndicator?.Show("You do not have access to this schema or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
             return;
         }
@@ -96,13 +88,13 @@ public partial class PropertyCreateForm : ComponentBase
         if (result.IsSuccess)
         {
             Schema.Properties.Add(result.Value);
-            statusIndicator?.Show("Successfully created schema property.",
+            StatusIndicator?.Show("Successfully created schema property.",
                 StatusIndicator.StatusSeverity.Success);
-            await HideForm();
+            await OnSuccess.InvokeAsync();
         }
         else
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
                 StatusIndicator.StatusSeverity.Error);
         }
         

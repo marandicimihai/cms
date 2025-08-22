@@ -17,7 +17,14 @@ public static class PropertyValidationExtensions
         switch (property.Type)
         {
             case SchemaPropertyType.Text:
-                value = value as string;
+                if (value is string s)
+                {
+                    value = s == string.Empty ? null : s;
+                }
+                else
+                {
+                    value = null;
+                }
                 break;
             case SchemaPropertyType.Integer:
                 if (value is int intValue)

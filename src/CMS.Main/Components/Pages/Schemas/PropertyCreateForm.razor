@@ -1,8 +1,7 @@
 @using CMS.Shared.DTOs.SchemaProperty
 @rendermode InteractiveServer
 
-@if (FormVisible)
-{
+<div class="@(Visible ? "" : "hidden")">
     <EditForm Model="PropertyDto" OnValidSubmit="HandleCreatePropertySubmit" class="mb-4">
         <DataAnnotationsValidator/>
         <div class="grid grid-cols-1 gap-4">
@@ -28,7 +27,7 @@
             @if (PropertyDto.Type == SchemaPropertyType.Enum)
             {
                 <div class="flex flex-col gap-2 md:col-span-1">
-                    <label class="text-xs uppercase tracking-wide text-slate-600">Options (comma separated)</label>
+                    <label class="text-xs uppercase tracking-wide text-slate-600">Options (space separated)</label>
                     <InputText @bind-Value="EnumOptions" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="Red, Green, Blue"/>
                     @if (!IsEnumOptionsValid)
                     {
@@ -38,16 +37,14 @@
             }
         </div>
         <div class="flex gap-2 mt-4">
-            <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 min-w-[140px]" aria-label="Save Property" disabled="@(PropertyDto.Type == CMS.Shared.DTOs.SchemaProperty.SchemaPropertyType.Enum && !IsEnumOptionsValid)">
+            <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 min-w-[140px]" aria-label="Save Property" disabled="@(PropertyDto.Type == SchemaPropertyType.Enum && !IsEnumOptionsValid)">
                 <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
                 Save Property
             </button>
-            <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" aria-label="Cancel" @onclick="HideForm">
+            <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" aria-label="Cancel" @onclick="async () => await OnCancel.InvokeAsync()">
                 <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
                 Cancel
             </button>
         </div>
-    </EditForm>    
-}
-
-<StatusIndicator @ref="statusIndicator" />
+    </EditForm>
+</div>

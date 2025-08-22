@@ -1,9 +1,9 @@
-@page "/project/{projectId:guid}/schema/{schemaId:guid}/entries"
+@page "/schema/{schemaId:guid}/entries"
 @rendermode InteractiveServer
 
 @attribute [Authorize]
 
-<AuthorizeView Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
+<AuthorizeView Policy="SchemaPolicies.CanEditSchema" Resource="SchemaId.ToString()">
     <Authorized>
         
         <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>

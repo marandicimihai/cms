@@ -13,7 +13,16 @@ public partial class PropertyUpdateForm : ComponentBase
     public SchemaDto Schema { get; set; } = default!;
 
     [Parameter]
-    public EventCallback OnHide { get; set; }
+    public EventCallback OnSuccess { get; set; }
+    
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    
+    [Parameter]
+    public StatusIndicator? StatusIndicator { get; set; }
+    
+    [Parameter]
+    public bool Visible { get; set; } = true;
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -21,36 +30,16 @@ public partial class PropertyUpdateForm : ComponentBase
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
 
-    public bool FormVisible { get; private set; }
-
+    [SupplyParameterFromForm]
     private SchemaPropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
-    private SchemaPropertyType[] PropertyTypes { get; } = Enum.GetValues<SchemaPropertyType>();
-    
-    private StatusIndicator? statusIndicator;
 
-    public void ShowForm(SchemaPropertyDto propertyDto)
+    public void SetModel(SchemaPropertyDto propertyDto)
     {
         PropertyDto = propertyDto;
-        FormVisible = true;
+        EnumOptions = PropertyDto.Options is { Length: > 0 } ? string.Join(" ", PropertyDto.Options) : string.Empty;
     }
 
-    private async Task HideForm()
-    {
-        FormVisible = false;
-        statusIndicator?.Hide();
-        await OnHide.InvokeAsync();
-    }
-
-    private void OnTypeChanged(ChangeEventArgs _)
-    {
-        if (PropertyDto.Type != SchemaPropertyType.Enum)
-        {
-            EnumOptions = string.Empty;
-            PropertyDto.Options = null;
-        }
-    }
-    
     private bool IsEnumOptionsValid =>
         PropertyDto.Type != SchemaPropertyType.Enum ||
         (!string.IsNullOrWhiteSpace(EnumOptions) &&
@@ -60,7 +49,7 @@ public partial class PropertyUpdateForm : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(Schema.Id))
         {
-            statusIndicator?.Show("You do not have access to this schema or it does not exist.",
+            StatusIndicator?.Show("You do not have access to this schema or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
             return;
         }
@@ -69,7 +58,7 @@ public partial class PropertyUpdateForm : ComponentBase
         {
             var options = string.IsNullOrWhiteSpace(EnumOptions)
                 ? []
-                : EnumOptions.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                : EnumOptions.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             if (options.Length == 0)
             {
                 return;
@@ -83,14 +72,13 @@ public partial class PropertyUpdateForm : ComponentBase
 
         if (result.IsSuccess)
         {
-            Schema.Properties.Add(result.Value);
-            statusIndicator?.Show("Successfully created schema property.",
+            StatusIndicator?.Show("Successfully updated schema property.",
                 StatusIndicator.StatusSeverity.Success);
-            await HideForm();
+            await OnSuccess.InvokeAsync();
         }
         else
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
                 StatusIndicator.StatusSeverity.Error);
         }
         

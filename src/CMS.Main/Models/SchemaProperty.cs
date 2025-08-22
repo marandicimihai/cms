@@ -4,7 +4,7 @@ using CMS.Shared.DTOs.SchemaProperty;
 
 namespace CMS.Main.Models;
 
-public class SchemaProperty
+public class SchemaProperty : IValidatableObject
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public string Id { get; set; } = default!;
@@ -26,4 +26,18 @@ public class SchemaProperty
     public string[]? Options { get; set; }
     
     public bool IsRequired { get; set; } = false;
+
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Options == null) yield break;
+        
+        foreach (var option in Options)
+        {
+            if (option.Contains(' '))
+            {
+                yield return new ValidationResult("Options cannot contain spaces.", [nameof(Options)]);
+            }
+        }
+    }
 }
