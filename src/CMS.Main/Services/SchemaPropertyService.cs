@@ -24,10 +24,7 @@ public class SchemaPropertyService(
             if (schema is null)
                 return Result.NotFound();
 
-            var property = dto.Adapt<SchemaProperty>(new TypeAdapterConfig()
-                .NewConfig<SchemaPropertyDto, SchemaProperty>()
-                .Ignore(p => p.Id)
-                .Config);
+            var property = dto.Adapt<SchemaProperty>();
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -54,11 +51,12 @@ public class SchemaPropertyService(
 
             if (property is null)
                 return Result.NotFound();
-
+            
             dto.Adapt(property, new TypeAdapterConfig()
                 .NewConfig<SchemaPropertyDto, SchemaProperty>()
-                .Ignore(p => p.Id)
+                .Inherits<SchemaPropertyDto, SchemaProperty>()
                 .Ignore(p => p.SchemaId)
+                .Ignore(p => p.Schema)
                 .Ignore(p => p.Type)
                 .Config);
 

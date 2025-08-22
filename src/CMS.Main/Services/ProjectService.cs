@@ -108,11 +108,7 @@ public class ProjectService(
                 await dbContext.SaveChangesAsync();
             });
 
-            var adapted = project.Adapt<ProjectDto>(new TypeAdapterConfig()
-                .NewConfig<ProjectDto, Project>()
-                .Ignore(p => p.Id)
-                .Ignore(p => p.LastUpdated)
-                .Config);
+            var adapted = project.Adapt<ProjectDto>();
             projectStateService.NotifyCreated([adapted]);
 
             return Result.Success(adapted);
@@ -134,11 +130,7 @@ public class ProjectService(
             if (project is null)
                 return Result.NotFound();
 
-            dto.Adapt(project, new TypeAdapterConfig()
-                .NewConfig<ProjectDto, Project>()
-                .Ignore(p => p.Id)
-                .Ignore(p => p.LastUpdated)
-                .Config);
+            dto.Adapt(project);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 

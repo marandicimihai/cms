@@ -42,8 +42,7 @@ public class SchemaService(
                 return Result.NotFound();
 
             var dto = schema.Adapt<SchemaDto>();
-            if (!options.IncludeProperties)
-                dto.Properties = [];
+            dto.Properties = options.IncludeProperties ? dto.Properties.OrderBy(p => p.CreatedAt).ToList() : [];
 
             return Result.Success(dto);
         }
@@ -65,10 +64,7 @@ public class SchemaService(
             if (project is null)
                 return Result.NotFound($"Project {dto.ProjectId} was not found.");
 
-            var schema = dto.Adapt<Schema>(new TypeAdapterConfig()
-                .NewConfig<SchemaDto, Schema>()
-                .Ignore(s => s.Id)
-                .Config);
+            var schema = dto.Adapt<Schema>();
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {

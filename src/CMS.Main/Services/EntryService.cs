@@ -127,12 +127,7 @@ public class EntryService(
             if (schema is null) 
                 return Result.NotFound();
             
-            var entry = dto.Adapt<Entry>(new TypeAdapterConfig()
-                .NewConfig<EntryDto, Entry>()
-                .Ignore(e => e.Id)
-                .Ignore(e => e.CreatedAt)
-                .Ignore(e => e.UpdatedAt)
-                .Config);
+            var entry = dto.Adapt<Entry>();
 
             var dictStringObject = new Dictionary<string, object?>();
             var dictSchemaPropertyObject = new Dictionary<SchemaPropertyDto, object?>();

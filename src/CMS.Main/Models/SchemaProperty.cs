@@ -16,7 +16,7 @@ public class SchemaProperty : IValidatableObject
     
     [Required]
     [Length(3, 100)]
-    [RegularExpression("^[A-Za-z][A-Za-z0-9_]*[A-Za-z]$", ErrorMessage = "Name must start and end with a letter, and only contain letters, numbers, and underscores in between.")]
+    [RegularExpression("^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]$", ErrorMessage = "Name must start with a letter and end with a letter or number, and only contain letters, numbers, and underscores in between.")]
     public string Name { get; set; } = default!;
     
     [Required]
@@ -25,8 +25,9 @@ public class SchemaProperty : IValidatableObject
     // For enums
     public string[]? Options { get; set; }
     
-    public bool IsRequired { get; set; } = false;
-
+    public bool IsRequired { get; set; }
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

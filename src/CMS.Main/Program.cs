@@ -6,6 +6,7 @@ using CMS.Main.Components.Account;
 using CMS.Main.Data;
 using CMS.Main.Emails;
 using CMS.Main.Emails.Config;
+using CMS.Main.Models.Config;
 using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using FastEndpoints;
@@ -17,7 +18,7 @@ using _Imports = CMS.Main.Client._Imports;
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-TypeAdapterConfig.GlobalSettings.Default.PreserveReference(true);
+MapsterConfig.ConfigureMapster();
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration config = builder.Configuration;
