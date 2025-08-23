@@ -89,6 +89,7 @@
     {
         Value = SchemaProperty.Type switch
         {
+            SchemaPropertyType.Text => string.Empty,
             SchemaPropertyType.Boolean => false,
             _ => null
         };

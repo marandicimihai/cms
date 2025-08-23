@@ -109,6 +109,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             case bool b:
                 builder.AddContent(0, b.ToString().ToLowerInvariant());
                 return;
+            case DateTime d:
+            {
+                var display = d.ToLocalTime().ToString("g");
+                builder.OpenElement(0, "span");
+                builder.AddAttribute(1, "class", "whitespace-pre");
+                builder.AddContent(2, display);
+                builder.CloseElement();
+                break;
+            }
             default:
                 builder.AddContent(0, value.ToString());
                 break;

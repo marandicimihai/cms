@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Ardalis.Result;
 using CMS.Shared.DTOs.SchemaProperty;
 
@@ -17,14 +18,7 @@ public static class PropertyValidationExtensions
         switch (property.Type)
         {
             case SchemaPropertyType.Text:
-                if (value is string s)
-                {
-                    value = s == string.Empty ? null : s;
-                }
-                else
-                {
-                    value = null;
-                }
+                value = value as string;
                 break;
             case SchemaPropertyType.Integer:
                 if (value is int intValue)
@@ -159,7 +153,7 @@ public static class PropertyValidationExtensions
                 break;
         }
         
-        if (property.IsRequired && value == null)
+        if (property.IsRequired && value is null or "")
         {
             return Result.Invalid(new ValidationError($"Property '{property.Name}' is required and cannot be null or empty."));
         }
