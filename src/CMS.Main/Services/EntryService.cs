@@ -182,4 +182,29 @@ public class EntryService(
             return Result.Error($"Error creating entry for schema {dto.SchemaId}");
         }
     }
+
+    public async Task<Result> DeleteEntryAsync(string entryId)
+    {
+        try
+        {
+            var entry = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Entries.FindAsync(entryId));
+
+            if (entry is null)
+                return Result.NotFound();
+
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                dbContext.Entries.Remove(entry);
+                await dbContext.SaveChangesAsync();
+            });
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting entry {entryId}", entryId);
+            return Result.Error($"Error deleting entry {entryId}");
+        }
+    }
 }

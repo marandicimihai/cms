@@ -1,5 +1,7 @@
 using CMS.Main.Client.Components;
+using CMS.Main.Client.Services;
 using CMS.Main.Client.Services.State;
+using CMS.Main.Services;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.Entry;
 using CMS.Shared.DTOs.Pagination;
@@ -18,9 +20,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     [Inject]
     private IEntryService EntryService { get; set; } = default!;
+    
+    [Inject]
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
 
     [Inject]
     private EntryStateService EntryStateService { get; set; } = default!;
+    
+    [Inject]
+    private ConfirmationService ConfirmationService { get; set; } = default!;
     
     private List<EntryDto> Entries { get; set; } = [];
     
@@ -123,6 +131,38 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
                 break;
         }
     };
+
+    private async Task OnDeleteEntry(EntryDto entry)
+    {
+        if (!await AuthHelper.CanEditSchema(SchemaId))
+        {
+            statusIndicator?.Show("You can not delete entries.", 
+                StatusIndicator.StatusSeverity.Error);
+            return;
+        }
+        
+        var isConfirmed = await ConfirmationService.ShowAsync(
+            "Delete Entry",
+            "Are you sure you want to delete this entry? This action cannot be undone.",
+            "Delete");
+
+        if (!isConfirmed)
+            return;
+        
+        var result = await EntryService.DeleteEntryAsync(entry.Id);
+        
+        if (result.IsSuccess)
+        {
+            Entries.Remove(entry);
+            statusIndicator?.Show("Successfully deleted entry.", 
+                StatusIndicator.StatusSeverity.Success);
+        }
+        else
+        {
+            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
+                StatusIndicator.StatusSeverity.Error);
+        }
+    }
 
     public void Dispose()
     {

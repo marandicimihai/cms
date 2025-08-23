@@ -15,4 +15,7 @@ public interface IEntryService
     
     Task<Result<EntryDto>> AddEntryAsync(
         EntryDto dto);
+    
+    Task<Result> DeleteEntryAsync(
+        string entryId);
 }
