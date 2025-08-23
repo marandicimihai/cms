@@ -5,6 +5,7 @@ using CMS.Main.Models;
 using CMS.Shared.Abstractions;
 using CMS.Shared.DTOs.SchemaProperty;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Main.Services;
 
@@ -19,10 +20,15 @@ public class SchemaPropertyService(
         try
         {
             var schema = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Schemas.FindAsync(dto.SchemaId));
+                await dbContext.Schemas
+                    .Include(s => s.Properties)
+                    .FirstOrDefaultAsync(s => s.Id == dto.SchemaId));
 
             if (schema is null)
                 return Result.NotFound();
+
+            if (schema.Properties.Any(p => p.Name == dto.Name))
+                return Result.Error("Property name must be unique within the schema.");
 
             var property = dto.Adapt<SchemaProperty>();
 
@@ -37,8 +43,8 @@ public class SchemaPropertyService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating schema property for schema {schemaId}", dto.SchemaId);
-            return Result.Error($"Error creating schema property for schema {dto.SchemaId}");
+            logger.LogError(ex, "Error creating schema property for schema {schemaId}.", dto.SchemaId);
+            return Result.Error($"Error creating schema property for schema {dto.SchemaId}.");
         }
     }
 
@@ -66,8 +72,8 @@ public class SchemaPropertyService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error updating schema property {propertyId}", dto.Id);
-            return Result.Error($"Error updating schema property {dto.Id}");
+            logger.LogError(ex, "Error updating schema property {propertyId}.", dto.Id);
+            return Result.Error($"Error updating schema property {dto.Id}.");
         }
     }
 
@@ -91,8 +97,8 @@ public class SchemaPropertyService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error deleting schema property {propertyId}", propertyId);
-            return Result.Error($"Error deleting schema property {propertyId}");
+            logger.LogError(ex, "Error deleting schema property {propertyId}.", propertyId);
+            return Result.Error($"Error deleting schema property {propertyId}.");
         }
     }
 }

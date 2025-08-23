@@ -108,8 +108,8 @@ public class EntryService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error getting entries for schema {schemaId}", schemaId);
-            return Result.Error($"Error getting entries for schema {schemaId}");
+            logger.LogError(ex, "Error getting entries for schema {schemaId}.", schemaId);
+            return Result.Error($"Error getting entries for schema {schemaId}.");
         }
     }
 
@@ -178,8 +178,8 @@ public class EntryService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating entry for schema {schemaId}", dto.SchemaId);
-            return Result.Error($"Error creating entry for schema {dto.SchemaId}");
+            logger.LogError(ex, "Error creating entry for schema {schemaId}.", dto.SchemaId);
+            return Result.Error($"Error creating entry for schema {dto.SchemaId}.");
         }
     }
 
@@ -203,8 +203,8 @@ public class EntryService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error deleting entry {entryId}", entryId);
-            return Result.Error($"Error deleting entry {entryId}");
+            logger.LogError(ex, "Error deleting entry {entryId}.", entryId);
+            return Result.Error($"Error deleting entry {entryId}.");
         }
     }
 }
