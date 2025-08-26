@@ -16,6 +16,14 @@ public class SchemaDto
     [StringLength(36)]
     public string ProjectId { get; set; } = default!;
     public ProjectDto Project { get; set; } = default!;
-    
-    public List<SchemaPropertyDto> Properties { get; set; } = [];
+
+    private List<SchemaPropertyDto> properties = [];
+    public List<SchemaPropertyDto> Properties
+    {
+        get => properties;
+        set
+        {
+            properties = value.OrderBy(p => p.CreatedAt).ToList();
+        }
+    }
 }

@@ -195,7 +195,7 @@ public class EntryService(
             {
                 var name = property.Key.Name;
 
-                // If property does not exist in schema, skip it
+                // If the property does not exist in the schema, skip it
                 var schemaProp = schema.Properties.FirstOrDefault(p => p.Name == name);
                 if (schemaProp == null)
                 {
@@ -240,9 +240,65 @@ public class EntryService(
         }
     }
 
-    public Task<Result> UpdateEntryAsync(EntryDto dto)
+    public async Task<Result> UpdateEntryAsync(EntryDto dto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var entry = await dbHelper.ExecuteAsync(async dbContext =>
+                await dbContext.Entries
+                    .Include(e => e.Schema)
+                    .ThenInclude(s => s.Properties)
+                    .FirstOrDefaultAsync(e => e.Id == dto.Id));
+
+            if (entry is null)
+                return Result.NotFound();
+            
+            var dictStringObject = new Dictionary<string, object?>();
+            
+            var validationErrors = new List<ValidationError>();
+
+            foreach (var property in dto.Properties)
+            {
+                var name = property.Key.Name;
+
+                // If the property does not exist in the schema, skip it
+                var schemaProp = entry.Schema.Properties.FirstOrDefault(p => p.Name == name);
+                if (schemaProp == null)
+                {
+                    validationErrors.Add(new ValidationError($"Property {name} does not exist in schema."));
+                    continue;
+                }
+
+                var finalValue = property.Value;
+                var validationResult = PropertyValidationExtensions.ValidateProperty(property.Key, ref finalValue);
+                if (validationResult.IsInvalid())
+                {
+                    validationErrors.AddRange(validationResult.ValidationErrors);
+                    continue;
+                }
+
+                dictStringObject.Add(name, finalValue);
+            }
+
+            if (validationErrors.Count > 0)
+            {
+                return Result.Invalid(validationErrors);
+            }
+            
+            entry.Data = JsonDocument.Parse(JsonSerializer.Serialize(dictStringObject));
+
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                await dbContext.SaveChangesAsync();
+            });
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating entry {entryId}.", dto.Id);
+            return Result.Error($"Error updating entry {dto.Id}.");
+        }
     }
 
     public async Task<Result> DeleteEntryAsync(string entryId)

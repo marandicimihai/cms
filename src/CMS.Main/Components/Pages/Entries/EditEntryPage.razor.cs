@@ -18,9 +18,8 @@ public partial class EditEntryPage : ComponentBase
     [Inject]
     private IEntryService EntryService { get; set; } = default!;
     
-    private EntryDto Entry { get; set; } = new();
+    private EntryDto? Entry { get; set; }
     
-    private DynamicEntryForm? entryForm;
     private StatusIndicator? statusIndicator;
 
     protected override async Task OnInitializedAsync()
@@ -51,21 +50,32 @@ public partial class EditEntryPage : ComponentBase
         }
     }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            entryForm?.SetValues(Entry.Properties);
-        }
-    }
-
     private async Task UpdateEntry(Dictionary<SchemaPropertyDto, object?> entry)
     {
+        if (Entry is null)
+            return;
+
         if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this entry or it does not exist.", 
+            statusIndicator?.Show("You do not have access to this entry or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
             return;
+        }
+
+        Entry.Id = EntryId.ToString();
+        Entry.Properties = entry;
+
+        var result = await EntryService.UpdateEntryAsync(Entry);
+
+        if (result.IsSuccess)
+        {
+            statusIndicator?.Show("Entry updated successfully.",
+                StatusIndicator.StatusSeverity.Success);
+        }
+        else
+        {
+            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error.",
+                StatusIndicator.StatusSeverity.Error);
         }
     }
 }

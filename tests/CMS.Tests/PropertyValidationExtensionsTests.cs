@@ -50,59 +50,10 @@ public class PropertyValidationExtensionsTests
         Assert.Contains("required", result.ValidationErrors.First().ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Theory]
-    [InlineData("5", 5)]
-    [InlineData(" 5 ", 5)]
-    [InlineData("-42", -42)]
-    public void Integer_String_Parses(string input, int expected)
-    {
-        var prop = MakeProp("Count", SchemaPropertyType.Integer);
-        object? val = input;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        Assert.Equal(expected, val);
-    }
-
-    [Theory]
-    [InlineData("003", 3)]
-    [InlineData("+3", 3)]
-    [InlineData("-0", 0)]
-    public void Integer_String_Additional_Parses(string input, int expected)
-    {
-        var prop = MakeProp("Count", SchemaPropertyType.Integer);
-        object? val = input;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        Assert.Equal(expected, val);
-    }
-
-    [Theory]
-    [InlineData("3.")]
-    [InlineData("3.0")]
-    [InlineData("-2.5")]
-    [InlineData("-")]
-    public void Integer_Invalid_Fraction_Or_Incomplete(string input)
-    {
-        var prop = MakeProp("Count", SchemaPropertyType.Integer);
-        object? val = input;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
-        Assert.True(result.IsInvalid());
-    }
-
-    [Fact]
-    public void Integer_Invalid_String_Fails()
-    {
-        var prop = MakeProp("Count", SchemaPropertyType.Integer);
-        object? val = "5x";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
-        Assert.True(result.IsInvalid());
-        Assert.Contains("Invalid integer", result.ValidationErrors.First().ErrorMessage);
-    }
-
     [Fact]
     public void Integer_Empty_String_Becomes_Null()
     {
-        var prop = MakeProp("Count", SchemaPropertyType.Integer);
+        var prop = MakeProp("Count", SchemaPropertyType.Number);
         object? val = "   ";
         var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -206,7 +157,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Decimal_String_Parses()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Decimal);
+        var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = "1.23";
         var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -220,7 +171,7 @@ public class PropertyValidationExtensionsTests
     [InlineData("  .5  ", 0.5)]
     public void Decimal_Fraction_Forms_Parse(string input, decimal expected)
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Decimal);
+        var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = input;
         var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -230,7 +181,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Decimal_Empty_String_To_Null()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Decimal);
+        var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = "   ";
         var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -240,7 +191,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Decimal_Invalid_String_Fails()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Decimal);
+        var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = "1.2.3";
         var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
@@ -280,7 +231,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Required_Fails_When_Value_Null_PostNormalization()
     {
-        var prop = MakeProp("Count", SchemaPropertyType.Integer, required:true);
+        var prop = MakeProp("Count", SchemaPropertyType.Number, required:true);
         object? val = ""; // becomes null
         var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());

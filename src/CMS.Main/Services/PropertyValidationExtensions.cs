@@ -20,36 +20,6 @@ public static class PropertyValidationExtensions
             case SchemaPropertyType.Text:
                 value = value as string;
                 break;
-            case SchemaPropertyType.Integer:
-                if (value is int intValue)
-                {
-                    value = intValue;
-                }
-                else if (value is string intString)
-                {
-                    intString = intString.Trim();
-                    if (string.IsNullOrEmpty(intString))
-                    {
-                        value = null;
-                    }
-                    else if (int.TryParse(intString, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedInt))
-                    {
-                        value = parsedInt;
-                    }
-                    else
-                    {
-                        return Result.Invalid(new ValidationError($"Invalid integer value for property '{property.Name}'."));
-                    }
-                }
-                else if (value is not null)
-                {
-                    return Result.Invalid(new ValidationError($"Invalid integer value for property '{property.Name}'."));
-                }
-                else
-                {
-                    value = null;
-                }
-                break;
             case SchemaPropertyType.Boolean:
                 switch (value)
                 {
@@ -104,7 +74,7 @@ public static class PropertyValidationExtensions
                     value = null;
                 }
                 break;
-            case SchemaPropertyType.Decimal:
+            case SchemaPropertyType.Number:
                 if (value is decimal decimalValue)
                 {
                     value = decimalValue;

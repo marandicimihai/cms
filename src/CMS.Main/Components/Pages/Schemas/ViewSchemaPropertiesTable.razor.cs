@@ -74,10 +74,9 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
                 dict[p.Name] = p.Type switch
                 {
                     SchemaPropertyType.Text => $"Sample {p.Name}",
-                    SchemaPropertyType.Integer => 123,
                     SchemaPropertyType.Boolean => true,
                     SchemaPropertyType.DateTime => DateTime.UtcNow.ToString("o"),
-                    SchemaPropertyType.Decimal => 123.45m,
+                    SchemaPropertyType.Number => 123.45,
                     SchemaPropertyType.Enum => p.Options is { Length: > 0 } ? p.Options[0] : "ExampleOption",
                     _ => null
                 };

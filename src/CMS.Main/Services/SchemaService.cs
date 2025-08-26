@@ -42,7 +42,6 @@ public class SchemaService(
                 return Result.NotFound();
 
             var dto = schema.Adapt<SchemaDto>();
-            dto.Properties = options.IncludeProperties ? dto.Properties.OrderBy(p => p.CreatedAt).ToList() : [];
 
             return Result.Success(dto);
         }
