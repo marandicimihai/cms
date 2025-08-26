@@ -1,14 +1,11 @@
-using CMS.Main.Client.Components;
-using CMS.Main.Client.Services;
-using CMS.Main.Client.Services.State;
+using CMS.Main.Abstractions;
 using CMS.Main.Components.Shared;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Entry;
-using CMS.Shared.DTOs.Schema;
-using CMS.Shared.DTOs.SchemaProperty;
-using Microsoft.AspNetCore.Authorization;
+using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs.Schema;
+using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Services;
+using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace CMS.Main.Components.Pages.Entries;
 
@@ -31,11 +28,13 @@ public partial class EntriesPage : ComponentBase
     [Inject]
     private EntryStateService EntryStateService { get; set; } = default!;
 
-    private DynamicEntryForm? entryForm;
+    private EntryDto UpdateDto { get; set; } = new();
+
+    private DynamicEntryForm? entryCreateForm;
     
     private StatusIndicator? statusIndicator;
 
-    private bool showForm;
+    private bool showCreateForm;
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
@@ -75,7 +74,7 @@ public partial class EntriesPage : ComponentBase
         }
     }
 
-    private async Task OnEntrySubmit(Dictionary<SchemaPropertyDto, object?> entry)
+    private async Task OnEntryCreateSubmit(Dictionary<SchemaPropertyDto, object?> entry)
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
@@ -98,9 +97,9 @@ public partial class EntriesPage : ComponentBase
             
             statusIndicator?.Show("Entry created successfully.",
                 StatusIndicator.StatusSeverity.Success);
-            showForm = false;
-            
-            entryForm?.Reset();
+            showCreateForm = false;
+
+            entryCreateForm?.Reset();
             StateHasChanged();
         }
         else
@@ -110,8 +109,14 @@ public partial class EntriesPage : ComponentBase
         }
     }
 
-    private void ToggleAddForm()
+    private void ShowAddForm()
     {
-        showForm = !showForm;
+        entryCreateForm?.Reset();
+        showCreateForm = true;
+    }
+    
+    private void HideAddForm()
+    {
+        showCreateForm = false;
     }
 }

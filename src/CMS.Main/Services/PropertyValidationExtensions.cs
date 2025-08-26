@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using Ardalis.Result;
-using CMS.Shared.DTOs.SchemaProperty;
+using CMS.Main.DTOs.SchemaProperty;
 
 namespace CMS.Main.Services;
 

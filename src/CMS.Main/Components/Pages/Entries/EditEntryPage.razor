@@ -1,0 +1,14 @@
+@page "/entry/{entryId:guid}/edit"
+@rendermode InteractiveServer
+
+<BackButton Href="@()" Text="Back to Entries" />
+<StatusIndicator @ref="statusIndicator" />
+
+<AuthorizeView Policy="EntryPolicies.CanEditEntry" Resource="EntryId">
+    <Authorized>
+        <div class="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="text-sm font-medium text-slate-900 mb-3">Update entry</h2>
+            <DynamicEntryForm @ref="entryForm" Properties="Entry.Schema.Properties" OnValidSubmit="UpdateEntry" />
+        </div>
+    </Authorized>
+</AuthorizeView>

@@ -1,9 +1,8 @@
-using System.Linq.Expressions;
 using Ardalis.Result;
+using CMS.Main.Abstractions;
 using CMS.Main.Data;
+using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.SchemaProperty;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,6 +89,10 @@ public class SchemaPropertyService(
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 dbContext.Remove(property);
+
+                await dbContext.Database.ExecuteSqlAsync(
+                    $"UPDATE \"Entries\" SET \"Data\" = \"Data\" - {property.Name} WHERE \"SchemaId\" = {property.SchemaId}");
+                
                 await dbContext.SaveChangesAsync();
             });
 

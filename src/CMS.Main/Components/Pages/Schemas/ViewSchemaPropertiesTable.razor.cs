@@ -1,10 +1,9 @@
 using System.Text.Json;
-using CMS.Main.Client.Components;
-using CMS.Main.Client.Services;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Schema;
+using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Schema;
-using CMS.Shared.DTOs.SchemaProperty;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Schemas;

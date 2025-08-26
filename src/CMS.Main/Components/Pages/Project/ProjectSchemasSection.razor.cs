@@ -1,12 +1,8 @@
-using CMS.Main.Client.Components;
-using CMS.Main.Client.Services;
-using CMS.Main.Client.Services.State;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Schema;
 using CMS.Main.Services;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Schema;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace CMS.Main.Components.Pages.Project;
 

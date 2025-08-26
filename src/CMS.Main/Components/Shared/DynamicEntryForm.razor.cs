@@ -1,5 +1,6 @@
-using CMS.Shared.DTOs.SchemaProperty;
+using CMS.Main.DTOs.SchemaProperty;
 using Microsoft.AspNetCore.Components;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CMS.Main.Components.Shared;
 
@@ -31,6 +32,22 @@ public partial class DynamicEntryForm : ComponentBase
         foreach (var field in Fields)
         {
             field?.Reset();
+        }
+    }
+
+    public void SetValues(Dictionary<SchemaPropertyDto, object?> values)
+    {
+        foreach (var field in Fields)
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (field?.SchemaProperty != null && values.Keys.Any(p => p.Id == field.SchemaProperty.Id))
+            {
+                field.SetValue(values[field.SchemaProperty]);
+            }
+            else
+            {
+                field?.Reset();
+            }
         }
     }
     

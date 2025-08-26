@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using CMS.Main.Client.Components;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Project;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Project;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Project;

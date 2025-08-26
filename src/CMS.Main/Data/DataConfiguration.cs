@@ -29,9 +29,12 @@ public static class DataConfiguration
                 policy.Requirements.Add(new CanEditProjectRequirement()));
             options.AddPolicy("SchemaPolicies.CanEditSchema", policy =>
                 policy.Requirements.Add(new CanEditSchemaRequirement()));
+            options.AddPolicy("EntryPolicies.CanEditEntry", policy =>
+                policy.Requirements.Add(new CanEditEntryRequirement()));
         });
         services.AddScoped<IAuthorizationHandler, CanEditProjectHandler>();
         services.AddScoped<IAuthorizationHandler, CanEditSchemaHandler>();
+        services.AddScoped<IAuthorizationHandler, CanEditEntryHandler>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));

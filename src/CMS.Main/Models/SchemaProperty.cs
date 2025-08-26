@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CMS.Shared.DTOs.SchemaProperty;
+using CMS.Main.DTOs.SchemaProperty;
 
 namespace CMS.Main.Models;
 

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Ardalis.Result;
-using CMS.Main.Client.Services.State;
 using CMS.Main.Data;
+using CMS.Main.DTOs.Pagination;
+using CMS.Main.DTOs.Project;
 using CMS.Main.Models;
 using CMS.Main.Services;
-using CMS.Shared.DTOs.Pagination;
-using CMS.Shared.DTOs.Project;
+using CMS.Main.Services.State;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -216,7 +216,6 @@ public class ProjectServiceTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal("Updated Name", result.Value.Name);
 
         // Verify project was updated in database
         var updatedProject = await context.Projects.FindAsync(projectId);

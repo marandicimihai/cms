@@ -1,10 +1,10 @@
 using Ardalis.Result;
-using CMS.Main.Client.Services.State;
+using CMS.Main.Abstractions;
 using CMS.Main.Data;
+using CMS.Main.DTOs.Pagination;
+using CMS.Main.DTOs.Project;
 using CMS.Main.Models;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Pagination;
-using CMS.Shared.DTOs.Project;
+using CMS.Main.Services.State;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -120,7 +120,7 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectDto>> UpdateProjectAsync(ProjectDto dto)
+    public async Task<Result> UpdateProjectAsync(ProjectDto dto)
     {
         try
         {
@@ -137,7 +137,7 @@ public class ProjectService(
             var adapted = project.Adapt<ProjectDto>();
             projectStateService.NotifyUpdated([adapted]);
 
-            return Result.Success(adapted);
+            return Result.Success();
         }
         catch (Exception ex)
         {

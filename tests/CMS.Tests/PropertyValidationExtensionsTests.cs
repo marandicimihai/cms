@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using Ardalis.Result;
+using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
-using CMS.Shared.DTOs.SchemaProperty;
 using Xunit;
 
 namespace CMS.Tests;

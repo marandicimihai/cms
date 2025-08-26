@@ -1,11 +1,10 @@
-using CMS.Main.Client.Components;
-using CMS.Main.Client.Services;
-using CMS.Main.Client.Services.State;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs.Pagination;
+using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Entry;
-using CMS.Shared.DTOs.Pagination;
-using CMS.Shared.DTOs.SchemaProperty;
+using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Entries;
@@ -29,6 +28,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
+    
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
     
     private List<EntryDto> Entries { get; set; } = [];
     
@@ -162,6 +164,11 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
                 StatusIndicator.StatusSeverity.Error);
         }
+    }
+
+    private void EditEntry(string entryId)
+    {
+        NavigationManager.NavigateTo($"/entry/{entryId}/edit");
     }
 
     public void Dispose()

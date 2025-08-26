@@ -1,9 +1,7 @@
-using CMS.Main.Client.Components;
-using CMS.Main.Client.Services;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Project;
 using CMS.Main.Services;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Project;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Project;

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using CMS.Shared.Abstractions;
+using CMS.Main.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Main.Auth;

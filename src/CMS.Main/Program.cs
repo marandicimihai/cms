@@ -1,19 +1,16 @@
 using System.Globalization;
-using CMS.Main.Client.Services;
-using CMS.Main.Client.Services.State;
+using CMS.Main.Abstractions;
 using CMS.Main.Components;
 using CMS.Main.Components.Account;
 using CMS.Main.Data;
 using CMS.Main.Emails;
 using CMS.Main.Emails.Config;
-using CMS.Main.Models.Config;
+using CMS.Main.Models.MappingConfig;
 using CMS.Main.Services;
-using CMS.Shared.Abstractions;
+using CMS.Main.Services.State;
 using FastEndpoints;
 using FastEndpoints.Swagger;
-using Mapster;
 using Microsoft.AspNetCore.Identity;
-using _Imports = CMS.Main.Client._Imports;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -28,9 +25,7 @@ builder.Services
     .SwaggerDocument();
 
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization();
+    .AddInteractiveServerComponents();
 
 var connectionString = config.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -79,9 +74,7 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(_Imports).Assembly);
+    .AddInteractiveServerRenderMode();
 
 app.UseFastEndpoints()
     .UseSwaggerGen();
