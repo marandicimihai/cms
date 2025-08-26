@@ -1,7 +1,7 @@
 @page "/entry/{entryId:guid}/edit"
 @rendermode InteractiveServer
 
-<BackButton Href="@()" Text="Back to Entries" />
+<BackButton Href="@("")" Text="Back to Entries" />
 <StatusIndicator @ref="statusIndicator" />
 
 <AuthorizeView Policy="EntryPolicies.CanEditEntry" Resource="EntryId">

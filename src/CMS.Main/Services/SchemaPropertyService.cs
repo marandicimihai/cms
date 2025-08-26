@@ -90,8 +90,15 @@ public class SchemaPropertyService(
             {
                 dbContext.Remove(property);
 
-                await dbContext.Database.ExecuteSqlAsync(
-                    $"UPDATE \"Entries\" SET \"Data\" = \"Data\" - {property.Name} WHERE \"SchemaId\" = {property.SchemaId}");
+                if (dbContext.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+                {
+                    await dbContext.Database.ExecuteSqlAsync(
+                        $"UPDATE \"Entries\" SET \"Data\" = \"Data\" - {property.Name} WHERE \"SchemaId\" = {property.SchemaId}");
+                }
+                else
+                {
+                    logger.LogInformation("Skipping SQL execution as the database is not npgsql and might not support json.");
+                }
                 
                 await dbContext.SaveChangesAsync();
             });
