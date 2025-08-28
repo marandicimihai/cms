@@ -18,10 +18,14 @@
     </div>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet class="fixed bottom-0 left-0 w-full bg-red-600 text-white p-4">
-    An unhandled error has occurred.
-    <a href="." class="underline hover:text-slate-200">Reload</a>
-    <span class="dismiss float-right cursor-pointer">🗙</span>
+<div id="blazor-error-ui" data-nosnippet class="fixed bottom-0 left-0 w-full bg-rose-600">
+    <div class="text-white p-4 flex items-center justify-between">
+        <span>An unhandled error has occurred.</span>
+        <div class="flex items-center gap-4">
+            <a href="." class="underline hover:text-rose-200 text-sm">Reload</a>
+            <span class="dismiss cursor-pointer text-sm">Dismiss</span>
+        </div>
+    </div>
 </div>
 
 <ConfirmationModal />

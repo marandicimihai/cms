@@ -11,6 +11,8 @@ using CMS.Main.Services.State;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
+using System.Runtime.InteropServices;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -54,6 +56,14 @@ builder.Services
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);
 
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+{
+    var keysFolder = "/var/data-protection-keys"; // Ensure this path is writable in your Docker container
+    builder.Services.AddDataProtection()
+        .SetApplicationName("cms.app")
+        .PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -71,12 +81,14 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.UseWebSockets();
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.UseFastEndpoints()
-    .UseSwaggerGen();
+// app.UseFastEndpoints()
+//     .UseSwaggerGen();
 
 app.MapAdditionalIdentityEndpoints();
 

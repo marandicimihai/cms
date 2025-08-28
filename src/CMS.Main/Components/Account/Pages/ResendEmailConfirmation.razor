@@ -10,8 +10,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
-@inject DbContextConcurrencyHelper ConcurrencyHelper
+@inject IDbContextConcurrencyHelper ConcurrencyHelper
 
 <PageTitle>Resend email confirmation</PageTitle>
 
