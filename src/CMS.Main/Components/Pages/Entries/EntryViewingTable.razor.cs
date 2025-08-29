@@ -36,8 +36,11 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     private StatusIndicator? statusIndicator;
     
-    // Used later for loading more entries
+    // Pagination state (mirrors sidebar pattern)
+    private readonly int pageSize = 20;
+    private bool isLoadingMore;
     private int totalCount;
+    private bool HasMoreEntries => Entries.Count < totalCount;
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
@@ -48,7 +51,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
-            new PaginationParams(1, 100),
+            new PaginationParams(1, pageSize),
             opt =>
             {
                 opt.SortingOption = EntrySortingOption.CreatedAt;
@@ -79,7 +82,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     private void EntriesCreated(List<EntryDto> created)
     {
+        // Prepend new entries; keep newest-first order consistent with sort
         Entries.InsertRange(0, created);
+        StateHasChanged();
     }
     
     private object? GetEntryPropertyValue(EntryDto entry, string propertyName)
@@ -156,6 +161,8 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         if (result.IsSuccess)
         {
             Entries.Remove(entry);
+            // Keep pagination metadata in sync with user-visible list
+            if (totalCount > 0) totalCount--;
             statusIndicator?.Show("Successfully deleted entry.", 
                 StatusIndicator.StatusSeverity.Success);
         }
@@ -163,6 +170,48 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         {
             statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
                 StatusIndicator.StatusSeverity.Error);
+        }
+    }
+
+    private async Task LoadMoreEntriesAsync()
+    {
+        if (isLoadingMore || !HasMoreEntries) return;
+        isLoadingMore = true;
+        StateHasChanged();
+        await Task.Yield();
+
+        try
+        {
+            // Calculate next page (1-based)
+            var nextPage = (Entries.Count / pageSize) + 1;
+            var result = await EntryService.GetEntriesForSchema(
+                SchemaId,
+                new PaginationParams(nextPage, pageSize),
+                opt =>
+                {
+                    opt.SortingOption = EntrySortingOption.CreatedAt;
+                    opt.Descending = true;
+                });
+
+            if (result.IsSuccess)
+            {
+                var (newEntries, pagination) = result.Value;
+                foreach (var e in newEntries)
+                {
+                    if (Entries.All(existing => existing.Id != e.Id))
+                        Entries.Add(e);
+                }
+                totalCount = pagination.TotalCount;
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+        finally
+        {
+            isLoadingMore = false;
+            StateHasChanged();
         }
     }
 

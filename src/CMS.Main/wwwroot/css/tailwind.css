@@ -7,7 +7,6 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
-    --color-red-600: oklch(57.7% 0.245 27.325);
     --color-amber-50: oklch(98.7% 0.022 95.277);
     --color-amber-100: oklch(96.2% 0.059 95.617);
     --color-amber-200: oklch(92.4% 0.12 95.746);
@@ -65,7 +64,6 @@
     --text-4xl--line-height: calc(2.5 / 2.25);
     --text-6xl: 3.75rem;
     --text-6xl--line-height: 1;
-    --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --tracking-wide: 0.025em;
@@ -253,8 +251,23 @@
   .z-50 {
     z-index: 50;
   }
-  .float-right {
-    float: right;
+  .container {
+    width: 100%;
+    @media (width >= 40rem) {
+      max-width: 40rem;
+    }
+    @media (width >= 48rem) {
+      max-width: 48rem;
+    }
+    @media (width >= 64rem) {
+      max-width: 64rem;
+    }
+    @media (width >= 80rem) {
+      max-width: 80rem;
+    }
+    @media (width >= 96rem) {
+      max-width: 96rem;
+    }
   }
   .mx-4 {
     margin-inline: calc(var(--spacing) * 4);
@@ -270,6 +283,9 @@
   }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
+  }
+  .mt-3 {
+    margin-top: calc(var(--spacing) * 3);
   }
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
@@ -373,6 +389,9 @@
   .max-w-\[240px\] {
     max-width: 240px;
   }
+  .max-w-full {
+    max-width: 100%;
+  }
   .max-w-md {
     max-width: var(--container-md);
   }
@@ -393,6 +412,9 @@
   }
   .min-w-full {
     min-width: 100%;
+  }
+  .min-w-max {
+    min-width: max-content;
   }
   .flex-1 {
     flex: 1;
@@ -483,20 +505,6 @@
       margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
     }
   }
-  .divide-y {
-    :where(& > :not(:last-child)) {
-      --tw-divide-y-reverse: 0;
-      border-bottom-style: var(--tw-border-style);
-      border-top-style: var(--tw-border-style);
-      border-top-width: calc(1px * var(--tw-divide-y-reverse));
-      border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
-    }
-  }
-  .divide-slate-200 {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-slate-200);
-    }
-  }
   .truncate {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -584,9 +592,6 @@
   }
   .bg-emerald-100 {
     background-color: var(--color-emerald-100);
-  }
-  .bg-red-600 {
-    background-color: var(--color-red-600);
   }
   .bg-rose-50 {
     background-color: var(--color-rose-50);
@@ -711,10 +716,6 @@
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
   }
-  .font-normal {
-    --tw-font-weight: var(--font-weight-normal);
-    font-weight: var(--font-weight-normal);
-  }
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
@@ -777,9 +778,6 @@
   }
   .text-white {
     color: var(--color-white);
-  }
-  .normal-case {
-    text-transform: none;
   }
   .uppercase {
     text-transform: uppercase;
@@ -883,17 +881,17 @@
       }
     }
   }
+  .hover\:text-rose-200 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-rose-200);
+      }
+    }
+  }
   .hover\:text-rose-700 {
     &:hover {
       @media (hover: hover) {
         color: var(--color-rose-700);
-      }
-    }
-  }
-  .hover\:text-slate-200 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-slate-200);
       }
     }
   }
@@ -978,11 +976,6 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-  .md\:grid-cols-3 {
-    @media (width >= 48rem) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
   .lg\:max-w-xl {
     @media (width >= 64rem) {
       max-width: var(--container-xl);
@@ -1063,11 +1056,6 @@
   initial-value: 0;
 }
 @property --tw-space-x-reverse {
-  syntax: "*";
-  inherits: false;
-  initial-value: 0;
-}
-@property --tw-divide-y-reverse {
   syntax: "*";
   inherits: false;
   initial-value: 0;
@@ -1205,7 +1193,6 @@
     *, ::before, ::after, ::backdrop {
       --tw-space-y-reverse: 0;
       --tw-space-x-reverse: 0;
-      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-font-weight: initial;
       --tw-tracking: initial;

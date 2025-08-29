@@ -1,0 +1,11 @@
+@* Table data cell component *@
+<td class="px-3 py-2 text-slate-700 @(Class)">
+    @ChildContent
+</td>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public string? Class { get; set; }
+}

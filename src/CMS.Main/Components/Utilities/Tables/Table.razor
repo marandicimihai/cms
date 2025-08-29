@@ -1,0 +1,11 @@
+@* Table wrapper component *@
+<div class="w-full overflow-x-auto">
+    <table class="min-w-full text-sm">
+        @ChildContent
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
