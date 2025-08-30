@@ -5,7 +5,7 @@
 
 <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" /> 
 
-<div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 mb-4 max-w-screen-lg mx-auto">
+<Paper>
     <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-medium">
             @Schema.Name
@@ -28,4 +28,4 @@
     <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" StatusIndicator="statusIndicator" @ref="createForm" Visible="createFormVisible" />
     <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" StatusIndicator="statusIndicator" @ref="updateForm" Visible="updateFormVisible" />
     <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/> 
-</div>
+</Paper>

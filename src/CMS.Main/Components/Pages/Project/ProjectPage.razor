@@ -5,7 +5,7 @@
 
 <AuthorizeView Context="authContext" Policy="ProjectPolicies.CanEditProject" Resource="ProjectId.ToString()">
     <Authorized>
-        <div class="rounded-lg bg-white p-4 mb-4 border border-slate-200 shadow-sm max-w-screen-lg mx-auto">
+        <Paper>
             <h2 class="text-lg font-medium mb-3">Edit project properties:</h2>
             <StatusIndicator @ref="statusIndicator"/>
             <EditForm Model="ProjectDto" OnValidSubmit="OnSaveName" class="flex flex-col gap-2">
@@ -31,7 +31,7 @@
                     </button>
                 </div>
             </EditForm>
-        </div>
+        </Paper>
         <ProjectSchemasSection Schemas="@ProjectDto.Schemas" ProjectId="@ProjectDto.Id"/>
     </Authorized>
     <NotAuthorized>

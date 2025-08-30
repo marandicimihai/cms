@@ -7,7 +7,7 @@
     <Authorized>
         <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>
 
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 mb-4 max-w-screen-lg mx-auto">
+        <Paper>
             <div class="flex items-center justify-between mb-4">
                 <h1 class="text-lg font-medium text-slate-900">Entries</h1>
                 @if (!showCreateForm)
@@ -30,7 +30,7 @@
             <StatusIndicator @ref="statusIndicator"/>
 
             <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
-        </div>
+        </Paper>
     </Authorized>
     <NotAuthorized>
         <BackButton />
