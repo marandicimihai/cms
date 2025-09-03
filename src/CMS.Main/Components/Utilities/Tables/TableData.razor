@@ -1,11 +1,15 @@
 @* Table data cell component *@
-<td class="px-3 py-2 text-slate-700 @(Class)">
+<td class="px-3 py-2 text-slate-700 @(Class)" @attributes="AdditionalAttributes">
     @ChildContent
 </td>
 
 @code {
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+    
     [Parameter]
     public string? Class { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)] 
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 }

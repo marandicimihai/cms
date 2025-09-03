@@ -33,6 +33,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private NavigationManager NavigationManager { get; set; } = default!;
     
     private List<EntryDto> Entries { get; set; } = [];
+    private List<EntryDto> SelectedEntries { get; set; } = [];
     
     private StatusIndicator? statusIndicator;
     
@@ -215,9 +216,85 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
     }
 
-    private void EditEntry(string entryId)
+    private void RedirectToEdit(string entryId)
     {
         NavigationManager.NavigateTo($"/entry/{entryId}/edit");
+    }
+
+    private bool IsAllSelected
+    {
+        get => Entries.Count > 0 && SelectedEntries.Count == Entries.Count;
+        set => ToggleSelectAll(value);
+    }
+
+    private bool IsEntrySelected(EntryDto entry)
+    {
+        return SelectedEntries.Any(e => e.Id == entry.Id);
+    }
+
+    private void ToggleEntrySelection(EntryDto entry, bool selected)
+    {
+        if (selected)
+        {
+            if (SelectedEntries.All(e => e.Id != entry.Id))
+                SelectedEntries.Add(entry);
+        }
+        else
+        {
+            SelectedEntries.RemoveAll(e => e.Id == entry.Id);
+        }
+        StateHasChanged();
+    }
+
+    private void ToggleSelectAllHandler(ChangeEventArgs e)
+    {
+        var selected = e.Value as bool? ?? false;
+        ToggleSelectAll(selected);
+    }
+
+    private void ToggleSelectAll(bool selected)
+    {
+        if (selected)
+        {
+            SelectedEntries = Entries.ToList();
+        }
+        else
+        {
+            SelectedEntries.Clear();
+        }
+        StateHasChanged();
+    }
+
+    private void ClearSelection()
+    {
+        SelectedEntries.Clear();
+        StateHasChanged();
+    }
+
+    private async Task DeleteSelectedEntriesAsync()
+    {
+        if (SelectedEntries.Count == 0)
+            return;
+
+        var isConfirmed = await ConfirmationService.ShowAsync(
+            "Delete Entries",
+            $"Are you sure you want to delete {SelectedEntries.Count} selected entr{(SelectedEntries.Count == 1 ? "y" : "ies")}? This action cannot be undone.",
+            "Delete");
+
+        if (!isConfirmed)
+            return;
+
+        foreach (var entry in SelectedEntries.ToList())
+        {
+            var result = await EntryService.DeleteEntryAsync(entry.Id);
+            if (result.IsSuccess)
+            {
+                Entries.RemoveAll(e => e.Id == entry.Id);
+            }
+            // Optionally, show error for failed deletes
+        }
+        SelectedEntries.Clear();
+        StateHasChanged();
     }
 
     public void Dispose()

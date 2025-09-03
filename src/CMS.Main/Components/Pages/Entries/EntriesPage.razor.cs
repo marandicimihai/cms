@@ -28,8 +28,6 @@ public partial class EntriesPage : ComponentBase
     [Inject]
     private EntryStateService EntryStateService { get; set; } = default!;
 
-    private EntryDto UpdateDto { get; set; } = new();
-
     private DynamicEntryForm? entryCreateForm;
     
     private StatusIndicator? statusIndicator;
