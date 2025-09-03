@@ -1,12 +1,12 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Ardalis.Result;
 using CMS.Main.Data;
+using CMS.Main.DTOs.Schema;
+using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
 using CMS.Main.Services;
-using CMS.Shared.DTOs.Schema;
-using CMS.Shared.DTOs.SchemaProperty;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -21,6 +21,7 @@ public class SchemaServiceTests
 
     public SchemaServiceTests()
     {
+        TypeAdapterConfig.GlobalSettings.Default.PreserveReference(true);
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
@@ -54,8 +55,12 @@ public class SchemaServiceTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(schema.Id, result.Value.Id);
-        Assert.Empty(result.Value.Properties); // Should be empty because IncludeProperties default is false
+        var dto = result.Value;
+        Assert.Equal(schema.Id, dto.Id);
+        Assert.Equal(schema.Name, dto.Name);
+        Assert.Equal(schema.ProjectId, dto.ProjectId);
+        Assert.NotNull(dto.Project);
+        Assert.Empty(dto.Properties); // Should be empty because IncludeProperties default is false
     }
 
     [Fact]
@@ -76,15 +81,20 @@ public class SchemaServiceTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Properties.Count);
-        Assert.Contains(result.Value.Properties, p => p.Name == "Title");
-        Assert.Contains(result.Value.Properties, p => p.Name == "PublishedOn");
+        var dto = result.Value;
+        Assert.Equal(schema.Id, dto.Id);
+        Assert.Equal(schema.Name, dto.Name);
+        Assert.Equal(schema.ProjectId, dto.ProjectId);
+        Assert.NotNull(dto.Project);
+        Assert.Equal(2, dto.Properties.Count);
+        Assert.Contains(dto.Properties, p => p.Name == "Title");
+        Assert.Contains(dto.Properties, p => p.Name == "PublishedOn");
     }
 
     [Fact]
     public async Task CreateSchemaAsync_NotFound_WhenProjectMissing()
     {
-        var dto = new SchemaCreationDto { Name = "Article", ProjectId = Guid.NewGuid().ToString() };
+        var dto = new SchemaDto { Name = "Article", ProjectId = Guid.NewGuid().ToString() };
         var result = await schemaService.CreateSchemaAsync(dto);
         Assert.True(result.IsNotFound());
     }
@@ -96,7 +106,7 @@ public class SchemaServiceTests
         await context.Projects.AddAsync(project);
         await context.SaveChangesAsync();
 
-        var dto = new SchemaCreationDto { Name = "Article", ProjectId = project.Id };
+        var dto = new SchemaDto { Name = "Article", ProjectId = project.Id };
         var result = await schemaService.CreateSchemaAsync(dto);
 
         Assert.True(result.IsSuccess);
@@ -126,4 +136,3 @@ public class SchemaServiceTests
         Assert.Null(await context.Schemas.FindAsync(schema.Id));
     }
 }
-

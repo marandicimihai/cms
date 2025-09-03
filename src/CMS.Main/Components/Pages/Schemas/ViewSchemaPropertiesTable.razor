@@ -1,0 +1,50 @@
+@if (Schema.Properties.Count > 0)
+{
+    <StatusIndicator @ref="statusIndicator" />
+    <Table>
+        <TableHead>
+            <TableRow>
+                <TableHeader>Name</TableHeader>
+                <TableHeader>Type</TableHeader>
+                <TableHeader>Options</TableHeader>
+                <TableHeader class="text-center">Required</TableHeader>
+                <TableHeader class="text-right">Actions</TableHeader>
+            </TableRow>
+        </TableHead>
+        <TableBody>
+        @foreach (var prop in Schema.Properties)
+        {
+            <TableRow>
+                <TableData>@prop.Name</TableData>
+                <TableData>@prop.Type</TableData>
+                <TableData>@(prop.Options is { Length: > 0 } ? string.Join(" ", prop.Options) : "-")</TableData>
+                <TableData>@(prop.IsRequired ? "true" : "false")</TableData>
+                <TableData class="text-right">
+                    <button type="button"
+                            class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-xs px-2.5 py-1.5 mr-2 focus:ring-2 focus:ring-blue-500"
+                            aria-label="Edit property"
+                            @onclick="() => OnEditProperty.InvokeAsync(prop)">
+                        <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
+                        Edit
+                    </button>
+                    <button type="button"
+                            class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500"
+                            aria-label="Delete property"
+                            @onclick="() => OnDeletePropertyClicked(prop)">
+                        <span class="material-symbols-outlined icons-default text-base mr-1">delete</span>
+                        Delete
+                    </button>
+                </TableData>
+            </TableRow>
+        }
+        </TableBody>
+    </Table>
+    <div class="mt-6">
+        <h3 class="text-sm font-medium text-slate-700 mb-2">Example JSON Object</h3>
+        <pre class="text-xs bg-slate-900 text-slate-100 rounded-md p-4 overflow-x-auto" aria-label="Example JSON object"><code>@ExampleJson</code></pre>
+    </div>
+}
+else
+{
+    <div class="text-slate-500 text-sm mt-4">No properties defined for this schema.</div>
+}

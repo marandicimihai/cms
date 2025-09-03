@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using CMS.Main.Client.Components;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Project;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Project;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Project;
@@ -12,14 +12,13 @@ public partial class CreateProject : ComponentBase
 
     private string? projectUrl;
 
-    private StatusIndicator? statusIndicator;
-    private string? statusText;
-
     [SupplyParameterFromForm]
-    private ProjectCreationDto ProjectDto { get; set; } = new();
+    private ProjectDto ProjectDto { get; set; } = new();
 
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
+
+    private StatusIndicator? statusIndicator;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,20 +44,20 @@ public partial class CreateProject : ComponentBase
 
             if (!result.IsSuccess)
             {
-                statusText = "Something went wrong when creating the project.";
-                statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+                statusIndicator?.Show("Something went wrong when creating the project.",
+                    StatusIndicator.StatusSeverity.Error);
                 return;
             }
 
-            statusText = "The project was successfully created.";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+            statusIndicator?.Show("The project was successfully created.",
+                StatusIndicator.StatusSeverity.Success);
 
             projectUrl = $"/project/{result.Value.Id}";
         }
         catch
         {
-            statusText = "Something went wrong when creating the project.";
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+            statusIndicator?.Show("Something went wrong when creating the project.",
+                StatusIndicator.StatusSeverity.Error);
         }
         finally
         {

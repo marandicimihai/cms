@@ -1,0 +1,41 @@
+@page "/schema/{schemaId:guid}/entries"
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+<AuthorizeView Policy="SchemaPolicies.CanEditSchema" Resource="SchemaId.ToString()">
+    <Authorized>
+        <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>
+
+        <Paper>
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-lg font-medium text-slate-900">Entries</h1>
+                @if (!showCreateForm)
+                {
+                    <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2" @onclick="ShowAddForm">
+                        <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
+                        Add Entry
+                    </button>
+                }
+            </div>
+
+            @if (showCreateForm)
+            {
+                <div class="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <h2 class="text-sm font-medium text-slate-900 mb-3">New Entry</h2>
+                    <DynamicEntryForm @ref="entryCreateForm" Properties="Schema.Properties" OnValidSubmit="OnEntryCreateSubmit" OnCancel="HideAddForm"/>
+                </div>
+            }
+
+            <StatusIndicator @ref="statusIndicator"/>
+
+            <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
+        </Paper>
+    </Authorized>
+    <NotAuthorized>
+        <BackButton />
+        <Paper>
+            <StatusIndicator @ref="statusIndicator"/>
+        </Paper>
+    </NotAuthorized>
+</AuthorizeView>

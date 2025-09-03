@@ -6,7 +6,7 @@ namespace CMS.Main.Components.Account;
 internal sealed class IdentityUserAccessor(
     UserManager<ApplicationUser> userManager,
     IdentityRedirectManager redirectManager,
-    DbContextConcurrencyHelper concurrencyHelper)
+    IDbContextConcurrencyHelper concurrencyHelper)
 {
     public async Task<ApplicationUser> GetRequiredUserAsync(HttpContext context)
     {

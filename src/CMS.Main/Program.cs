@@ -1,15 +1,23 @@
+using System.Globalization;
+using CMS.Main.Abstractions;
 using CMS.Main.Components;
 using CMS.Main.Components.Account;
 using CMS.Main.Data;
 using CMS.Main.Emails;
 using CMS.Main.Emails.Config;
+using CMS.Main.Models.MappingConfig;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
-using CMS.Shared.Abstractions;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Identity;
-using _Imports = CMS.Main.Client._Imports;
+using Microsoft.AspNetCore.DataProtection;
+using System.Runtime.InteropServices;
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
+MapsterConfig.ConfigureMapster();
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration config = builder.Configuration;
@@ -19,9 +27,7 @@ builder.Services
     .SwaggerDocument();
 
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization();
+    .AddInteractiveServerComponents();
 
 var connectionString = config.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -36,22 +42,32 @@ builder.Services
 
 // ? Custom Services
 builder.Services
-    .AddScoped<DbContextConcurrencyHelper>()
+    .AddScoped<IDbContextConcurrencyHelper, DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
+    .AddScoped<EntryStateService>()
+    .AddScoped<AuthorizationHelperService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()
+    .AddScoped<IEntryService, EntryService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>();
 
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);
 
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+{
+    var keysFolder = "/var/data-protection-keys"; // Ensure this path is writable in your Docker container
+    builder.Services.AddDataProtection()
+        .SetApplicationName("cms.app")
+        .PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
     app.UseMigrationsEndPoint();
 }
 else
@@ -65,14 +81,14 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.UseWebSockets();
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(_Imports).Assembly);
+    .AddInteractiveServerRenderMode();
 
-app.UseFastEndpoints()
-    .UseSwaggerGen();
+// app.UseFastEndpoints()
+//     .UseSwaggerGen();
 
 app.MapAdditionalIdentityEndpoints();
 

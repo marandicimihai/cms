@@ -1,0 +1,96 @@
+@using CMS.Main.DTOs.SchemaProperty
+@rendermode InteractiveServer
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit" class="flex flex-col gap-4">
+    
+    @for (var i = 0; i < Properties.Count; i++)
+    {
+        var j = i; // Capture the current index for use in the field component
+        <DynamicEntryField SchemaProperty="Properties[j]" InitialValue="InitialValues?[j]" UseInitialValue="@(InitialValues != null)" @ref="Fields[j]" />
+    }
+
+    <div class="flex gap-2 justify-start mt-2">
+        <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2" aria-label="Save Entry">
+            <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
+            Save
+        </button>
+        <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2" @onclick="HandleCancel" aria-label="Cancel">
+            <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
+            Cancel
+        </button>
+    </div>
+</EditForm>
+
+@code {
+
+    private object Model { get; set; } = new();
+
+    [Parameter]
+    public List<SchemaPropertyDto> Properties { get; set; } = [];
+    
+    [Parameter]
+    public List<object?>? InitialValues { get; set; }
+    
+    [Parameter] 
+    public EventCallback<Dictionary<SchemaPropertyDto, object?>> OnValidSubmit { get; set; }
+    
+    [Parameter] 
+    public EventCallback OnCancel { get; set; }
+    
+    private List<DynamicEntryField?> Fields { get; set; } = [];
+
+    protected override void OnParametersSet()
+    {
+        if (Fields.Count != Properties.Count)
+        {
+            Fields = Enumerable.Repeat<DynamicEntryField?>(null, Properties.Count).ToList();
+        }
+    }
+
+    public void Reset()
+    {
+        foreach (var field in Fields)
+        {
+            field?.Reset();
+        }
+    }
+
+    protected async Task HandleValidSubmit()
+    {
+        var isValid = true;
+        foreach (var field in Fields)
+        {
+            var isFieldValid = field?.IsValid();
+
+            if (isFieldValid is false or null)
+                isValid = false;
+        }
+        
+        if (!isValid)
+            return;
+        
+        var propertiesAndValues = new Dictionary<SchemaPropertyDto, object?>();
+        
+        foreach (var field in Fields)
+        {
+            if (field is null) continue;
+            
+            var (property, value) = field.GetPropertyAndValue();
+            propertiesAndValues.Add(property, value);
+        }
+
+        if (OnValidSubmit.HasDelegate)
+        {
+            await OnValidSubmit.InvokeAsync(propertiesAndValues);
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+}

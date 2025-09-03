@@ -1,0 +1,11 @@
+@* Table header row/cell component *@
+<th class="text-left px-3 py-2 text-xs uppercase tracking-wide text-slate-600 font-medium @(Class)" >
+    @ChildContent
+</th>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public string? Class { get; set; }
+}

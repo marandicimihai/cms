@@ -6,13 +6,14 @@
       context: .
       dockerfile: src/CMS.Main/Dockerfile
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "9000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=CMS;Username=postgres;Password=postgres;Include Error Detail=true
       - EmailSettings__Smtp__Host=smtp4dev
       - EmailSettings__Smtp__Port=25
+    volumes:
+      - ./.containers/cms/data-protection-keys:/var/data-protection-keys
     depends_on:
       db:
         condition: service_healthy

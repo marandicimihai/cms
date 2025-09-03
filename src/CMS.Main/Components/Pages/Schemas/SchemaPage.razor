@@ -1,110 +1,41 @@
-@page "/project/{projectId:guid}/schema/{schemaId:guid}"
+@page "/schema/{schemaId:guid}"
 @rendermode InteractiveServer
 
 @attribute [Authorize]
 
-<NavLink class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1 mb-2" href="@($"/project/{ProjectId}")" aria-label="Back to project">
-    <span class="material-symbols-outlined icons-default text-base mr-1">arrow_back</span>
-    Back to Project
-</NavLink>
+<AuthorizeView>
+    <Authorized>
+        <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" /> 
 
-<div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 mb-4 max-w-screen-lg mx-auto">
-    <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-medium">
-            @(!string.IsNullOrWhiteSpace(Schema.Name) ? Schema.Name : "Schema Properties")
-        </h2>
-        @if (!isCreatePropertyFormVisible)
-        {
-            <button
-                class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                aria-label="Create Property" @onclick="ShowCreatePropertyForm">
-                <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
-                Create Property
-            </button>
-        }
-    </div>
+        <Paper>
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-medium">
+                    @Schema.Name
+                </h2>
 
-    @if (isCreatePropertyFormVisible)
-    {
-        <EditForm Model="NewProperty" OnValidSubmit="HandleCreatePropertySubmit" class="mb-4">
-            <DataAnnotationsValidator />
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="flex flex-col gap-2 md:col-span-1">
-                    <label class="text-xs uppercase tracking-wide text-slate-600">Name</label>
-                    <InputText @bind-Value="NewProperty.Name" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="Property name" />
-                    <ValidationMessage For="() => NewProperty.Name" class="text-rose-600 text-xs" />
-                </div>
-                <div class="flex flex-col gap-2 md:col-span-1">
-                    <label class="text-xs uppercase tracking-wide text-slate-600">Type</label>
-                    <InputSelect @bind-Value="NewProperty.Type" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" @onchange="OnTypeChanged">
-                        @foreach (var t in PropertyTypes)
-                        {
-                            <option value="@t">@t</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="() => NewProperty.Type" class="text-rose-600 text-xs" />
-                </div>
-                @if (NewProperty.Type == CMS.Shared.DTOs.SchemaProperty.SchemaPropertyType.Enum)
+                @if (!createFormVisible && !updateFormVisible)
                 {
-                    <div class="flex flex-col gap-2 md:col-span-1">
-                        <label class="text-xs uppercase tracking-wide text-slate-600">Options (comma separated)</label>
-                        <InputText @bind-Value="OptionsCsv" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="Red, Green, Blue" />
-                        @if (!IsEnumOptionsValid)
-                        {
-                            <span class="text-rose-600 text-xs mt-1">You must provide at least one option for Enum type.</span>
-                        }
+                    <div class="flex items-center gap-2">
+                        <button
+                            class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                            aria-label="Create Property" @onclick="ShowCreateForm">
+                            <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
+                            Create Property
+                        </button>
                     </div>
                 }
             </div>
-            <div class="flex gap-2 mt-4">
-                <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 min-w-[140px]" aria-label="Save Property" disabled="@(NewProperty.Type == CMS.Shared.DTOs.SchemaProperty.SchemaPropertyType.Enum && !IsEnumOptionsValid)">
-                    <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
-                    Save Property
-                </button>
-                <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" aria-label="Cancel" @onclick="HideCreatePropertyForm">
-                    <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
-                    Cancel
-                </button>
-            </div>
-        </EditForm>
-    }
-    
-    <StatusIndicator @ref="statusIndicator">@statusText</StatusIndicator>
 
-    @if (Schema?.Properties?.Count > 0)
-    {
-        <table class="min-w-full divide-y divide-slate-200 mt-4">
-            <thead>
-            <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wide">Name</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wide">Type</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wide">Options</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-slate-600 uppercase tracking-wide">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var prop in Schema.Properties)
-            {
-                <tr>
-                    <td class="px-3 py-2 text-sm text-slate-900">@prop.Name</td>
-                    <td class="px-3 py-2 text-sm text-slate-900">@prop.Type</td>
-                    <td class="px-3 py-2 text-sm text-slate-900">@(prop.Options is { Length: > 0 } ? string.Join(", ", prop.Options) : "-")</td>
-                    <td class="px-3 py-2 text-sm text-slate-900 text-right">
-                        <button type="button"
-                                class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500"
-                                aria-label="Delete property"
-                                @onclick="() => OnDeletePropertyClicked(prop)">
-                            <span class="material-symbols-outlined icons-default text-base mr-1">delete</span>
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    }
-    else if (!isCreatePropertyFormVisible)
-    {
-        <div class="text-slate-500 text-sm mt-4">No properties defined for this schema.</div>
-    }
-</div>
+            <StatusIndicator @ref="statusIndicator"/> 
+            <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" StatusIndicator="statusIndicator" @ref="createForm" Visible="createFormVisible" />
+            <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" StatusIndicator="statusIndicator" @ref="updateForm" Visible="updateFormVisible" />
+            <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/> 
+        </Paper>
+    </Authorized>
+    <NotAuthorized>
+        <BackButton />
+        <Paper>
+            <StatusIndicator @ref="statusIndicator"/>
+        </Paper>
+    </NotAuthorized>
+</AuthorizeView>

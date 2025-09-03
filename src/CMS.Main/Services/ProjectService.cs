@@ -1,22 +1,22 @@
 using Ardalis.Result;
+using CMS.Main.Abstractions;
 using CMS.Main.Data;
+using CMS.Main.DTOs.Pagination;
+using CMS.Main.DTOs.Project;
 using CMS.Main.Models;
 using CMS.Main.Services.State;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Pagination;
-using CMS.Shared.DTOs.Project;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Main.Services;
 
 public class ProjectService(
-    DbContextConcurrencyHelper dbHelper,
+    IDbContextConcurrencyHelper dbHelper,
     ProjectStateService projectStateService,
     ILogger<ProjectService> logger
 ) : IProjectService
 {
-    public async Task<Result<(List<ProjectWithIdDto>, PaginationMetadata)>> GetProjectsForUserAsync(
+    public async Task<Result<(List<ProjectDto>, PaginationMetadata)>> GetProjectsForUserAsync(
         string userId,
         PaginationParams? paginationParams = null,
         Action<ProjectQueryOptions>? configureOptions = null)
@@ -49,7 +49,7 @@ public class ProjectService(
                     IProjectService.MaxPageSize
                 );
 
-                var dtos = projects.Adapt<List<ProjectWithIdDto>>();
+                var dtos = projects.Adapt<List<ProjectDto>>();
                 if (!options.IncludeSchemas)
                     foreach (var dto in dtos)
                         dto.Schemas = [];
@@ -66,7 +66,7 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> GetProjectByIdAsync(
+    public async Task<Result<ProjectDto>> GetProjectByIdAsync(
         string projectId,
         Action<ProjectQueryOptions>? configureOptions = null)
     {
@@ -83,7 +83,7 @@ public class ProjectService(
             });
             if (result is null)
                 return Result.NotFound();
-            var dto = result.Adapt<ProjectWithIdDto>();
+            var dto = result.Adapt<ProjectDto>();
             if (!options.IncludeSchemas) dto.Schemas = [];
             return Result.Success(dto);
         }
@@ -94,55 +94,55 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> CreateProjectAsync(ProjectCreationDto projectDto)
+    public async Task<Result<ProjectDto>> CreateProjectAsync(ProjectDto dto)
     {
-        if (!Guid.TryParse(projectDto.OwnerId, out _))
+        if (!Guid.TryParse(dto.OwnerId, out _))
             return Result.Invalid(new ValidationError("OwnerID must be a valid GUID."));
 
         try
         {
-            var project = projectDto.Adapt<Project>();
+            var project = dto.Adapt<Project>();
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 await dbContext.Projects.AddAsync(project);
                 await dbContext.SaveChangesAsync();
             });
 
-            var adapted = project.Adapt<ProjectWithIdDto>();
+            var adapted = project.Adapt<ProjectDto>();
             projectStateService.NotifyCreated([adapted]);
 
             return Result.Success(adapted);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an error when creating a project for user {ownerId}.", projectDto.OwnerId);
-            return Result.Error($"There was an error when creating a project for user {projectDto.OwnerId}.");
+            logger.LogError(ex, "There was an error when creating a project for user {ownerId}.", dto.OwnerId);
+            return Result.Error($"There was an error when creating a project for user {dto.OwnerId}.");
         }
     }
 
-    public async Task<Result<ProjectWithIdDto>> UpdateProjectAsync(ProjectUpdateDto projectDto)
+    public async Task<Result> UpdateProjectAsync(ProjectDto dto)
     {
         try
         {
             var project = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(projectDto.Id));
+                await dbContext.Projects.FindAsync(dto.Id));
 
             if (project is null)
                 return Result.NotFound();
 
-            projectDto.Adapt(project);
+            dto.Adapt(project);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 
-            var adapted = project.Adapt<ProjectWithIdDto>();
+            var adapted = project.Adapt<ProjectDto>();
             projectStateService.NotifyUpdated([adapted]);
 
-            return Result.Success(adapted);
+            return Result.Success();
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an error when updating project {projectId}.", projectDto.Id);
-            return Result.Error($"There was an error when updating project {projectDto.Id}.");
+            logger.LogError(ex, "There was an error when updating project {projectId}.", dto.Id);
+            return Result.Error($"There was an error when updating project {dto.Id}.");
         }
     }
 
@@ -170,24 +170,6 @@ public class ProjectService(
         {
             logger.LogError(ex, "There was an error when deleting project {projectId}.", projectId);
             return Result.Error($"There was an error when deleting project {projectId}.");
-        }
-    }
-
-    public async Task<Result<bool>> OwnsProject(string userId, string projectId)
-    {
-        try
-        {
-            var project = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(projectId));
-
-            return project is null ? Result.NotFound() : Result.Success(project.OwnerId == userId);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an error when checking ownership of project {projectId} for user {userId}.",
-                projectId, userId);
-            return Result.Error(
-                $"There was an error when checking ownership of project {projectId} for user {userId}.");
         }
     }
 }

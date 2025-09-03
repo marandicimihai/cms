@@ -1,8 +1,8 @@
 using System.Security.Claims;
+using CMS.Main.Abstractions;
+using CMS.Main.DTOs.Pagination;
+using CMS.Main.DTOs.Project;
 using CMS.Main.Services.State;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Pagination;
-using CMS.Shared.DTOs.Project;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
@@ -10,7 +10,7 @@ namespace CMS.Main.Components.Layout;
 
 [StreamRendering]
 [Authorize]
-public partial class SideBar : ComponentBase
+public partial class SideBar : ComponentBase, IDisposable
 {
     private readonly int pageSize = 20;
     private bool isLoadingMore;
@@ -22,7 +22,7 @@ public partial class SideBar : ComponentBase
     [Inject]
     private ProjectStateService ProjectStateService { get; set; } = default!;
 
-    private List<ProjectWithIdDto> Projects { get; set; } = [];
+    private List<ProjectDto> Projects { get; set; } = [];
     private bool HasMoreProjects => Projects.Count < totalCount;
 
     protected override async Task OnInitializedAsync()
@@ -100,14 +100,14 @@ public partial class SideBar : ComponentBase
         StateHasChanged();
     }
 
-    private void ProjectsCreated(List<ProjectWithIdDto> projects)
+    private void ProjectsCreated(List<ProjectDto> projects)
     {
         Projects.AddRange(projects);
         Projects = Projects.OrderByDescending(p => p.LastUpdated).ToList();
         StateHasChanged();
     }
 
-    private void ProjectsUpdated(List<ProjectWithIdDto> projects)
+    private void ProjectsUpdated(List<ProjectDto> projects)
     {
         foreach (var updatedProject in projects)
         {
@@ -138,5 +138,13 @@ public partial class SideBar : ComponentBase
         }
 
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ProjectStateService.ProjectsCreated -= ProjectsCreated;
+        ProjectStateService.ProjectsUpdated -= ProjectsUpdated;
+        ProjectStateService.ProjectsDeleted -= OnProjectsDeleted;
+        GC.SuppressFinalize(this);
     }
 }

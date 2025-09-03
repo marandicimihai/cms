@@ -1,20 +1,15 @@
-using CMS.Main.Client.Components;
+using CMS.Main.Abstractions;
+using CMS.Main.Components.Shared;
+using CMS.Main.DTOs.Schema;
 using CMS.Main.Services;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Schema;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace CMS.Main.Components.Pages.Project;
 
 public partial class ProjectSchemasSection : ComponentBase
 {
-    private StatusIndicator? statusIndicator;
-    private string? statusText;
-
     [Parameter]
-    public List<SchemaWithIdDto> Schemas { get; set; } = [];
+    public List<SchemaDto> Schemas { get; set; } = [];
 
     [Parameter]
     public string ProjectId { get; set; } = string.Empty;
@@ -23,42 +18,45 @@ public partial class ProjectSchemasSection : ComponentBase
     private ISchemaService SchemaService { get; set; } = default!;
 
     [Inject]
-    private IAuthorizationService AuthorizationService { get; set; } = default!;
-
-    [Inject]
-    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
-
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
+    
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
+    
+    private StatusIndicator? statusIndicator;
 
     [SupplyParameterFromForm]
-    public SchemaCreationDto NewSchema { get; set; } = new();
+    public SchemaDto NewSchema { get; set; } = new();
     private bool IsAddFormVisible { get; set; }
 
     private bool IsCreatingSchema { get; set; }
 
     protected override void OnParametersSet()
     {
-        NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
+        NewSchema = new SchemaDto { ProjectId = ProjectId };
     }
 
     private void ShowAddForm()
     {
         IsAddFormVisible = true;
-        NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
+        NewSchema = new SchemaDto { ProjectId = ProjectId };
     }
 
     private void HideAddForm()
     {
         statusIndicator?.Hide();
         IsAddFormVisible = false;
-        NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
+        NewSchema = new SchemaDto { ProjectId = ProjectId };
     }
 
     public async Task HandleAddSchema()
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanEditProject(ProjectId))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         IsCreatingSchema = true;
         StateHasChanged();
@@ -68,27 +66,31 @@ public partial class ProjectSchemasSection : ComponentBase
 
         if (!result.IsSuccess)
         {
-            statusText = result.Errors.First();
-            statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-            IsCreatingSchema = false;
-            StateHasChanged();
-            return;
+            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                StatusIndicator.StatusSeverity.Error);
         }
+        else
+        {
+            statusIndicator?.Show("Successfully created schema.",
+                StatusIndicator.StatusSeverity.Success);
 
-        statusText = "Successfully created schema.";
-        statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
-        IsAddFormVisible = false;
-        NewSchema = new SchemaCreationDto { ProjectId = ProjectId };
-        Schemas.Add(result.Value);
+            IsAddFormVisible = false;
+            NewSchema = new SchemaDto { ProjectId = ProjectId };
+            Schemas.Add(result.Value);
+        }
 
         IsCreatingSchema = false;
         StateHasChanged();
     }
 
-    private async Task OnDeleteSchemaAsync(SchemaWithIdDto schema)
+    private async Task OnDeleteSchemaAsync(SchemaDto schema)
     {
-        if (!await HasAccess())
+        if (!await AuthHelper.CanEditProject(ProjectId))
+        {
+            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+                StatusIndicator.StatusSeverity.Error);
             return;
+        }
 
         var confirmed = await ConfirmationService.ShowAsync(
             "Delete Schema",
@@ -102,29 +104,15 @@ public partial class ProjectSchemasSection : ComponentBase
 
             if (result.IsSuccess)
             {
-                statusText = "Schema deleted successfully.";
-                statusIndicator?.Show(StatusIndicator.StatusSeverity.Success);
+                statusIndicator?.Show("Schema deleted successfully.",
+                    StatusIndicator.StatusSeverity.Success);
                 Schemas.Remove(schema);
             }
             else
             {
-                statusText = result.Errors.First();
-                statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
+                statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
+                    StatusIndicator.StatusSeverity.Error);
             }
         }
-    }
-
-    private async Task<bool> HasAccess()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var authorizationResult = await AuthorizationService.AuthorizeAsync(user, ProjectId, "ProjectPolicies.CanEditProject");
-
-        if (authorizationResult.Succeeded) return true;
-
-        statusText = "Could not load project. You do not have permission to access this project.";
-        statusIndicator?.Show(StatusIndicator.StatusSeverity.Error);
-
-        return false;
     }
 }

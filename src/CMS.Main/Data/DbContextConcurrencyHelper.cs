@@ -1,6 +1,6 @@
 namespace CMS.Main.Data;
 
-public class DbContextConcurrencyHelper(ApplicationDbContext dbContext)
+public class DbContextConcurrencyHelper(ApplicationDbContext dbContext) : IDbContextConcurrencyHelper
 {
     private readonly SemaphoreSlim semaphore = new(1, 1);
 

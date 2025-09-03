@@ -1,19 +1,19 @@
 using Ardalis.Result;
+using CMS.Main.Abstractions;
 using CMS.Main.Data;
+using CMS.Main.DTOs.Schema;
 using CMS.Main.Models;
-using CMS.Shared.Abstractions;
-using CMS.Shared.DTOs.Schema;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Main.Services;
 
 public class SchemaService(
-    DbContextConcurrencyHelper dbHelper,
+    IDbContextConcurrencyHelper dbHelper,
     ILogger<SchemaService> logger
 ) : ISchemaService
 {
-    public async Task<Result<SchemaWithIdDto>> GetSchemaByIdAsync(
+    public async Task<Result<SchemaDto>> GetSchemaByIdAsync(
         string schemaId, 
         Action<SchemaGetOptions>? optionsAction = null)
     {
@@ -22,20 +22,27 @@ public class SchemaService(
         try
         {
             var schema = await dbHelper.ExecuteAsync(async dbContext =>
-                options.IncludeProperties
-                    ? await dbContext.Schemas
-                        .Include(s => s.Properties)
-                        .FirstOrDefaultAsync(s => s.Id == schemaId)
-                    : await dbContext.Schemas
-                        .FirstOrDefaultAsync(s => s.Id == schemaId)
-            );
+            {
+                var query = dbContext.Schemas.AsQueryable();
+
+                if (options.IncludeProperties)
+                {
+                    query = query.Include(s => s.Properties);
+                }
+
+                if (options.IncludeProject)
+                {
+                    query = query.Include(s => s.Project);
+                }
+
+                return await query.FirstOrDefaultAsync(s => s.Id == schemaId);
+            });
 
             if (schema is null)
                 return Result.NotFound();
 
-            var dto = schema.Adapt<SchemaWithIdDto>();
-            if (!options.IncludeProperties)
-                dto.Properties = [];
+            var dto = schema.Adapt<SchemaDto>();
+            dto.Properties = options.IncludeProperties ? dto.Properties : [];
 
             return Result.Success(dto);
         }
@@ -46,18 +53,18 @@ public class SchemaService(
         }
     }
 
-    public async Task<Result<SchemaWithIdDto>> CreateSchemaAsync(SchemaCreationDto schemaCreationDto)
+    public async Task<Result<SchemaDto>> CreateSchemaAsync(SchemaDto dto)
     {
         try
         {
-            // Check if project exists
+            // Check if the project exists
             var project = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.Projects.FindAsync(schemaCreationDto.ProjectId));
+                await dbContext.Projects.FindAsync(dto.ProjectId));
 
             if (project is null)
-                return Result.NotFound($"Project {schemaCreationDto.ProjectId} was not found.");
+                return Result.NotFound($"Project {dto.ProjectId} was not found.");
 
-            var schema = schemaCreationDto.Adapt<Schema>();
+            var schema = dto.Adapt<Schema>();
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -65,14 +72,14 @@ public class SchemaService(
                 await dbContext.SaveChangesAsync();
             });
 
-            return Result.Success(schema.Adapt<SchemaWithIdDto>());
+            return Result.Success(schema.Adapt<SchemaDto>());
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error when creating the schema for project {projectId}.",
-                schemaCreationDto.ProjectId);
+                dto.ProjectId);
             return Result.Error(
-                $"There was an error when creating the schema for project {schemaCreationDto.ProjectId}.");
+                $"There was an error when creating the schema for project {dto.ProjectId}.");
         }
     }
 

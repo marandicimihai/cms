@@ -1,0 +1,10 @@
+<div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 mb-4 max-w-screen-lg mx-auto">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}

@@ -1,0 +1,24 @@
+@rendermode InteractiveServer
+
+<button class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1 mb-2 cursor-pointer" @onclick="NavigateToDestination" aria-label="Back">
+    <span class="material-symbols-outlined icons-default text-base mr-1">arrow_back</span>
+    @ButtonText
+</button>
+
+@code {
+    [Parameter]
+    public string Href { get; set; } = "/";
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    private string ButtonText => string.IsNullOrWhiteSpace(Text) ? "Back" : Text;
+
+    private void NavigateToDestination()
+    {
+        NavigationManager.NavigateTo(Href);
+    }
+}

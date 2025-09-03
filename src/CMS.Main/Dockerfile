@@ -4,11 +4,16 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Ensure the data protection keys directory exists and is writable before switching to non-root user
+USER root
+RUN mkdir -p /var/data-protection-keys \
+    && chmod -R 777 /var/data-protection-keys
+USER $APP_UID
+
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/CMS.Main/CMS.Main.csproj", "src/CMS.Main/"]
-COPY ["src/CMS.Main.Client/CMS.Main.Client.csproj", "src/CMS.Main.Client/"]
 RUN dotnet restore "src/CMS.Main/CMS.Main.csproj"
 COPY . .
 WORKDIR "/src/src/CMS.Main"
@@ -21,4 +26,8 @@ RUN dotnet publish "./CMS.Main.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Copy Email Templates directory to /app/Emails/Templates
+COPY src/CMS.Main/Emails/Templates /app/Emails/Templates
+
 ENTRYPOINT ["dotnet", "CMS.Main.dll"]
