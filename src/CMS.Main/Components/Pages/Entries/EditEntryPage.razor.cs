@@ -22,6 +22,8 @@ public partial class EditEntryPage : ComponentBase
     
     private StatusIndicator? statusIndicator;
 
+    private bool hasAccess;
+
     protected override async Task OnInitializedAsync()
     {
         if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
@@ -30,6 +32,8 @@ public partial class EditEntryPage : ComponentBase
                 StatusIndicator.StatusSeverity.Error);
             return;
         }
+
+        hasAccess = true;
 
         var result = await EntryService.GetEntryByIdAsync(
             EntryId.ToString(),

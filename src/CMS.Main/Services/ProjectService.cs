@@ -35,6 +35,7 @@ public class ProjectService(
                 var query = dbContext.Projects
                     .Where(p => p.OwnerId == userId);
                 if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
+                if (options.IncludeApiKeys) query = query.Include(p => p.ApiKeys);
                 var projects = await query
                     .OrderByDescending(p => p.LastUpdated)
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
@@ -78,6 +79,7 @@ public class ProjectService(
             {
                 var query = dbContext.Projects.AsQueryable();
                 if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
+                if (options.IncludeApiKeys) query = query.Include(p => p.ApiKeys);
                 var project = await query.FirstOrDefaultAsync(p => p.Id == projectId);
                 return project;
             });

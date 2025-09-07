@@ -1,3 +1,4 @@
+using CMS.Main.DTOs.ApiKey;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Project;
 using CMS.Main.DTOs.Schema;
@@ -36,5 +37,10 @@ public class MapsterConfig
             .Ignore(e => e.CreatedAt)
             .Ignore(e => e.UpdatedAt)
             .Ignore(e => e.Schema);
+        
+        TypeAdapterConfig<ApiKeyDto, ApiKey>
+            .NewConfig()
+            .Ignore(k => k.Id)
+            .Ignore(k => k.CreatedAt);
     }
 }

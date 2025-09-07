@@ -1,42 +1,41 @@
 using CMS.Main.Abstractions;
-using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.DTOs.ApiKey;
+using CMS.Main.DTOs.Project;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
+using Ardalis.Result;
+using CMS.Main.Components.Shared;
 
-namespace CMS.Main.Components.Pages.Schemas;
+namespace CMS.Main.Components.Pages.ApiKeys;
 
-public partial class SchemaPage : ComponentBase
+public partial class ManageApiKeysPage : ComponentBase
 {
     [Parameter]
-    public Guid SchemaId { get; set; }
+    public Guid ProjectId { get; set; }
 
-    private SchemaDto Schema { get; set; } = new();
+    [Inject]
+    private IProjectService ProjectService { get; set; } = default!;
+
+    [Inject]
+    private IApiKeyService ApiKeyService { get; set; } = default!;
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
     
-    [Inject]
-    private ISchemaService SchemaService { get; set; } = default!;
+    private ProjectDto ProjectDto { get; set; } = new();
     
-    [Inject]
-    private ISchemaPropertyService PropertyService { get; set; } = default!;
-
-    private PropertyCreateForm? createForm;
-    private PropertyUpdateForm? updateForm;
     private StatusIndicator? statusIndicator;
+    private ApiKeyCreateForm? createForm;
     
-    private bool createFormVisible;
-    private bool updateFormVisible;
-    private bool hasAccess;
-
+    // queued status for showing after render when initialized
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
+    private bool createFormVisible;
+    private bool hasAccess;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
+        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
             queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
@@ -45,14 +44,12 @@ public partial class SchemaPage : ComponentBase
 
         hasAccess = true;
 
-        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
-        {
-            opt.IncludeProperties = true;
-        });
+        var result =
+            await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeApiKeys = true; });
 
         if (result.IsSuccess)
         {
-            Schema = result.Value;
+            ProjectDto = result.Value;
         }
         else
         {
@@ -75,23 +72,7 @@ public partial class SchemaPage : ComponentBase
     {
         createForm?.ResetForm();
         createFormVisible = true;
-        updateFormVisible = false;
     }
     
-    private void HideCreateForm()
-    {
-        createFormVisible = false;
-    }
-    
-    private void ShowUpdateForm(SchemaPropertyDto property)
-    {
-        updateForm?.SetModel(property);
-        updateFormVisible = true;
-        createFormVisible = false;
-    }
-    
-    private void HideUpdateForm()
-    {
-        updateFormVisible = false;
-    }
+    private void HideCreateForm() => createFormVisible = false;
 }

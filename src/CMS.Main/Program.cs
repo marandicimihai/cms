@@ -45,11 +45,13 @@ builder.Services
     .AddScoped<IDbContextConcurrencyHelper, DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
     .AddScoped<EntryStateService>()
+    .AddScoped<ApiKeyStateService>()
     .AddScoped<AuthorizationHelperService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()
     .AddScoped<IEntryService, EntryService>()
+    .AddScoped<IApiKeyService, ApiKeyService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>();
 

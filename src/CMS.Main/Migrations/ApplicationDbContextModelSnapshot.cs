@@ -87,6 +87,38 @@ namespace CMS.Main.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("CMS.Main.Models.ApiKey", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("HashedKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ApiKeys");
+                });
+
             modelBuilder.Entity("CMS.Main.Models.Entry", b =>
                 {
                     b.Property<string>("Id")
@@ -326,6 +358,17 @@ namespace CMS.Main.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CMS.Main.Models.ApiKey", b =>
+                {
+                    b.HasOne("CMS.Main.Models.Project", "Project")
+                        .WithMany("ApiKeys")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("CMS.Main.Models.Entry", b =>
                 {
                     b.HasOne("CMS.Main.Models.Schema", "Schema")
@@ -412,6 +455,8 @@ namespace CMS.Main.Migrations
 
             modelBuilder.Entity("CMS.Main.Models.Project", b =>
                 {
+                    b.Navigation("ApiKeys");
+
                     b.Navigation("Schemas");
                 });
 

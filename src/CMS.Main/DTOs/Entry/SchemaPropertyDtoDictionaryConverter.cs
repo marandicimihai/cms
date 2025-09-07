@@ -8,19 +8,7 @@ namespace CMS.Main.DTOs.Entry
     {
         public override Dictionary<SchemaPropertyDto, object?> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var dict = new Dictionary<SchemaPropertyDto, object?>();
-            if (reader.TokenType != JsonTokenType.StartObject)
-                throw new JsonException();
-            reader.Read();
-            while (reader.TokenType == JsonTokenType.PropertyName)
-            {
-                var propertyId = reader.GetString();
-                reader.Read();
-                var value = JsonSerializer.Deserialize<object?>(ref reader, options);
-                dict.Add(new SchemaPropertyDto { Id = propertyId }, value);
-                reader.Read();
-            }
-            return dict;
+            throw new NotImplementedException();
         }
 
         public override void Write(Utf8JsonWriter writer, Dictionary<SchemaPropertyDto, object?> value, JsonSerializerOptions options)

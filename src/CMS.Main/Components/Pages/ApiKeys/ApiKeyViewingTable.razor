@@ -1,0 +1,52 @@
+<Table>
+    <TableHead>
+        <TableRow>
+            <TableHeader Class="font-mono text-xs">ID</TableHeader>
+            <TableHeader>Name</TableHeader>
+            <TableHeader>Created</TableHeader>
+            <TableHeader>Status</TableHeader>
+            <TableHeader Class="text-right">Actions</TableHeader>
+        </TableRow>
+    </TableHead>
+    <TableBody>
+        @if (ApiKeys.Any() == true)
+        {
+            @foreach (var key in ApiKeys)
+            {
+                <TableRow>
+                    <TableData Class="font-mono text-xs whitespace-nowrap">@key.Id</TableData>
+                    <TableData Class="truncate max-w-[240px]">@key.Name</TableData>
+                    <TableData Class="whitespace-nowrap">@key.CreatedAt.ToString("g")</TableData>
+                    <TableData>
+                        @if (key.IsActive)
+                        {
+                            <span class="text-emerald-700">Active</span>
+                        }
+                        else
+                        {
+                            <span class="text-rose-600">Revoked</span>
+                        }
+                    </TableData>
+                    <TableData Class="text-right flex gap-2 justify-end">
+                        <button class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-xs px-2.5 py-1.5" aria-label="Edit API Key" @onclick="() => OnEditKey(key)">
+                            <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
+                            Edit
+                        </button>
+                        <button class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5" aria-label="Delete API Key" @onclick="() => OnDeleteKey(key)">
+                            <span class="material-symbols-outlined icons-default text-base mr-1">delete</span>
+                            Delete
+                        </button>
+                    </TableData>
+                </TableRow>
+            }
+        }
+        else
+        {
+            <TableRow>
+                <TableData Class="px-3 py-4 text-slate-600 text-sm" colspan="5">No API keys yet.</TableData>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
+
+<div class="hidden whitespace-pre"></div>

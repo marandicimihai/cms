@@ -30,6 +30,7 @@ public partial class ProjectPage : ComponentBase
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
+    private bool hasAccess;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,6 +40,8 @@ public partial class ProjectPage : ComponentBase
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }
+
+        hasAccess = true;
 
         var result =
             await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeSchemas = true; });

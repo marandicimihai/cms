@@ -33,6 +33,7 @@ public partial class EntriesPage : ComponentBase
     private StatusIndicator? statusIndicator;
 
     private bool showCreateForm;
+    private bool hasAccess;
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
@@ -45,6 +46,8 @@ public partial class EntriesPage : ComponentBase
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }
+
+        hasAccess = true;
 
         var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
         {
