@@ -35,7 +35,7 @@ public partial class ProjectPage : ComponentBase
     {
         if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this project or it does not exist.";
+            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }

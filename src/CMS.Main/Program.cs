@@ -87,8 +87,8 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// app.UseFastEndpoints()
-//     .UseSwaggerGen();
+app.UseFastEndpoints()
+    .UseSwaggerGen();
 
 app.MapAdditionalIdentityEndpoints();
 

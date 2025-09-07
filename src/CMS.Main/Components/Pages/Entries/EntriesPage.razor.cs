@@ -41,7 +41,7 @@ public partial class EntriesPage : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this project or it does not exist.";
+            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }
@@ -76,7 +76,7 @@ public partial class EntriesPage : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+            statusIndicator?.Show("You do not have access to this resource or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
             return;
         }

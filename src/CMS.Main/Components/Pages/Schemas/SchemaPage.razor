@@ -3,7 +3,7 @@
 
 @attribute [Authorize]
 
-<AuthorizeView>
+<AuthorizeView Policy="SchemaPolicies.CanEditSchema" Resource="SchemaId.ToString()">
     <Authorized>
         <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" /> 
 
@@ -26,7 +26,7 @@
                 }
             </div>
 
-            <StatusIndicator @ref="statusIndicator"/> 
+            <StatusIndicator @ref="statusIndicator" /> 
             <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" StatusIndicator="statusIndicator" @ref="createForm" Visible="createFormVisible" />
             <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" StatusIndicator="statusIndicator" @ref="updateForm" Visible="updateFormVisible" />
             <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/> 
@@ -35,7 +35,9 @@
     <NotAuthorized>
         <BackButton />
         <Paper>
-            <StatusIndicator @ref="statusIndicator"/>
+            <StatusIndicator 
+                InitialMessage="You do not have access to this resource or it does not exist." 
+                InitialSeverity="StatusIndicator.StatusSeverity.Error" />
         </Paper>
     </NotAuthorized>
 </AuthorizeView>

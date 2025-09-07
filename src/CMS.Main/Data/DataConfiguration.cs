@@ -44,5 +44,32 @@ public static class DataConfiguration
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
+        
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Events.OnRedirectToLogin = context =>
+            {
+                // Only suppress redirect for API or JSON requests
+                if (context.Request.Path.StartsWithSegments("/api") ||
+                    context.Request.Headers["Accept"].ToString().Contains("application/json"))
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                }
+                context.Response.Redirect(context.RedirectUri);
+                return Task.CompletedTask;
+            };
+            options.Events.OnRedirectToAccessDenied = context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api") ||
+                    context.Request.Headers["Accept"].ToString().Contains("application/json"))
+                {
+                    context.Response.StatusCode = 403;
+                    return Task.CompletedTask;
+                }
+                context.Response.Redirect(context.RedirectUri);
+                return Task.CompletedTask;
+            };
+        });
     }
 }

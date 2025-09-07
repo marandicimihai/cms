@@ -37,7 +37,7 @@ public partial class SchemaPage : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this schema or it does not exist.";
+            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }

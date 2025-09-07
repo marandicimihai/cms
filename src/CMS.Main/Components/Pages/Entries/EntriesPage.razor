@@ -35,7 +35,9 @@
     <NotAuthorized>
         <BackButton />
         <Paper>
-            <StatusIndicator @ref="statusIndicator"/>
+            <StatusIndicator 
+                InitialMessage="You do not have access to this resource or it does not exist." 
+                InitialSeverity="StatusIndicator.StatusSeverity.Error" />
         </Paper>
     </NotAuthorized>
 </AuthorizeView>
