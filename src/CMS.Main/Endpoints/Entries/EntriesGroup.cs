@@ -1,12 +1,11 @@
-using CMS.Main.Auth;
 using FastEndpoints;
 
 namespace CMS.Main.Endpoints.Entries;
 
-public sealed class EntriesGroup : Group
+public sealed class EntriesGroup : SubGroup<ApiGroup>
 {
     public EntriesGroup()
     {
-        Configure("api/{schemaId}/entries", _ => { });
+        Configure("{schemaId}/entries", _ => { });
     }
 }

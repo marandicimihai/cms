@@ -13,6 +13,7 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using System.Runtime.InteropServices;
+using CMS.Main.Auth;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -32,6 +33,7 @@ builder.Services.AddRazorComponents()
 var connectionString = config.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.ConfigureDataServices(connectionString);
+builder.Services.ConfigureAuth();
 
 // ? Settings
 builder.Services
@@ -83,13 +85,13 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-app.UseWebSockets();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.UseFastEndpoints()
+app.UseAuthentication()
+    .UseAuthorization()
+    .UseFastEndpoints()
     .UseSwaggerGen();
 
 app.MapAdditionalIdentityEndpoints();

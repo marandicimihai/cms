@@ -76,7 +76,7 @@ public class GetEntries(
                 opt.SortingOption = EntrySortingOption.CreatedAt;
                 opt.Descending = true;
             });
-
+        
         if (result.IsSuccess)
         {
             var (entries, pagination) = result.Value;
