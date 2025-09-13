@@ -4,6 +4,7 @@ using CMS.Main.Data;
 using CMS.Main.DTOs.Pagination;
 using CMS.Main.DTOs.Project;
 using CMS.Main.Models;
+using CMS.Main.Models.MappingConfig;
 using CMS.Main.Services.State;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -132,7 +133,7 @@ public class ProjectService(
             if (project is null)
                 return Result.NotFound();
 
-            dto.Adapt(project);
+            dto.Adapt(project, MapsterConfig.EditProjectConfig);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 

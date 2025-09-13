@@ -3,6 +3,7 @@ using CMS.Main.Abstractions;
 using CMS.Main.Data;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
+using CMS.Main.Models.MappingConfig;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -69,13 +70,7 @@ public class SchemaPropertyService(
                     logger.LogInformation("Skipping SQL execution as the database is not npgsql and might not support json.");
                 }
                 
-                dto.Adapt(property, new TypeAdapterConfig()
-                    .NewConfig<SchemaPropertyDto, SchemaProperty>()
-                    .Inherits<SchemaPropertyDto, SchemaProperty>()
-                    .Ignore(p => p.SchemaId)
-                    .Ignore(p => p.Schema)
-                    .Ignore(p => p.Type)
-                    .Config);
+                dto.Adapt(property, MapsterConfig.EditSchemaPropertyConfig);
                 
                 await dbContext.SaveChangesAsync();
             });

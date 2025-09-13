@@ -3,7 +3,9 @@ using Ardalis.Result;
 using CMS.Main.Abstractions;
 using CMS.Main.Data;
 using CMS.Main.DTOs.ApiKey;
+using Microsoft.EntityFrameworkCore;
 using CMS.Main.Models;
+using CMS.Main.Models.MappingConfig;
 using Mapster;
 
 namespace CMS.Main.Services;
@@ -17,23 +19,22 @@ public class ApiKeyService(
     {
         try
         {
+            var project = await dbHelper.ExecuteAsync(async dbContext => 
+                await dbContext.Projects.FindAsync(dto.ProjectId));
+
+            if (project is null)
+                return Result.NotFound();
+            
             var newKey = dto.Adapt<ApiKey>();
             var keyValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
             var hashedKey = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(keyValue)));
             newKey.HashedKey = hashedKey;
+            newKey.CreatedAt = DateTime.UtcNow;
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
-                try
-                {
-                    dbContext.ApiKeys.Add(newKey);
-                    await dbContext.SaveChangesAsync();
-                }
-                catch
-                {
-                    dbContext.Entry(newKey).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
-                    throw;
-                }
+                dbContext.ApiKeys.Add(newKey);
+                await dbContext.SaveChangesAsync();
             });
 
             return Result.Success((keyValue, newKey.Adapt<ApiKeyDto>()));
@@ -50,17 +51,13 @@ public class ApiKeyService(
         try
         {
             var key = await dbHelper.ExecuteAsync(async dbContext => 
-                await dbContext.ApiKeys.FindAsync(dto.Id));
+                await dbContext.ApiKeys.FirstOrDefaultAsync(k => k.Id == dto.Id));
             
             if (key is null)
                 return Result.NotFound();
-            
-            dto.Adapt(key, 
-                TypeAdapterConfig<ApiKeyDto, ApiKey>
-                .NewConfig()
-                .Ignore(k => k.ProjectId)
-                .Config);
-            
+
+            dto.Adapt(key, MapsterConfig.EditApiKeyConfig);
+
             await dbHelper.ExecuteAsync(async dbContext => await dbContext.SaveChangesAsync());
 
             return Result.Success();

@@ -3,6 +3,7 @@ using CMS.Main.DTOs.ApiKey;
 using CMS.Main.Components.Shared;
 using Microsoft.AspNetCore.Components;
 using CMS.Main.Services.State;
+using Mapster;
 
 namespace CMS.Main.Components.Pages.ApiKeys;
 
@@ -29,6 +30,7 @@ public partial class ApiKeyCreateForm : ComponentBase
     [Inject]
     private ApiKeyStateService ApiKeyStateService { get; set; } = default!;
 
+    [SupplyParameterFromForm]
     private ApiKeyDto ApiKeyDto { get; set; } = new();
     private string? rawKey;
 
@@ -50,18 +52,20 @@ public partial class ApiKeyCreateForm : ComponentBase
 
     private async Task HandleCreateApiKeySubmit()
     {
-        ApiKeyDto.ProjectId = ProjectId;
-        var result = await ApiKeyService.CreateApiKeyAsync(ApiKeyDto);
+        var toCreate = ApiKeyDto.Adapt<ApiKeyDto>();
+        var result = await ApiKeyService.CreateApiKeyAsync(toCreate);
         if (result.IsSuccess)
         {
             rawKey = result.Value.Item1;
-            StatusIndicator?.Show("Successfully created API key.", StatusIndicator.StatusSeverity.Success);
+            StatusIndicator?.Show("Successfully created API key.", 
+                StatusIndicator.StatusSeverity.Success);
             ApiKeyStateService.NotifyCreated(result.Value.Item2);
             await OnSuccess.InvokeAsync();
         }
         else
         {
-            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", StatusIndicator.StatusSeverity.Error);
+            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
+                StatusIndicator.StatusSeverity.Error);
         }
         StateHasChanged();
     }

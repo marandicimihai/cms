@@ -33,7 +33,7 @@ public class ApiKeySchemeHandler(
                 .FirstOrDefaultAsync(k => k.HashedKey == hash);
         });
         
-        if (hashedKey is null)
+        if (hashedKey is null || !hashedKey.IsActive)
             return AuthenticateResult.Fail("Invalid api key.");
         
         var user = await dbHelper.ExecuteAsync(async _ => await userManager.FindByIdAsync(hashedKey.Project.OwnerId));

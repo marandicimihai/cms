@@ -9,29 +9,21 @@
         </TableRow>
     </TableHead>
     <TableBody>
-        @if (ApiKeys.Any() == true)
+        @if (ApiKeys.Any())
         {
-            @foreach (var key in ApiKeys)
+            foreach (var key in ApiKeys)
             {
                 <TableRow>
                     <TableData Class="font-mono text-xs whitespace-nowrap">@key.Id</TableData>
                     <TableData Class="truncate max-w-[240px]">@key.Name</TableData>
                     <TableData Class="whitespace-nowrap">@key.CreatedAt.ToString("g")</TableData>
                     <TableData>
-                        @if (key.IsActive)
-                        {
-                            <span class="text-emerald-700">Active</span>
-                        }
-                        else
-                        {
-                            <span class="text-rose-600">Revoked</span>
-                        }
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" checked="@key.IsActive" @onchange="e => OnToggleKeyState(key, e.Value)" />
+                            <div class="size-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-400 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600 peer-checked:border-emerald-500 peer:bg-rose-600 peer:border-rose-500 peer-not-checked:bg-rose-600 peer-not-checked:border-rose-500"></div>
+                        </label>
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">
-                        <button class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-xs px-2.5 py-1.5" aria-label="Edit API Key" @onclick="() => OnEditKey(key)">
-                            <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
-                            Edit
-                        </button>
                         <button class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5" aria-label="Delete API Key" @onclick="() => OnDeleteKey(key)">
                             <span class="material-symbols-outlined icons-default text-base mr-1">delete</span>
                             Delete

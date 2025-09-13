@@ -1,4 +1,4 @@
-@page "/{projectId:guid}/manageApiKeys"
+@page "/{projectId:guid}/manageapikeys"
 @rendermode InteractiveServer
 
 @attribute [Authorize]
@@ -23,7 +23,7 @@
 
         <ApiKeyCreateForm @ref="createForm" ProjectId="@ProjectId.ToString()" StatusIndicator="statusIndicator" Visible="@createFormVisible" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" />
 
-        <ApiKeyViewingTable ApiKeys="ProjectDto.ApiKeys" />
+        <ApiKeyTable ApiKeys="ProjectDto.ApiKeys" StatusIndicator="statusIndicator" />
     </Paper>
 }
 else
