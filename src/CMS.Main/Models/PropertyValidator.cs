@@ -33,11 +33,11 @@ public class PropertyValidator
     {
         switch (property.Type)
         {
-            // ! Value accepted if it is a string; empty string becomes null
+            // ! Value accepted if it is a string
             case SchemaPropertyType.Text:
                 if (value is string strValue)
                 {
-                    value = strValue is "" ? null : strValue;
+                    value = strValue;
                 }
                 else
                 {
@@ -157,9 +157,6 @@ public class PropertyValidator
     /// <returns>Success if valid; otherwise, an invalid result with validation errors.</returns>
     public static Result ValidateProperty(SchemaProperty property, ref object? value)
     {
-        // Normalize empty strings to null
-        value = value is "" ? null : value;
-
         // Don't validate null values for non-required fields
         if (property.IsRequired && value is not null)
         {

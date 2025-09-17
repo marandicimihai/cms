@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Ardalis.Result;
 using CMS.Main.Abstractions;
 using CMS.Main.DTOs.Entry;
@@ -11,8 +12,9 @@ public class CreateEntryRequest
 {
     [RouteParam]
     public string SchemaId { get; set; } = default!;
-    
+
     [FromBody]
+    [JsonConverter(typeof(Serialization.DictionaryStringJsonConverter))]
     public Dictionary<string, string?>? RawProperties { get; set; }
     
     internal sealed class CreateEntryRequestValidator : Validator<CreateEntryRequest>

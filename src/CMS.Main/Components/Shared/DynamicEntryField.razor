@@ -147,7 +147,7 @@
         if (!IsNull) 
         {
             // Treat field as if required if not required already
-            var value = Value;
+            var value = Value is "" ? null : Value;
 
             // Store previous IsRequired value and set to true
             var temp = SchemaProperty.IsRequired;

@@ -102,6 +102,14 @@ public class Entry : IDisposable
             validFields.Add(fieldName, fieldValue);
         }
 
+        foreach (var property in properties)
+        {
+            if (property.IsRequired && !seenFieldNames.Contains(property.Name))
+            {
+                validationErrors.Add(new ValidationError($"Property '{property.Name}' is required and must be provided."));
+            }
+        }
+
         if (validationErrors.Count == 0)
         {
             var json = JsonSerializer.Serialize(validFields);

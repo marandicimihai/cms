@@ -84,6 +84,13 @@ if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
         .PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
 }
 
+// Register the custom converter for server-side JSON binding (HTTP requests)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(opts =>
+{
+    opts.SerializerOptions.Converters.Add(new CMS.Main.Serialization.DictionaryStringJsonConverter());
+});
+
+// Also register for MVC/Controllers if used by any components
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
