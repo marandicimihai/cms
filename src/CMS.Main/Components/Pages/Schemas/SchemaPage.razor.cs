@@ -45,10 +45,7 @@ public partial class SchemaPage : ComponentBase
 
         hasAccess = true;
 
-        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
-        {
-            opt.IncludeProperties = true;
-        });
+        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
 
         if (result.IsSuccess)
         {

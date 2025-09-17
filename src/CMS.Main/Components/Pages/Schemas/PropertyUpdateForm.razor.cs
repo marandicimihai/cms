@@ -37,7 +37,7 @@ public partial class PropertyUpdateForm : ComponentBase
     public void SetModel(SchemaPropertyDto propertyDto)
     {
         PropertyDto = propertyDto;
-        EnumOptions = PropertyDto.Options is { Length: > 0 } ? string.Join(" ", PropertyDto.Options) : string.Empty;
+        EnumOptions = PropertyDto.Options is { Length: > 0 } ? string.Join(", ", PropertyDto.Options) : string.Empty;
     }
 
     private bool IsEnumOptionsValid =>
@@ -58,7 +58,7 @@ public partial class PropertyUpdateForm : ComponentBase
         {
             var options = string.IsNullOrWhiteSpace(EnumOptions)
                 ? []
-                : EnumOptions.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                : EnumOptions.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             if (options.Length == 0)
             {
                 return;

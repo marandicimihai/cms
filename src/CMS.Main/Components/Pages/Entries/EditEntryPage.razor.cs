@@ -35,13 +35,7 @@ public partial class EditEntryPage : ComponentBase
 
         hasAccess = true;
 
-        var result = await EntryService.GetEntryByIdAsync(
-            EntryId.ToString(),
-            opt =>
-            {
-                opt.IncludeSchema = true;
-                opt.SchemaGetOptions.IncludeProperties = true;
-            });
+        var result = await EntryService.GetEntryByIdAsync(EntryId.ToString());
 
         if (result.IsSuccess)
         {
@@ -54,7 +48,7 @@ public partial class EditEntryPage : ComponentBase
         }
     }
 
-    private async Task UpdateEntry(Dictionary<SchemaPropertyDto, object?> entry)
+    private async Task UpdateEntry(Dictionary<string, object?> entry)
     {
         if (Entry is null)
             return;
@@ -67,7 +61,7 @@ public partial class EditEntryPage : ComponentBase
         }
 
         Entry.Id = EntryId.ToString();
-        Entry.Properties = entry;
+        Entry.Fields = entry;
 
         var result = await EntryService.UpdateEntryAsync(Entry);
 

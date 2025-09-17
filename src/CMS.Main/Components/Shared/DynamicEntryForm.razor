@@ -32,7 +32,7 @@
     public List<object?>? InitialValues { get; set; }
     
     [Parameter] 
-    public EventCallback<Dictionary<SchemaPropertyDto, object?>> OnValidSubmit { get; set; }
+    public EventCallback<Dictionary<string, object?>> OnValidSubmit { get; set; }
     
     [Parameter] 
     public EventCallback OnCancel { get; set; }
@@ -69,14 +69,14 @@
         if (!isValid)
             return;
         
-        var propertiesAndValues = new Dictionary<SchemaPropertyDto, object?>();
+        var propertiesAndValues = new Dictionary<string, object?>();
         
         foreach (var field in Fields)
         {
             if (field is null) continue;
             
             var (property, value) = field.GetPropertyAndValue();
-            propertiesAndValues.Add(property, value);
+            propertiesAndValues.Add(property.Name, value);
         }
 
         if (OnValidSubmit.HasDelegate)

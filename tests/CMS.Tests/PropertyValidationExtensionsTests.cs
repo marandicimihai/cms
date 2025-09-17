@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Ardalis.Result;
 using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Models;
 using CMS.Main.Services;
 using Xunit;
 
@@ -25,7 +26,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Title", SchemaPropertyType.Text);
         object? val = "Hello";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal("Hello", val);
     }
@@ -35,7 +36,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Title", SchemaPropertyType.Text);
         object? val = 123;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
     }
@@ -45,7 +46,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Title", SchemaPropertyType.Text, required:true);
         object? val = null;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("required", result.ValidationErrors.First().ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
@@ -55,7 +56,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Count", SchemaPropertyType.Number);
         object? val = "   ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
     }
@@ -65,7 +66,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean);
         object? val = "TrUe";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal(true, val);
     }
@@ -78,7 +79,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean);
         object? val = input;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal(expected, val);
     }
@@ -88,7 +89,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean);
         object? val = "yes";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid boolean", result.ValidationErrors.First().ErrorMessage);
     }
@@ -98,7 +99,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean);
         object? val = "   ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
     }
@@ -108,7 +109,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
         object? val = "   ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
     }
 
@@ -117,7 +118,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
         object? val = new DateTime(2025,8,20,12,30,0, DateTimeKind.Utc);
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         var str = Assert.IsType<string>(val);
         Assert.EndsWith("Z", str);
@@ -128,7 +129,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
         object? val = new DateTime(2025,8,20,12,30,0, DateTimeKind.Local);
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("UTC", result.ValidationErrors.First().ErrorMessage);
     }
@@ -138,7 +139,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
         object? val = "2025-08-20T12:30:00Z";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         var str = Assert.IsType<string>(val);
         Assert.EndsWith("Z", str);
@@ -149,7 +150,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
         object? val = "   ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
     }
@@ -159,7 +160,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = "1.23";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal(1.23m, val);
     }
@@ -173,7 +174,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = input;
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal(expected, val);
     }
@@ -183,7 +184,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = "   ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
     }
@@ -193,7 +194,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Price", SchemaPropertyType.Number);
         object? val = "1.2.3";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid decimal", result.ValidationErrors.First().ErrorMessage);
     }
@@ -203,7 +204,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Color", SchemaPropertyType.Enum, false, new []{"Red","Green","Blue"});
         object? val = "green";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal("Green", val); // normalized to actual option casing
     }
@@ -213,7 +214,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Color", SchemaPropertyType.Enum, false, new []{"Red","Green","Blue"});
         object? val = "  RED  ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal("Red", val);
     }
@@ -223,7 +224,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Color", SchemaPropertyType.Enum, false, new []{"Red","Green"});
         object? val = "Blue";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid enum value", result.ValidationErrors.First().ErrorMessage);
     }
@@ -233,7 +234,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Count", SchemaPropertyType.Number, required:true);
         object? val = ""; // becomes null
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("required", result.ValidationErrors.First().ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
@@ -244,7 +245,7 @@ public class PropertyValidationExtensionsTests
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
         // Provide a local style with offset that will adjust to UTC but we want to ensure Kind is UTC after parse; offset makes Kind Utc so create a case without Z or offset but we expect Accept due to AssumeUniversal.
         object? val = "2025-08-20T12:30:00+02:00"; // This should parse and become UTC string
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess); // current logic accepts offset converting to UTC
         Assert.IsType<string>(val);
     }
@@ -254,7 +255,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
         object? val = "2025-08-20T12:30:00"; // unspecified kind, assumed universal
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess); // Due to AssumeUniversal flag
     }
 
@@ -263,7 +264,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
         object? val = "   ";
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
     }
 
@@ -272,7 +273,7 @@ public class PropertyValidationExtensionsTests
     {
         var prop = MakeProp("Title", SchemaPropertyType.Text, required:true);
         object? val = "   "; // Current implementation does not trim or nullify
-        var result = PropertyValidationExtensions.ValidateProperty(prop, ref val);
+        var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess); // Document current behavior
         Assert.Equal("   ", val);
     }

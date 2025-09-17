@@ -60,6 +60,7 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
         if (result.IsSuccess)
         {
             ApiKeys.Remove(key);
+            StateHasChanged();
             StatusIndicator?.Show("Successfully deleted API key.", 
                 StatusIndicator.StatusSeverity.Success);
         }

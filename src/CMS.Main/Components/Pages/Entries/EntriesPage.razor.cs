@@ -49,10 +49,7 @@ public partial class EntriesPage : ComponentBase
 
         hasAccess = true;
 
-        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
-        {
-            opt.IncludeProperties = true;
-        });
+        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
 
         if (result.IsSuccess)
         {
@@ -75,7 +72,7 @@ public partial class EntriesPage : ComponentBase
         }
     }
 
-    private async Task OnEntryCreateSubmit(Dictionary<SchemaPropertyDto, object?> entry)
+    private async Task OnEntryCreateSubmit(Dictionary<string, object?> entry)
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
@@ -87,7 +84,7 @@ public partial class EntriesPage : ComponentBase
         var dto = new EntryDto
         {
             SchemaId = SchemaId.ToString(),
-            Properties = entry
+            Fields = entry
         };
 
         var result = await EntryService.AddEntryAsync(dto);

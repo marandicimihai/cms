@@ -17,7 +17,7 @@
             @if (PropertyDto.Type == SchemaPropertyType.Enum)
             {
                 <div class="flex flex-col gap-2 md:col-span-1">
-                    <label class="text-xs uppercase tracking-wide text-slate-600">Options (space separated)</label>
+                    <label class="text-xs uppercase tracking-wide text-slate-600">Options (comma separated)</label>
                     <InputText @bind-Value="EnumOptions" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="Red, Green, Blue"/>
                     @if (!IsEnumOptionsValid)
                     {

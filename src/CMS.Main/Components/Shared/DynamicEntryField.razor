@@ -1,6 +1,7 @@
 @using System.Globalization
 @using Ardalis.Result
 @using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.Models
 
 <div class="flex flex-col gap-1">
     <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@SchemaProperty.Id">
@@ -31,7 +32,7 @@
                     break;
                 case SchemaPropertyType.Enum:
                     <select id="field-@SchemaProperty.Id" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(IsNull ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")" value="@BindConverter.FormatValue(Value)" @onchange="OnInputChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" disabled="@IsNull">
-                        <option value="">-- select --</option>
+                        <option value="--select--">-- select --</option>
                         @if (SchemaProperty.Options != null)
                         {
                             foreach (var opt in SchemaProperty.Options)
@@ -90,6 +91,7 @@
             {
                 SchemaPropertyType.Text => string.Empty,
                 SchemaPropertyType.Boolean => false,
+                SchemaPropertyType.Enum => "--select--",
                 _ => null
             };
             IsNull = false;
@@ -116,6 +118,7 @@
             {
                 SchemaPropertyType.Text => string.Empty,
                 SchemaPropertyType.Boolean => false,
+                SchemaPropertyType.Enum => "--select--",
                 _ => null
             };
             Validate();
@@ -168,7 +171,7 @@
         ValidationMessage = null;
 
         var value = Value;
-        var validationResult = PropertyValidationExtensions.ValidateProperty(SchemaProperty, ref value);
+        var validationResult = PropertyValidator.ValidateProperty(SchemaProperty, ref value);
         if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
         {
             ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
@@ -179,7 +182,9 @@
     {
         Value = SchemaProperty.Type switch
         {
+            SchemaPropertyType.Text => string.Empty,
             SchemaPropertyType.Boolean => false,
+            SchemaPropertyType.Enum => "--select--",
             _ => null
         };
         ValidationMessage = null;
@@ -197,6 +202,8 @@
 
     public bool IsValid()
     {
+        if (IsNull) return true;
+        
         Validate();
         return !HasError;
     }

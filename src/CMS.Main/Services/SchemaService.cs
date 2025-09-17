@@ -23,17 +23,11 @@ public class SchemaService(
         {
             var schema = await dbHelper.ExecuteAsync(async dbContext =>
             {
-                var query = dbContext.Schemas.AsQueryable();
-
-                if (options.IncludeProperties)
-                {
-                    query = query.Include(s => s.Properties);
-                }
-
-                if (options.IncludeProject)
-                {
-                    query = query.Include(s => s.Project);
-                }
+                var query = dbContext.Schemas
+                    .AsNoTracking()
+                    .Include(s => s.Properties)
+                    .Include(s => s.Project)
+                    .AsQueryable();
 
                 return await query.FirstOrDefaultAsync(s => s.Id == schemaId);
             });
@@ -42,7 +36,6 @@ public class SchemaService(
                 return Result.NotFound();
 
             var dto = schema.Adapt<SchemaDto>();
-            dto.Properties = options.IncludeProperties ? dto.Properties : [];
 
             return Result.Success(dto);
         }

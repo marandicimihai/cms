@@ -90,9 +90,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     private object? GetEntryPropertyValue(EntryDto entry, string propertyName)
     {
-        foreach (var kv in entry.Properties)
+        foreach (var kv in entry.Fields)
         {
-            if (kv.Key.Name == propertyName)
+            if (kv.Key == propertyName)
                 return kv.Value;
         }
         return null;

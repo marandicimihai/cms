@@ -12,8 +12,8 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
-using System.Runtime.InteropServices;
 using CMS.Main.Auth;
+using NSwag;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -25,7 +25,23 @@ IConfiguration config = builder.Configuration;
 
 builder.Services
     .AddFastEndpoints()
-    .SwaggerDocument();
+    .SwaggerDocument(opt =>
+    {
+        opt.EnableJWTBearerAuth = false;
+        opt.DocumentSettings = s =>
+        {
+            s.DocumentName = "Initial Release";
+            s.Title = "CMS API";
+            s.Version = "v0";
+            s.AddAuth(AuthConstants.ApiKeyScheme, new()
+            {
+                Name = "ApiKey",
+                In = OpenApiSecurityApiKeyLocation.Header,
+                Scheme = AuthConstants.ApiKeyScheme,
+                Type = OpenApiSecuritySchemeType.ApiKey
+            });
+        };
+    });
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -91,7 +107,10 @@ app.MapRazorComponents<App>()
 
 app.UseAuthentication()
     .UseAuthorization()
-    .UseFastEndpoints()
+    .UseFastEndpoints(cfg =>
+    {
+        cfg.Versioning.Prefix = "v";
+    })
     .UseSwaggerGen();
 
 app.MapAdditionalIdentityEndpoints();

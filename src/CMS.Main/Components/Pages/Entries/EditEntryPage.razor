@@ -10,7 +10,7 @@
         <h2 class="text-sm font-medium text-slate-900 mb-3">Update entry</h2>
         @if (Entry is not null)
         {
-            <DynamicEntryForm Properties="Entry.Schema.Properties" InitialValues="Entry.Properties.Values.ToList()" OnValidSubmit="UpdateEntry" />
+            <DynamicEntryForm Properties="Entry.Schema.Properties" InitialValues="Entry.Fields.Values.ToList()" OnValidSubmit="UpdateEntry" />
         }
     </Paper>
 }

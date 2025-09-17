@@ -4,6 +4,7 @@ using CMS.Main.Abstractions;
 using CMS.Main.Data;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Pagination;
+using CMS.Main.DTOs.Schema;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
 using Mapster;
@@ -34,6 +35,7 @@ public class EntryService(
                 await dbContext.Schemas
                     .AsNoTracking()
                     .Include(s => s.Properties)
+                    .Include(s => s.Project)
                     .FirstOrDefaultAsync(s => s.Id == schemaId));
             
             if (schema is null) 
@@ -41,21 +43,12 @@ public class EntryService(
 
             var (entries, paginationMetadata) = await dbHelper.ExecuteAsync(async dbContext =>
             {
-                var query = dbContext.Entries.AsQueryable();
-
-                if (options.IncludeSchema)
-                {
-                    if (options.SchemaGetOptions.IncludeProperties)
-                        query = query.Include(e => e.Schema).ThenInclude(s => s.Properties);
-
-                    if (options.SchemaGetOptions.IncludeProject)
-                        query = query.Include(e => e.Schema).ThenInclude(s => s.Project);
-                }
-
-                query = query
+                var query = dbContext.Entries
                     .AsNoTracking()
-                    .Where(e => e.SchemaId == schemaId);
-                
+                    .Where(e => e.SchemaId == schemaId)
+                    .AsQueryable();
+
+                // Sort the entries
                 switch (options.SortingOption)
                 {
                     case EntrySortingOption.CreatedAt:
@@ -70,11 +63,13 @@ public class EntryService(
                         break;
                 }
                     
+                // Take relevant entries
                 var entries = await query
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
                     .Take(cappedPageSize)
                     .ToListAsync();
 
+                // Construct pagination metadata
                 var paginationMetadata = new PaginationMetadata(
                     await dbContext.Entries.CountAsync(e => e.SchemaId == schemaId),
                     cappedPageNumber,
@@ -85,10 +80,12 @@ public class EntryService(
                 return (entries, paginationMetadata);
             });
 
+            // Map entries to DTOs
             var dtos = entries.Select(e =>
             {
                 var dto = e.Adapt<EntryDto>();
-                dto.Properties = JsonToDictionary(e.Data, schema);
+                dto.Fields = e.GetFields(schema.Properties);
+                dto.Schema = schema.Adapt<SchemaDto>();
                 return dto;
             }).ToList();
             
@@ -111,27 +108,19 @@ public class EntryService(
         try
         {
             var entry = await dbHelper.ExecuteAsync(async dbContext =>
-            {
-                var query = dbContext.Entries.AsQueryable();
-
-                if (options.IncludeSchema)
-                {
-                    if (options.SchemaGetOptions.IncludeProperties)
-                        query = query.Include(e => e.Schema).ThenInclude(s => s.Properties);
-
-                    if (options.SchemaGetOptions.IncludeProject)
-                        query = query.Include(e => e.Schema).ThenInclude(s => s.Project);
-                }
-                
-                return await query.AsNoTracking()
-                    .FirstOrDefaultAsync(e => e.Id == entryId);
-            });
+                await dbContext.Entries
+                    .AsNoTracking()
+                    .Include(e => e.Schema)
+                        .ThenInclude(s => s.Properties)
+                    .Include(e => e.Schema)
+                        .ThenInclude(s => s.Project)
+                    .FirstOrDefaultAsync(e => e.Id == entryId));
 
             if (entry is null)
                 return Result.NotFound();
             
             var dto = entry.Adapt<EntryDto>();
-            dto.Properties = JsonToDictionary(entry.Data, entry.Schema);
+            dto.Fields = entry.GetFields(entry.Schema.Properties);
             
             return Result.Success(dto);
         }
@@ -140,34 +129,6 @@ public class EntryService(
             logger.LogError(ex, "Error getting entry {entryId}.", entryId);
             return Result.Error($"Error getting entry {entryId}.");
         }
-    }
-
-    private Dictionary<SchemaPropertyDto, object?> JsonToDictionary(JsonDocument data, Schema schema)
-    {
-        var adaptedProperties = schema.Properties.Adapt<List<SchemaPropertyDto>>();
-        var dictionary = new Dictionary<SchemaPropertyDto, object?>();
-        
-        foreach (var property in adaptedProperties)
-        {
-            if (data.RootElement.TryGetProperty(property.Name, out var value))
-            {
-                dictionary[property] = value.ValueKind switch
-                {
-                    JsonValueKind.Null => null,
-                    JsonValueKind.String => value.GetString(),
-                    JsonValueKind.False => false,
-                    JsonValueKind.True => true,
-                    JsonValueKind.Number => value.TryGetInt32(out var intValue) ? intValue : value.GetDecimal(),
-                    _ => null
-                };
-            }
-            else
-            {
-                dictionary[property] = null;
-            }
-        }
-
-        return dictionary;
     }
 
     public async Task<Result<EntryDto>> AddEntryAsync(
@@ -185,42 +146,12 @@ public class EntryService(
                 return Result.NotFound();
             
             var entry = dto.Adapt<Entry>();
+            var setResult = entry.SetFields(schema.Properties, dto.Fields);
 
-            var dictStringObject = new Dictionary<string, object?>();
-            var dictSchemaPropertyObject = new Dictionary<SchemaPropertyDto, object?>();
-            
-            var validationErrors = new List<ValidationError>();
-
-            foreach (var property in dto.Properties)
+            if (setResult.IsInvalid())
             {
-                var name = property.Key.Name;
-
-                // If the property does not exist in the schema, skip it
-                var schemaProp = schema.Properties.FirstOrDefault(p => p.Name == name);
-                if (schemaProp == null)
-                {
-                    validationErrors.Add(new ValidationError($"Property {name} does not exist in schema."));
-                    continue;
-                }
-
-                var finalValue = property.Value;
-                var validationResult = PropertyValidationExtensions.ValidateProperty(property.Key, ref finalValue);
-                if (validationResult.IsInvalid())
-                {
-                    validationErrors.AddRange(validationResult.ValidationErrors);
-                    continue;
-                }
-
-                dictStringObject.Add(name, finalValue);
-                dictSchemaPropertyObject.Add(property.Key, finalValue);
+                return Result.Invalid(setResult.ValidationErrors);
             }
-
-            if (validationErrors.Count > 0)
-            {
-                return Result.Invalid(validationErrors);
-            }
-
-            entry.Data = JsonDocument.Parse(JsonSerializer.Serialize(dictStringObject));
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -229,7 +160,7 @@ public class EntryService(
             });
 
             var adaptedEntry = entry.Adapt<EntryDto>();
-            adaptedEntry.Properties = dictSchemaPropertyObject;
+            adaptedEntry.Fields = setResult.Value;
 
             return Result.Success(adaptedEntry);
         }
@@ -253,39 +184,22 @@ public class EntryService(
             if (entry is null)
                 return Result.NotFound();
             
-            var dictStringObject = new Dictionary<string, object?>();
-            
-            var validationErrors = new List<ValidationError>();
-
-            foreach (var property in dto.Properties)
+            // Get current fields and update with new values
+            var fields = entry.GetFields(entry.Schema.Properties);
+            foreach (var field in fields)
             {
-                var name = property.Key.Name;
-
-                // If the property does not exist in the schema, skip it
-                var schemaProp = entry.Schema.Properties.FirstOrDefault(p => p.Name == name);
-                if (schemaProp == null)
+                if (dto.Fields.TryGetValue(field.Key, out object? value))
                 {
-                    validationErrors.Add(new ValidationError($"Property {name} does not exist in schema."));
-                    continue;
+                    fields[field.Key] = value;
                 }
-
-                var finalValue = property.Value;
-                var validationResult = PropertyValidationExtensions.ValidateProperty(property.Key, ref finalValue);
-                if (validationResult.IsInvalid())
-                {
-                    validationErrors.AddRange(validationResult.ValidationErrors);
-                    continue;
-                }
-
-                dictStringObject.Add(name, finalValue);
             }
 
-            if (validationErrors.Count > 0)
+            var setResult = entry.SetFields(entry.Schema.Properties, fields);
+
+            if (setResult.IsInvalid())
             {
-                return Result.Invalid(validationErrors);
+                return Result.Invalid(setResult.ValidationErrors);
             }
-            
-            entry.Data = JsonDocument.Parse(JsonSerializer.Serialize(dictStringObject));
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
