@@ -32,13 +32,14 @@ public class PropertyValidationExtensionsTests
     }
 
     [Fact]
-    public void Text_NonString_Becomes_Null_NotRequired()
+    public void Text_NonString_Unchanged_When_Optional()
     {
         var prop = MakeProp("Title", SchemaPropertyType.Text);
         object? val = 123;
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
-        Assert.Null(val);
+        // Optional fields are not type-cast; value remains unchanged
+        Assert.Equal(123, val);
     }
 
     [Fact]
@@ -55,7 +56,7 @@ public class PropertyValidationExtensionsTests
     public void Integer_Empty_String_Becomes_Null()
     {
         var prop = MakeProp("Count", SchemaPropertyType.Number);
-        object? val = "   ";
+        object? val = ""; // only exact empty string becomes null
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
@@ -64,7 +65,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Boolean_Accepts_True_String()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean);
+        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
         object? val = "TrUe";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -77,7 +78,7 @@ public class PropertyValidationExtensionsTests
     [InlineData("FaLsE", false)]
     public void Boolean_Varied_Casing_Parses(string input, bool expected)
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean);
+        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
         object? val = input;
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -87,7 +88,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Boolean_Invalid_String_Fails()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean);
+        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
         object? val = "yes";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
@@ -98,7 +99,7 @@ public class PropertyValidationExtensionsTests
     public void Boolean_Empty_String_Becomes_Null()
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean);
-        object? val = "   ";
+        object? val = ""; // only exact empty string becomes null
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
@@ -116,7 +117,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void DateTime_Utc_DateTime_Serializes()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
+        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
         object? val = new DateTime(2025,8,20,12,30,0, DateTimeKind.Utc);
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -127,7 +128,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void DateTime_Local_DateTime_Fails()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
+        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
         object? val = new DateTime(2025,8,20,12,30,0, DateTimeKind.Local);
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
@@ -137,7 +138,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void DateTime_Utc_String_Parses()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
+        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
         object? val = "2025-08-20T12:30:00Z";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -149,7 +150,7 @@ public class PropertyValidationExtensionsTests
     public void DateTime_Blank_String_Becomes_Null()
     {
         var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
-        object? val = "   ";
+        object? val = ""; // only exact empty string becomes null
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
@@ -158,7 +159,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Decimal_String_Parses()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number);
+        var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
         object? val = "1.23";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -172,7 +173,7 @@ public class PropertyValidationExtensionsTests
     [InlineData("  .5  ", 0.5)]
     public void Decimal_Fraction_Forms_Parse(string input, decimal expected)
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number);
+        var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
         object? val = input;
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -183,7 +184,7 @@ public class PropertyValidationExtensionsTests
     public void Decimal_Empty_String_To_Null()
     {
         var prop = MakeProp("Price", SchemaPropertyType.Number);
-        object? val = "   ";
+        object? val = ""; // only exact empty string becomes null
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Null(val);
@@ -192,7 +193,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Decimal_Invalid_String_Fails()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number);
+        var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
         object? val = "1.2.3";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
@@ -202,7 +203,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Enum_Valid_Case_Insensitive()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, false, new []{"Red","Green","Blue"});
+        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new []{"Red","Green","Blue"});
         object? val = "green";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -212,7 +213,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Enum_Whitespace_Case_Insensitive_Match()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, false, new []{"Red","Green","Blue"});
+        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new []{"Red","Green","Blue"});
         object? val = "  RED  ";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
@@ -222,7 +223,7 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Enum_Invalid_Value_Fails()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, false, new []{"Red","Green"});
+        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new []{"Red","Green"});
         object? val = "Blue";
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
