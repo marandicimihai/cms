@@ -201,6 +201,8 @@ public class EntryService(
                 return Result.Invalid(setResult.ValidationErrors);
             }
 
+            entry.UpdatedAt = DateTime.UtcNow;
+
             await dbHelper.ExecuteAsync(async dbContext =>
             {
                 await dbContext.SaveChangesAsync();

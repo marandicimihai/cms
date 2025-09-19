@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Ardalis.Result;
 using CMS.Main.Abstractions;
 using CMS.Main.Auth;
@@ -9,23 +10,23 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Main.Endpoints.Entries;
 
-public class CreateEntryRequest
+public class UpdateEntryRequest
 {
     [RouteParam]
-    public string SchemaId { get; set; } = default!;
+    public string EntryId { get; set; } = default!;
 
     [FromBody]
     [JsonConverter(typeof(Serialization.DictionaryStringJsonConverter))]
     public Dictionary<string, string?>? Fields { get; set; }
 
-    internal sealed class CreateEntryRequestValidator : Validator<CreateEntryRequest>
+    internal sealed class UpdateEntryRequestValidator : Validator<UpdateEntryRequest>
     {
-        public CreateEntryRequestValidator()
+        public UpdateEntryRequestValidator()
         {
-            RuleFor(x => x.SchemaId)
+            RuleFor(x => x.EntryId)
                 .NotEmpty()
                 .Must(x => Guid.TryParse(x, out _))
-                .WithMessage("Property 'SchemaId' must be a valid GUID.");
+                .WithMessage("Property 'EntryId' must be a valid GUID.");
 
             RuleFor(x => x.Fields)
                 .NotNull()
@@ -34,52 +35,36 @@ public class CreateEntryRequest
     }
 }
 
-public class CreateEntryResponse
-{
-    [FromBody]
-    public EntryDto Entry { get; set; } = default!;
-}
-
-public class CreateEntry(
+public class UpdateEntry(
     IAuthorizationService authService,
     IEntryService entryService
-) : Endpoint<CreateEntryRequest, CreateEntryResponse>
+) : Endpoint<UpdateEntryRequest>
 {
     public override void Configure()
     {
-        Post("{schemaId}/entries");
+        Put("entry/{entryId}");
         Group<EntriesGroup>();
-        Description(b => b
-            .Produces<CreateEntryResponse>(201));
     }
 
-    public override async Task HandleAsync(CreateEntryRequest req, CancellationToken ct)
+    public override async Task HandleAsync(UpdateEntryRequest req, CancellationToken ct)
     {
-        var authResult = await authService.AuthorizeAsync(User, req.SchemaId, AuthConstants.CanEditSchema);
+        var authResult = await authService.AuthorizeAsync(User, req.EntryId, AuthConstants.CanEditEntry);
         if (!authResult.Succeeded)
         {
             await Send.NotFoundAsync(ct);
             return;
         }
 
-        var creationDto = new EntryDto
+        var dto = new EntryDto
         {
-            SchemaId = req.SchemaId,
+            Id = req.EntryId,
             Fields = req.Fields
                 ?.ToDictionary(kvp => kvp.Key, object? (kvp) => kvp.Value)
                 ?? []
         };
 
-        var result = await entryService.AddEntryAsync(creationDto);
-        if (result.IsSuccess)
-        {
-            Response.Entry = result.Value!;
-            await Send.CreatedAtAsync<GetEntryById>(new
-            {
-                entryId = result.Value!.Id
-            }, cancellation: ct);
-        }
-        else if (result.IsNotFound())
+        var result = await entryService.UpdateEntryAsync(dto);
+        if (result.IsNotFound())
         {
             await Send.NotFoundAsync(ct);
         }
@@ -99,7 +84,7 @@ public class CreateEntry(
             }
             ThrowIfAnyErrors();
         }
-        else
+        else if (!result.IsSuccess)
         {
             ThrowError("There was an error.");
         }

@@ -85,6 +85,11 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     {
         // Prepend new entries; keep newest-first order consistent with sort
         Entries.InsertRange(0, created);
+        // Keep pagination total in sync when new entries are created elsewhere
+        if (created?.Count > 0)
+        {
+            totalCount = Math.Max(0, totalCount + created.Count);
+        }
         StateHasChanged();
     }
     
@@ -163,7 +168,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         {
             Entries.Remove(entry);
             // Keep pagination metadata in sync with user-visible list
-            if (totalCount > 0) totalCount--;
+            totalCount = Math.Max(0, totalCount - 1);
             statusIndicator?.Show("Successfully deleted entry.", 
                 StatusIndicator.StatusSeverity.Success);
         }
@@ -284,15 +289,24 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         if (!isConfirmed)
             return;
 
+        var deletedCount = 0;
         foreach (var entry in SelectedEntries.ToList())
         {
             var result = await EntryService.DeleteEntryAsync(entry.Id);
             if (result.IsSuccess)
             {
                 Entries.RemoveAll(e => e.Id == entry.Id);
+                deletedCount++;
             }
             // Optionally, show error for failed deletes
         }
+
+        // Decrease totalCount by the number of successfully deleted entries
+        if (deletedCount > 0)
+        {
+            totalCount = Math.Max(0, totalCount - deletedCount);
+        }
+
         SelectedEntries.Clear();
         StateHasChanged();
     }

@@ -54,7 +54,7 @@ public class GetEntries(
 {
     public override void Configure()
     {
-        Get("/");
+        Get("{schemaId}/entries");
         Group<EntriesGroup>();
     }
 

@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using CMS.Main.Auth.ApiKeyScheme;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -9,16 +10,16 @@ public static class AuthConfiguration
     public static void ConfigureAuth(this IServiceCollection services)
     {
         services.AddAuthorizationBuilder()
-            .AddPolicy("ProjectPolicies.CanEditProject", policy =>
+            .AddPolicy(AuthConstants.CanEditProject, policy =>
                 policy.Requirements.Add(new CanEditProjectRequirement()))
-            .AddPolicy("SchemaPolicies.CanEditSchema", policy =>
+            .AddPolicy(AuthConstants.CanEditSchema, policy =>
                 policy.Requirements.Add(new CanEditSchemaRequirement()))
-            .AddPolicy("EntryPolicies.CanEditEntry", policy =>
+            .AddPolicy(AuthConstants.CanEditEntry, policy =>
                 policy.Requirements.Add(new CanEditEntryRequirement()));
         services.AddScoped<IAuthorizationHandler, CanEditProjectHandler>();
         services.AddScoped<IAuthorizationHandler, CanEditSchemaHandler>();
         services.AddScoped<IAuthorizationHandler, CanEditEntryHandler>();
-        
+
         services.AddAuthentication(options =>
             {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;

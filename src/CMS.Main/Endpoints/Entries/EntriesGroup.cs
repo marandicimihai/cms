@@ -6,6 +6,6 @@ public sealed class EntriesGroup : SubGroup<ApiGroup>
 {
     public EntriesGroup()
     {
-        Configure("{schemaId}/entries", _ => { });
+        Configure("", _ => { });
     }
 }
