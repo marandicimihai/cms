@@ -30,7 +30,7 @@
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [9004],
+	"forwardPorts": [9004]
 	// "portsAttributes": {
 	//		"5001": {
 	//			"protocol": "https"
@@ -38,8 +38,6 @@
 	// }
 
     // Use 'postCreateCommand' to run commands after the container is created.
-	// * Start up tailwind in watch mode
-    "postCreateCommand": "tailwindcss -i src/CMS.Main/wwwroot/css/app.css -o src/CMS.Main/wwwroot/css/tailwind.css",
     // "portsAttributes": {
     //     "5146": {
     //         "label": "5147"

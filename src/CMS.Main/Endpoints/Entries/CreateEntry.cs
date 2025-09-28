@@ -12,7 +12,7 @@ namespace CMS.Main.Endpoints.Entries;
 public class CreateEntryRequest
 {
     [RouteParam]
-    public string SchemaId { get; set; } = default!;
+    public string SchemaId { get; set; } = string.Empty;
 
     [FromBody]
     [JsonConverter(typeof(Serialization.DictionaryStringJsonConverter))]

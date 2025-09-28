@@ -1,21 +1,20 @@
 using Ardalis.Result;
 using CMS.Main.Abstractions;
 using CMS.Main.Auth;
-using CMS.Main.DTOs.Entry;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Main.Endpoints.Entries;
 
-public class GetEntryByIdRequest
+public class DeleteEntryRequest
 {
     [RouteParam]
     public string EntryId { get; set; } = string.Empty;
 
-    internal sealed class GetEntryByIdRequestValidator : Validator<GetEntryByIdRequest>
+    internal sealed class DeleteEntryRequestValidator : Validator<DeleteEntryRequest>
     {
-        public GetEntryByIdRequestValidator()
+        public DeleteEntryRequestValidator()
         {
             RuleFor(x => x.EntryId)
                 .NotEmpty()
@@ -25,18 +24,18 @@ public class GetEntryByIdRequest
     }
 }
 
-public class GetEntryById(
+public class DeleteEntry(
     IAuthorizationService authService,
     IEntryService entryService
-) : Endpoint<GetEntryByIdRequest, EntryDto>
+) : Endpoint<DeleteEntryRequest>
 {
     public override void Configure()
     {
-        Get("entry/{entryId}");
+        Delete("entry/{entryId}");
         Group<EntriesGroup>();
     }
 
-    public override async Task HandleAsync(GetEntryByIdRequest req, CancellationToken ct)
+    public override async Task HandleAsync(DeleteEntryRequest req, CancellationToken ct)
     {
         var authResult = await authService.AuthorizeAsync(User, req.EntryId, AuthConstants.CanEditEntry);
         if (!authResult.Succeeded)
@@ -45,16 +44,20 @@ public class GetEntryById(
             return;
         }
 
-        var result = await entryService.GetEntryByIdAsync(req.EntryId);
-        if (result.IsSuccess)
-        {
-            Response = result.Value;
-        }
-        else if (result.IsNotFound())
+        var result = await entryService.DeleteEntryAsync(req.EntryId);
+        if (result.IsNotFound())
         {
             await Send.NotFoundAsync(ct);
         }
-        else
+        else if (result.Errors.Any())
+        {
+            foreach (var error in result.Errors)
+            {
+                AddError(error);
+            }
+            ThrowIfAnyErrors();
+        }
+        else if (!result.IsSuccess)
         {
             ThrowError("There was an error.");
         }

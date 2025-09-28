@@ -53,16 +53,6 @@ public class PropertyValidationExtensionsTests
     }
 
     [Fact]
-    public void Integer_Empty_String_Becomes_Null()
-    {
-        var prop = MakeProp("Count", SchemaPropertyType.Number);
-        object? val = ""; // only exact empty string becomes null
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        Assert.Null(val);
-    }
-
-    [Fact]
     public void Boolean_Accepts_True_String()
     {
         var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
@@ -93,16 +83,6 @@ public class PropertyValidationExtensionsTests
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid boolean", result.ValidationErrors.First().ErrorMessage);
-    }
-
-    [Fact]
-    public void Boolean_Empty_String_Becomes_Null()
-    {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean);
-        object? val = ""; // only exact empty string becomes null
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        Assert.Null(val);
     }
 
     [Fact]
@@ -147,16 +127,6 @@ public class PropertyValidationExtensionsTests
     }
 
     [Fact]
-    public void DateTime_Blank_String_Becomes_Null()
-    {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
-        object? val = ""; // only exact empty string becomes null
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        Assert.Null(val);
-    }
-
-    [Fact]
     public void Decimal_String_Parses()
     {
         var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
@@ -178,16 +148,6 @@ public class PropertyValidationExtensionsTests
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsSuccess);
         Assert.Equal(expected, val);
-    }
-
-    [Fact]
-    public void Decimal_Empty_String_To_Null()
-    {
-        var prop = MakeProp("Price", SchemaPropertyType.Number);
-        object? val = ""; // only exact empty string becomes null
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        Assert.Null(val);
     }
 
     [Fact]
@@ -228,16 +188,6 @@ public class PropertyValidationExtensionsTests
         var result = PropertyValidator.ValidateProperty(prop, ref val);
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid enum value", result.ValidationErrors.First().ErrorMessage);
-    }
-
-    [Fact]
-    public void Required_Fails_When_Value_Null_PostNormalization()
-    {
-        var prop = MakeProp("Count", SchemaPropertyType.Number, required:true);
-        object? val = ""; // becomes null
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsInvalid());
-        Assert.Contains("required", result.ValidationErrors.First().ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

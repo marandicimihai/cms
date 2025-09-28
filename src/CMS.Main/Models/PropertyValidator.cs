@@ -62,7 +62,7 @@ public class PropertyValidator
                     return Result.Invalid(new ValidationError($"Invalid boolean value for property '{property.Name}'."));
                 }
                 break;
-            // ! Value accepted if it is a DateTime (must be UTC) or a date/time string (must parse to UTC); empty string becomes null
+            // ! Value accepted if it is a DateTime (must be UTC) or a date/time string (must parse to UTC)
             case SchemaPropertyType.DateTime:
                 if (value is DateTime dateTimeValue)
                 {

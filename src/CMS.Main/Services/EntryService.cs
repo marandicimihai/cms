@@ -74,7 +74,7 @@ public class EntryService(
                     await dbContext.Entries.CountAsync(e => e.SchemaId == schemaId),
                     cappedPageNumber,
                     cappedPageSize,
-                    IProjectService.MaxPageSize
+                    IEntryService.MaxPageSize
                 );
                 
                 return (entries, paginationMetadata);

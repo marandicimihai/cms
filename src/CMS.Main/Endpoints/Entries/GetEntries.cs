@@ -11,7 +11,7 @@ namespace CMS.Main.Endpoints.Entries;
 public class GetEntriesRequest
 {
     [RouteParam]
-    public string SchemaId { get; set; } = default!;
+    public string SchemaId { get; set; } = string.Empty;
 
     [QueryParam]
     public int? PageNumber { get; set; }

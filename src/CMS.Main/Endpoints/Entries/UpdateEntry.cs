@@ -13,7 +13,7 @@ namespace CMS.Main.Endpoints.Entries;
 public class UpdateEntryRequest
 {
     [RouteParam]
-    public string EntryId { get; set; } = default!;
+    public string EntryId { get; set; } = string.Empty;
 
     [FromBody]
     [JsonConverter(typeof(Serialization.DictionaryStringJsonConverter))]
