@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Ardalis.Result;
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.Data;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Pagination;
@@ -20,9 +20,9 @@ public class EntryService(
     public async Task<Result<(List<EntryDto>, PaginationMetadata)>> GetEntriesForSchema(
         string schemaId, 
         PaginationParams? paginationParams = null,
-        Action<EntryGetOptions>? configureOptions = null)
+        Action<EntrySortingOptions>? configureOptions = null)
     {
-        var options = new EntryGetOptions();
+        var options = new EntrySortingOptions();
         configureOptions?.Invoke(options);
         
         paginationParams ??= new PaginationParams(1, 10);
@@ -49,17 +49,47 @@ public class EntryService(
                     .AsQueryable();
 
                 // Sort the entries
-                switch (options.SortingOption)
+                switch (options.PropertyName)
                 {
-                    case EntrySortingOption.CreatedAt:
+                    case "CreatedAt":
                         query = options.Descending
                             ? query.OrderByDescending(e => e.CreatedAt)
                             : query.OrderBy(e => e.CreatedAt);
                         break;
-                    case EntrySortingOption.UpdatedAt:
+                    case "UpdatedAt":
                         query = options.Descending
                             ? query.OrderByDescending(e => e.UpdatedAt)
                             : query.OrderBy(e => e.UpdatedAt);
+                        break;
+                    default:
+                        // Sort by custom property
+                        var property = schema.Properties.FirstOrDefault(p => p.Name == options.PropertyName);
+                        if (property is not null && (property.Type == SchemaPropertyType.Text || property.Type == SchemaPropertyType.Number || property.Type == SchemaPropertyType.DateTime))
+                        {
+                            if (property.Type == SchemaPropertyType.Number)
+                            {
+                                query = options.Descending
+                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDecimal())
+                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDecimal());
+                                break;
+                            }
+                            else if (property.Type == SchemaPropertyType.DateTime)
+                            {
+                                query = options.Descending
+                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDateTime())
+                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDateTime());
+                            }
+                            else if (property.Type == SchemaPropertyType.Text)
+                            {
+                                query = options.Descending
+                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.PropertyName).GetString())
+                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.PropertyName).GetString());
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException($"Cannot sort by property '{options.PropertyName}'. It does not exist or is of an unsupported type.");
+                        }
                         break;
                 }
                     
@@ -91,6 +121,10 @@ public class EntryService(
             
             return Result.Success((dtos, paginationMetadata));
         }
+        catch (ArgumentException argEx)
+        {
+            return Result.Invalid(new ValidationError(argEx.Message));
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error getting entries for schema {schemaId}.", schemaId);
@@ -100,9 +134,9 @@ public class EntryService(
 
     public async Task<Result<EntryDto>> GetEntryByIdAsync(
         string entryId,
-        Action<EntryGetOptions>? configureOptions = null)
+        Action<EntrySortingOptions>? configureOptions = null)
     {
-        var options = new EntryGetOptions();
+        var options = new EntrySortingOptions();
         configureOptions?.Invoke(options);
         
         try

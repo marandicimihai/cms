@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using CMS.Main.Auth;
 using NSwag;
 using Microsoft.AspNetCore.DataProtection;
+using CMS.Main.Abstractions.Entries;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;

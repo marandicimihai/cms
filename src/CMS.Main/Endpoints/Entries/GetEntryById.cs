@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.Auth;
 using CMS.Main.DTOs.Entry;
 using FastEndpoints;

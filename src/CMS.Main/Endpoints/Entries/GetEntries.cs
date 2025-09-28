@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Pagination;
 using FastEndpoints;
@@ -70,12 +70,7 @@ public class GetEntries(
         
         var result = await entryService.GetEntriesForSchema(
             req.SchemaId,
-            new(req.PageNumber ?? 1, req.PageSize ?? 10), // pagination with defaults
-            opt =>
-            {
-                opt.SortingOption = EntrySortingOption.CreatedAt;
-                opt.Descending = true;
-            });
+            new(req.PageNumber ?? 1, req.PageSize ?? 10));
         
         if (result.IsSuccess)
         {

@@ -1,4 +1,4 @@
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Pagination;
@@ -34,6 +34,31 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     private List<EntryDto> Entries { get; set; } = [];
     private List<EntryDto> SelectedEntries { get; set; } = [];
+
+    // Sorting options (backing fields call shared handler when updated)
+    private string sortByPropertyBacking = "CreatedAt";
+    private string SortByProperty
+    {
+        get => sortByPropertyBacking;
+        set
+        {
+            if (value == sortByPropertyBacking) return;
+            sortByPropertyBacking = value;
+            _ = InvokeAsync(OnSortChangedAsync);
+        }
+    }
+
+    private bool descendingBacking = false;
+    private bool Descending
+    {
+        get => descendingBacking;
+        set
+        {
+            if (value == descendingBacking) return;
+            descendingBacking = value;
+            _ = InvokeAsync(OnSortChangedAsync);
+        }
+    }
     
     private StatusIndicator? statusIndicator;
     
@@ -52,12 +77,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
-            new PaginationParams(1, pageSize),
-            opt =>
-            {
-                opt.SortingOption = EntrySortingOption.CreatedAt;
-                opt.Descending = true;
-            });
+            new PaginationParams(1, pageSize));
 
         if (result.IsSuccess)
         {
@@ -69,6 +89,12 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
+
+        // Default the selected property to the first available property name if not already set
+        if (SortByProperty == null && Properties != null && Properties.Count > 0)
+        {
+            SortByProperty = Properties[0].Name;
+        }
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -78,6 +104,31 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
             queuedStatusMessage = null;
             queuedStatusSeverity = null;
+        }
+    }
+
+    // Called whenever the sort property or direction changes
+    private async Task OnSortChangedAsync()
+    {
+        var result = await EntryService.GetEntriesForSchema(
+            SchemaId,
+            new PaginationParams(1, pageSize),
+            opt =>
+            {
+                opt.PropertyName = SortByProperty;
+                opt.Descending = Descending;
+            });
+
+        if (result.IsSuccess)
+        {
+            (Entries, var pagination) = result.Value;
+            StateHasChanged();
+            totalCount = pagination.TotalCount;
+        }
+        else
+        {
+            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
     }
     
@@ -192,12 +243,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             var nextPage = (Entries.Count / pageSize) + 1;
             var result = await EntryService.GetEntriesForSchema(
                 SchemaId,
-                new PaginationParams(nextPage, pageSize),
-                opt =>
-                {
-                    opt.SortingOption = EntrySortingOption.CreatedAt;
-                    opt.Descending = true;
-                });
+                new PaginationParams(nextPage, pageSize));
 
             if (result.IsSuccess)
             {

@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using CMS.Main.DTOs.Pagination;
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 
 namespace CMS.Tests;
 
