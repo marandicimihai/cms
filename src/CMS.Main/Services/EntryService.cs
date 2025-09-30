@@ -20,9 +20,9 @@ public class EntryService(
     public async Task<Result<(List<EntryDto>, PaginationMetadata)>> GetEntriesForSchema(
         string schemaId, 
         PaginationParams? paginationParams = null,
-        Action<EntrySortingOptions>? configureOptions = null)
+        Action<EntryGetOptions>? configureOptions = null)
     {
-        var options = new EntrySortingOptions();
+        var options = new EntryGetOptions();
         configureOptions?.Invoke(options);
         
         paginationParams ??= new PaginationParams(1, 10);
@@ -49,7 +49,7 @@ public class EntryService(
                     .AsQueryable();
 
                 // Sort the entries
-                switch (options.PropertyName)
+                switch (options.SortByPropertyName)
                 {
                     case "CreatedAt":
                         query = options.Descending
@@ -63,32 +63,32 @@ public class EntryService(
                         break;
                     default:
                         // Sort by custom property
-                        var property = schema.Properties.FirstOrDefault(p => p.Name == options.PropertyName);
+                        var property = schema.Properties.FirstOrDefault(p => p.Name == options.SortByPropertyName);
                         if (property is not null && (property.Type == SchemaPropertyType.Text || property.Type == SchemaPropertyType.Number || property.Type == SchemaPropertyType.DateTime))
                         {
                             if (property.Type == SchemaPropertyType.Number)
                             {
                                 query = options.Descending
-                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDecimal())
-                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDecimal());
+                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDecimal())
+                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDecimal());
                                 break;
                             }
                             else if (property.Type == SchemaPropertyType.DateTime)
                             {
                                 query = options.Descending
-                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDateTime())
-                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.PropertyName).GetDateTime());
+                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDateTime())
+                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDateTime());
                             }
                             else if (property.Type == SchemaPropertyType.Text)
                             {
                                 query = options.Descending
-                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.PropertyName).GetString())
-                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.PropertyName).GetString());
+                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetString())
+                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetString());
                             }
                         }
                         else
                         {
-                            throw new ArgumentException($"Cannot sort by property '{options.PropertyName}'. It does not exist or is of an unsupported type.");
+                            throw new ArgumentException($"Cannot sort by property '{options.SortByPropertyName}'. It does not exist or is of an unsupported type.");
                         }
                         break;
                 }
@@ -134,9 +134,9 @@ public class EntryService(
 
     public async Task<Result<EntryDto>> GetEntryByIdAsync(
         string entryId,
-        Action<EntrySortingOptions>? configureOptions = null)
+        Action<EntryGetOptions>? configureOptions = null)
     {
-        var options = new EntrySortingOptions();
+        var options = new EntryGetOptions();
         configureOptions?.Invoke(options);
         
         try

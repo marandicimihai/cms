@@ -34,33 +34,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     private List<EntryDto> Entries { get; set; } = [];
     private List<EntryDto> SelectedEntries { get; set; } = [];
-
-    // Sorting options (backing fields call shared handler when updated)
-    private string sortByPropertyBacking = "CreatedAt";
-    private string SortByProperty
-    {
-        get => sortByPropertyBacking;
-        set
-        {
-            if (value == sortByPropertyBacking) return;
-            sortByPropertyBacking = value;
-            _ = InvokeAsync(OnSortChangedAsync);
-        }
-    }
-
-    private bool descendingBacking = false;
-    private bool Descending
-    {
-        get => descendingBacking;
-        set
-        {
-            if (value == descendingBacking) return;
-            descendingBacking = value;
-            _ = InvokeAsync(OnSortChangedAsync);
-        }
-    }
     
     private StatusIndicator? statusIndicator;
+
+    private List<string> SortableProperties => Properties
+        .Where(p => p.Type == SchemaPropertyType.Text || p.Type == SchemaPropertyType.Number || p.Type == SchemaPropertyType.DateTime)
+        .Select(p => p.Name)
+        .Append("CreatedAt")
+        .Append("UpdatedAt")
+        .ToList();
     
     // Pagination state (mirrors sidebar pattern)
     private readonly int pageSize = 20;
@@ -89,12 +71,6 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
-
-        // Default the selected property to the first available property name if not already set
-        if (SortByProperty == null && Properties != null && Properties.Count > 0)
-        {
-            SortByProperty = Properties[0].Name;
-        }
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -108,15 +84,17 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     }
 
     // Called whenever the sort property or direction changes
-    private async Task OnSortChangedAsync()
+    private async Task OnSortChangedAsync((string, bool) sortingParams)
     {
+        var (sortByProperty, descending) = sortingParams;
+
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
             new PaginationParams(1, pageSize),
             opt =>
             {
-                opt.PropertyName = SortByProperty;
-                opt.Descending = Descending;
+                opt.SortByPropertyName = sortByProperty;
+                opt.Descending = descending;
             });
 
         if (result.IsSuccess)

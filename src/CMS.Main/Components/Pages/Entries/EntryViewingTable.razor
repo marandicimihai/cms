@@ -1,30 +1,13 @@
-@using CMS.Main.DTOs.SchemaProperty
 <StatusIndicator @ref="statusIndicator" />
+
+<SortAndFilterOptions 
+    OnSortChanged="OnSortChangedAsync"
+    SortableProperties="SortableProperties"
+    InitialSortByProperty="CreatedAt"
+    InitialDescending="true" />
 
 @if (Properties != null)
 {
-    <div class="mb-3">
-        <label class="text-xs uppercase tracking-wide block mb-1">Map property to string</label>
-        <select class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2"
-            @bind="SortByProperty"
-            aria-label="Sort by">
-            @foreach (var prop in Properties)
-            {
-                @if (prop.Type == SchemaPropertyType.Text || prop.Type == SchemaPropertyType.Number || prop.Type == SchemaPropertyType.DateTime)
-                {
-                    <option value="@prop.Name">@prop.Name</option>
-                }
-            }
-            <option value="CreatedAt">Created At</option>
-            <option value="UpdatedAt">Updated At</option>
-        </select>
-    </div>
-
-    <div class="mb-3 flex items-center gap-3">
-        <input id="descendingCheckbox" type="checkbox" class="rounded border-slate-300" @bind="Descending" />
-        <label for="descendingCheckbox" class="text-sm text-slate-700">Descending</label>
-    </div>
-
     <Table>
         <TableHead>
             <TableRow>

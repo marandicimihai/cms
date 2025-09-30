@@ -11,11 +11,11 @@ public interface IEntryService
     Task<Result<(List<EntryDto>, PaginationMetadata)>> GetEntriesForSchema(
         string schemaId,
         PaginationParams? paginationParams = null,
-        Action<EntrySortingOptions>? configureOptions = null);
+        Action<EntryGetOptions>? configureOptions = null);
     
     Task<Result<EntryDto>> GetEntryByIdAsync(
         string entryId,
-        Action<EntrySortingOptions>? configureOptions = null);
+        Action<EntryGetOptions>? configureOptions = null);
     
     Task<Result<EntryDto>> AddEntryAsync(
         EntryDto dto);

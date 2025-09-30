@@ -125,7 +125,11 @@ public class EntryServiceTests
         }
         await context.SaveChangesAsync();
 
-        var result = await entryService.GetEntriesForSchema(schema.Id, new PaginationParams(1, 2), opt => { opt.SortingOption = EntrySortingOption.CreatedAt; opt.Descending = true; });
+        var result = await entryService.GetEntriesForSchema(schema.Id, new PaginationParams(1, 2), opt =>
+        {
+            opt.SortByPropertyName = "CreatedAt";
+            opt.Descending = true;
+        });
 
         Assert.True(result.IsSuccess);
         var list = result.Value.Item1;
