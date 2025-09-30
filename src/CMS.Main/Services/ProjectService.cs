@@ -4,6 +4,7 @@ using CMS.Main.Data;
 using CMS.Main.DTOs.Pagination;
 using CMS.Main.DTOs.Project;
 using CMS.Main.Models;
+using CMS.Main.Models.MappingConfig;
 using CMS.Main.Services.State;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ public class ProjectService(
                 var query = dbContext.Projects
                     .Where(p => p.OwnerId == userId);
                 if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
+                if (options.IncludeApiKeys) query = query.Include(p => p.ApiKeys);
                 var projects = await query
                     .OrderByDescending(p => p.LastUpdated)
                     .Skip((cappedPageNumber - 1) * cappedPageSize)
@@ -78,6 +80,7 @@ public class ProjectService(
             {
                 var query = dbContext.Projects.AsQueryable();
                 if (options.IncludeSchemas) query = query.Include(p => p.Schemas);
+                if (options.IncludeApiKeys) query = query.Include(p => p.ApiKeys);
                 var project = await query.FirstOrDefaultAsync(p => p.Id == projectId);
                 return project;
             });
@@ -130,7 +133,7 @@ public class ProjectService(
             if (project is null)
                 return Result.NotFound();
 
-            dto.Adapt(project);
+            dto.Adapt(project, MapsterConfig.EditProjectConfig);
             project.LastUpdated = DateTime.UtcNow;
             await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
 

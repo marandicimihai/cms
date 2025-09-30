@@ -30,15 +30,18 @@ public partial class ProjectPage : ComponentBase
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
+    private bool hasAccess;
 
     protected override async Task OnInitializedAsync()
     {
         if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this project or it does not exist.";
+            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }
+
+        hasAccess = true;
 
         var result =
             await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeSchemas = true; });

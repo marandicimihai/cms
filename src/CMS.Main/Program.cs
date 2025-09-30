@@ -11,8 +11,10 @@ using CMS.Main.Services.State;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Identity;
+using CMS.Main.Auth;
+using NSwag;
 using Microsoft.AspNetCore.DataProtection;
-using System.Runtime.InteropServices;
+using CMS.Main.Abstractions.Entries;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -24,7 +26,23 @@ IConfiguration config = builder.Configuration;
 
 builder.Services
     .AddFastEndpoints()
-    .SwaggerDocument();
+    .SwaggerDocument(opt =>
+    {
+        opt.EnableJWTBearerAuth = false;
+        opt.DocumentSettings = s =>
+        {
+            s.DocumentName = "Initial Release";
+            s.Title = "CMS API";
+            s.Version = "v0";
+            s.AddAuth(AuthConstants.ApiKeyScheme, new()
+            {
+                Name = "ApiKey",
+                In = OpenApiSecurityApiKeyLocation.Header,
+                Scheme = AuthConstants.ApiKeyScheme,
+                Type = OpenApiSecuritySchemeType.ApiKey
+            });
+        };
+    });
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -32,6 +50,7 @@ builder.Services.AddRazorComponents()
 var connectionString = config.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.ConfigureDataServices(connectionString);
+builder.Services.ConfigureAuth();
 
 // ? Settings
 builder.Services
@@ -45,25 +64,31 @@ builder.Services
     .AddScoped<IDbContextConcurrencyHelper, DbContextConcurrencyHelper>()
     .AddScoped<ProjectStateService>()
     .AddScoped<EntryStateService>()
+    .AddScoped<ApiKeyStateService>()
     .AddScoped<AuthorizationHelperService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()
     .AddScoped<IEntryService, EntryService>()
+    .AddScoped<IApiKeyService, ApiKeyService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>();
 
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);
 
-if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
-{
-    var keysFolder = "/var/data-protection-keys"; // Ensure this path is writable in your Docker container
-    builder.Services.AddDataProtection()
-        .SetApplicationName("cms.app")
-        .PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
-}
+var keysFolder = "/var/DataProtection-Keys"; // Ensure this path is writable in your Docker container
+builder.Services.AddDataProtection()
+    .SetApplicationName("cms.app")
+    .PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
 
+// Register the custom converter for server-side JSON binding (HTTP requests)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(opts =>
+{
+    opts.SerializerOptions.Converters.Add(new CMS.Main.Serialization.DictionaryStringJsonConverter());
+});
+
+// Also register for MVC/Controllers if used by any components
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -81,14 +106,15 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-app.UseWebSockets();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// app.UseFastEndpoints()
-//     .UseSwaggerGen();
+app.UseFastEndpoints(cfg =>
+    {
+        cfg.Versioning.Prefix = "v";
+    })
+    .UseSwaggerGen();
 
 app.MapAdditionalIdentityEndpoints();
 

@@ -19,4 +19,5 @@ public class Project
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
     public List<Schema> Schemas { get; set; } = [];
+    public List<ApiKey> ApiKeys { get; set; } = [];
 }

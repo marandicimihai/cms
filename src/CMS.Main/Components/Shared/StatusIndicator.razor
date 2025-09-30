@@ -74,6 +74,22 @@
 
     private string? message;
 
+    [Parameter]
+    public string? InitialMessage { get; set; }
+    
+    [Parameter]
+    public StatusSeverity InitialSeverity { get; set; } = StatusSeverity.Info;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(InitialMessage))
+        {
+            message = InitialMessage;
+            severity = InitialSeverity;
+            visible = true;
+        }
+    }
+
     public void Show(string newMessage, StatusSeverity newSeverity = StatusSeverity.Info)
     {
         severity = newSeverity;

@@ -3,6 +3,7 @@ using CMS.Main.Abstractions;
 using CMS.Main.Data;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
+using CMS.Main.Models.MappingConfig;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,16 +57,23 @@ public class SchemaPropertyService(
 
             if (property is null)
                 return Result.NotFound();
-            
-            dto.Adapt(property, new TypeAdapterConfig()
-                .NewConfig<SchemaPropertyDto, SchemaProperty>()
-                .Inherits<SchemaPropertyDto, SchemaProperty>()
-                .Ignore(p => p.SchemaId)
-                .Ignore(p => p.Schema)
-                .Ignore(p => p.Type)
-                .Config);
 
-            await dbHelper.ExecuteAsync(async dbContext => { await dbContext.SaveChangesAsync(); });
+            await dbHelper.ExecuteAsync(async dbContext =>
+            {
+                if (dto.Name != property.Name && dbContext.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+                {
+                    await dbContext.Database.ExecuteSqlAsync(
+                        $"UPDATE \"Entries\" SET \"Data\" = \"Data\" - {property.Name} WHERE \"SchemaId\" = {property.SchemaId}");
+                }
+                else
+                {
+                    logger.LogInformation("Skipping SQL execution as the database is not npgsql and might not support json.");
+                }
+                
+                dto.Adapt(property, MapsterConfig.EditSchemaPropertyConfig);
+                
+                await dbContext.SaveChangesAsync();
+            });
 
             return Result.Success(property.Adapt<SchemaPropertyDto>());
         }

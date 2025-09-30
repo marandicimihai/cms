@@ -39,32 +39,7 @@ public class SchemaServiceTests
     }
 
     [Fact]
-    public async Task GetSchemaByIdAsync_ReturnsSchema_WithoutProperties_WhenIncludeFalse()
-    {
-        // Arrange
-        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
-        await context.Projects.AddAsync(project);
-        var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Content", ProjectId = project.Id };
-        await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
-        await context.SaveChangesAsync();
-
-        // Act - default include false
-        var result = await schemaService.GetSchemaByIdAsync(schema.Id);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        var dto = result.Value;
-        Assert.Equal(schema.Id, dto.Id);
-        Assert.Equal(schema.Name, dto.Name);
-        Assert.Equal(schema.ProjectId, dto.ProjectId);
-        Assert.NotNull(dto.Project);
-        Assert.Empty(dto.Properties); // Should be empty because IncludeProperties default is false
-    }
-
-    [Fact]
-    public async Task GetSchemaByIdAsync_ReturnsSchema_WithProperties_WhenIncludeTrue()
+    public async Task GetSchemaByIdAsync_ReturnsSchema_WithProperties()
     {
         // Arrange
         var project = new Project { Id = Guid.NewGuid().ToString(), Name = "Proj", OwnerId = Guid.NewGuid().ToString() };
@@ -77,7 +52,7 @@ public class SchemaServiceTests
         await context.SaveChangesAsync();
 
         // Act
-        var result = await schemaService.GetSchemaByIdAsync(schema.Id, opt => opt.IncludeProperties = true);
+        var result = await schemaService.GetSchemaByIdAsync(schema.Id);
 
         // Assert
         Assert.True(result.IsSuccess);

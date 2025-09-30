@@ -3,39 +3,43 @@
 
 @attribute [Authorize]
 
-<AuthorizeView>
-    <Authorized>
-        <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" /> 
+@if (hasAccess)
+{
+    <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" />
 
-        <Paper>
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-medium">
-                    @Schema.Name
-                </h2>
+    <Paper>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-medium">
+                @Schema.Name
+            </h2>
 
-                @if (!createFormVisible && !updateFormVisible)
-                {
-                    <div class="flex items-center gap-2">
-                        <button
-                            class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                            aria-label="Create Property" @onclick="ShowCreateForm">
-                            <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
-                            Create Property
-                        </button>
-                    </div>
-                }
-            </div>
+            @if (!createFormVisible && !updateFormVisible)
+            {
+                <div class="flex items-center gap-2">
+                    <button
+                        class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        aria-label="Create Property" @onclick="ShowCreateForm">
+                        <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
+                        Create Property
+                    </button>
+                </div>
+            }
+        </div>
 
-            <StatusIndicator @ref="statusIndicator"/> 
-            <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" StatusIndicator="statusIndicator" @ref="createForm" Visible="createFormVisible" />
-            <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" StatusIndicator="statusIndicator" @ref="updateForm" Visible="updateFormVisible" />
-            <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/> 
-        </Paper>
-    </Authorized>
-    <NotAuthorized>
-        <BackButton />
-        <Paper>
-            <StatusIndicator @ref="statusIndicator"/>
-        </Paper>
-    </NotAuthorized>
-</AuthorizeView>
+        <StatusIndicator @ref="statusIndicator" />
+        <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" StatusIndicator="statusIndicator" @ref="createForm" Visible="createFormVisible" />
+        <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" StatusIndicator="statusIndicator" @ref="updateForm" Visible="updateFormVisible" />
+        <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/>
+    </Paper>
+}
+else
+{
+    <BackButton/>
+    <Paper>
+        <StatusIndicator
+            InitialMessage="You do not have access to this resource or it does not exist."
+            InitialSeverity="StatusIndicator.StatusSeverity.Error"/>
+    </Paper>
+}
+
+

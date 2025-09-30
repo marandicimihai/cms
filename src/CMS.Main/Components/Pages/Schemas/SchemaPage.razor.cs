@@ -29,6 +29,7 @@ public partial class SchemaPage : ComponentBase
     
     private bool createFormVisible;
     private bool updateFormVisible;
+    private bool hasAccess;
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
@@ -37,15 +38,14 @@ public partial class SchemaPage : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this schema or it does not exist.";
+            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }
 
-        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
-        {
-            opt.IncludeProperties = true;
-        });
+        hasAccess = true;
+
+        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
 
         if (result.IsSuccess)
         {

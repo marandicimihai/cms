@@ -1,4 +1,4 @@
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.SchemaProperty;
@@ -22,6 +22,8 @@ public partial class EditEntryPage : ComponentBase
     
     private StatusIndicator? statusIndicator;
 
+    private bool hasAccess;
+
     protected override async Task OnInitializedAsync()
     {
         if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
@@ -31,13 +33,9 @@ public partial class EditEntryPage : ComponentBase
             return;
         }
 
-        var result = await EntryService.GetEntryByIdAsync(
-            EntryId.ToString(),
-            opt =>
-            {
-                opt.IncludeSchema = true;
-                opt.SchemaGetOptions.IncludeProperties = true;
-            });
+        hasAccess = true;
+
+        var result = await EntryService.GetEntryByIdAsync(EntryId.ToString());
 
         if (result.IsSuccess)
         {
@@ -50,7 +48,7 @@ public partial class EditEntryPage : ComponentBase
         }
     }
 
-    private async Task UpdateEntry(Dictionary<SchemaPropertyDto, object?> entry)
+    private async Task UpdateEntry(Dictionary<string, object?> entry)
     {
         if (Entry is null)
             return;
@@ -63,7 +61,7 @@ public partial class EditEntryPage : ComponentBase
         }
 
         Entry.Id = EntryId.ToString();
-        Entry.Properties = entry;
+        Entry.Fields = entry;
 
         var result = await EntryService.UpdateEntryAsync(Entry);
 

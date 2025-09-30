@@ -1,6 +1,8 @@
 @using System.Globalization
 @using Ardalis.Result
 @using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.Models
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 
 <div class="flex flex-col gap-1">
     <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@SchemaProperty.Id">
@@ -86,12 +88,7 @@
         if (!UseInitialValue)
         {
             // Handle the case where InitialValue was not passed
-            Value = SchemaProperty.Type switch
-            {
-                SchemaPropertyType.Text => string.Empty,
-                SchemaPropertyType.Boolean => false,
-                _ => null
-            };
+            Value = GetDefaultValue();
             IsNull = false;
         }
         else
@@ -107,17 +104,12 @@
         if (IsNull)
         {
             TempValue = Value;
-            Value = null;
+            Value = GetDefaultValue();
             ValidationMessage = null;
         }
         else
         {
-            Value = TempValue ?? SchemaProperty.Type switch
-            {
-                SchemaPropertyType.Text => string.Empty,
-                SchemaPropertyType.Boolean => false,
-                _ => null
-            };
+            Value = TempValue;
             Validate();
         }
         StateHasChanged();
@@ -126,25 +118,11 @@
     private void OnInputChanged(ChangeEventArgs e)
     {
         var input = e.Value?.ToString();
-        if (SchemaProperty.Type == SchemaPropertyType.DateTime)
+        if (SchemaProperty.Type == SchemaPropertyType.DateTime &&
+            DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out var localDt))
         {
-            if (!string.IsNullOrWhiteSpace(input))
-            {
-                // Parse as local time, convert to UTC
-                if (DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out var localDt))
-                {
-                    var local = DateTime.SpecifyKind(localDt, DateTimeKind.Local);
-                    Value = local.ToUniversalTime().ToString("o");
-                }
-                else
-                {
-                    Value = input; // fallback, will fail validation
-                }
-            }
-            else
-            {
-                Value = null;
-            }
+            var local = DateTime.SpecifyKind(localDt, DateTimeKind.Local);
+            Value = local.ToUniversalTime().ToString("o");
         }
         else
         {
@@ -166,22 +144,30 @@
     private void Validate()
     {
         ValidationMessage = null;
-
-        var value = Value;
-        var validationResult = PropertyValidationExtensions.ValidateProperty(SchemaProperty, ref value);
-        if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
+        if (!IsNull) 
         {
-            ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
+            // Treat field as if required if not required already
+            var value = Value is "" ? null : Value;
+
+            // Store previous IsRequired value and set to true
+            var temp = SchemaProperty.IsRequired;
+            SchemaProperty.IsRequired = true;
+
+            var validationResult = PropertyValidator.ValidateProperty(SchemaProperty, ref value);
+            
+            // Restore original IsRequired value
+            SchemaProperty.IsRequired = temp;
+
+            if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
+            {
+                ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
+            }
         }
     }
 
     public void Reset()
     {
-        Value = SchemaProperty.Type switch
-        {
-            SchemaPropertyType.Boolean => false,
-            _ => null
-        };
+        Value = GetDefaultValue();
         ValidationMessage = null;
     }
 
@@ -199,6 +185,16 @@
     {
         Validate();
         return !HasError;
+    }
+
+    private object? GetDefaultValue()
+    {
+        return SchemaProperty.Type switch
+        {
+            SchemaPropertyType.Text => string.Empty,
+            SchemaPropertyType.Boolean => false,
+            _ => string.Empty
+        };
     }
 
 }

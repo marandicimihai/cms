@@ -1,0 +1,38 @@
+@page "/{projectId:guid}/manageapikeys"
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@if (hasAccess)
+{
+    <BackButton Href="@($"/project/{ProjectId}")" Text="Back to Project" />
+
+    <Paper>
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-lg font-medium text-slate-900">API Keys</h1>
+            @if (!createFormVisible)
+            {
+                <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2" @onclick="ShowCreateForm">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
+                    New API Key
+                </button>
+            }
+        </div>
+
+        <StatusIndicator @ref="statusIndicator" />
+
+        <ApiKeyCreateForm @ref="createForm" ProjectId="@ProjectId.ToString()" StatusIndicator="statusIndicator" Visible="@createFormVisible" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" />
+
+        <ApiKeyTable ApiKeys="ProjectDto.ApiKeys" StatusIndicator="statusIndicator" />
+    </Paper>
+}
+else
+{
+    <BackButton />
+    <Paper>
+        <StatusIndicator 
+            InitialMessage="You do not have access to manage API keys for this project." 
+            InitialSeverity="StatusIndicator.StatusSeverity.Error" />
+    </Paper>
+}
+

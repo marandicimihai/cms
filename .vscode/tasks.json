@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Tailwind: watch CSS",
+            "type": "shell",
+            "command": "tailwindcss -i src/CMS.Main/wwwroot/css/app.css -o src/CMS.Main/wwwroot/css/tailwind.css --watch",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        }
+    ]
+}

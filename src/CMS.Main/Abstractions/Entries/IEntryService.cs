@@ -2,7 +2,7 @@ using Ardalis.Result;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Pagination;
 
-namespace CMS.Main.Abstractions;
+namespace CMS.Main.Abstractions.Entries;
 
 public interface IEntryService
 {

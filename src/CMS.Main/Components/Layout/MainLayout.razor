@@ -7,7 +7,11 @@
     <!-- Main Content with Sidebar -->
     <div class="flex flex-1 overflow-hidden">
         <!-- Sidebar -->
-        <SideBar/>
+        <AuthorizeView>
+            <Authorized>
+                <SideBar />
+            </Authorized>
+        </AuthorizeView>
 
         <!-- Main Content -->
         <main class="flex-1 p-4 overflow-auto">

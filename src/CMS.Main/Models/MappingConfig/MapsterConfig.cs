@@ -1,3 +1,4 @@
+using CMS.Main.DTOs.ApiKey;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Project;
 using CMS.Main.DTOs.Schema;
@@ -28,6 +29,7 @@ public class MapsterConfig
             .NewConfig()
             .Ignore(p => p.Id)
             .Ignore(p => p.Schemas)
+            .Ignore(p => p.ApiKeys)
             .Ignore(p => p.LastUpdated);
 
         TypeAdapterConfig<EntryDto, Entry>
@@ -36,5 +38,36 @@ public class MapsterConfig
             .Ignore(e => e.CreatedAt)
             .Ignore(e => e.UpdatedAt)
             .Ignore(e => e.Schema);
+
+        TypeAdapterConfig<ApiKeyDto, ApiKey>
+            .NewConfig()
+            .Ignore(k => k.Id)
+            .Ignore(k => k.HashedKey)
+            .Ignore(k => k.Project)
+            .Ignore(k => k.CreatedAt);
     }
+
+    public static readonly TypeAdapterConfig EditSchemaPropertyConfig = new TypeAdapterConfig()
+        .NewConfig<SchemaPropertyDto, SchemaProperty>()
+        .Ignore(s => s.Id)
+        .Ignore(s => s.Schema)
+        .Ignore(s => s.CreatedAt)
+        .Ignore(p => p.SchemaId)
+        .Ignore(p => p.Type).Config;
+    
+    public static readonly TypeAdapterConfig EditProjectConfig = new TypeAdapterConfig()
+        .NewConfig<ProjectDto, Project>()
+        .Ignore(p => p.Id)
+        .Ignore(p => p.Schemas)
+        .Ignore(p => p.ApiKeys)
+        .Ignore(p => p.LastUpdated)
+        .Ignore(p => p.OwnerId).Config;
+    
+    public static readonly TypeAdapterConfig EditApiKeyConfig = new TypeAdapterConfig()
+        .NewConfig<ApiKeyDto, ApiKey>()
+        .Ignore(k => k.Id)
+        .Ignore(k => k.HashedKey)
+        .Ignore(k => k.Project)
+        .Ignore(k => k.CreatedAt)
+        .Ignore(k => k.ProjectId).Config;
 }

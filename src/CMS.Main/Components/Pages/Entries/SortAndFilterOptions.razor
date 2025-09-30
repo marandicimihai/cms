@@ -1,0 +1,16 @@
+﻿<div class="mb-3">
+    <label class="text-xs uppercase tracking-wide block mb-1">Map property to string</label>
+    <select class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2"
+        @bind="SortByProperty"
+        aria-label="Sort by">
+        @foreach (var prop in SortableProperties)
+        {
+            <option value="@prop">@prop</option>
+        }
+    </select>
+</div>
+
+<div class="mb-3 flex items-center gap-3">
+    <input id="descendingCheckbox" type="checkbox" class="rounded border-slate-300" @bind="Descending" />
+    <label for="descendingCheckbox" class="text-sm text-slate-700">Descending</label>
+</div>

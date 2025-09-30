@@ -1,4 +1,5 @@
 using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Schema;
@@ -33,6 +34,7 @@ public partial class EntriesPage : ComponentBase
     private StatusIndicator? statusIndicator;
 
     private bool showCreateForm;
+    private bool hasAccess;
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
@@ -41,15 +43,14 @@ public partial class EntriesPage : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this project or it does not exist.";
+            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
             return;
         }
 
-        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString(), opt =>
-        {
-            opt.IncludeProperties = true;
-        });
+        hasAccess = true;
+
+        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
 
         if (result.IsSuccess)
         {
@@ -72,11 +73,11 @@ public partial class EntriesPage : ComponentBase
         }
     }
 
-    private async Task OnEntryCreateSubmit(Dictionary<SchemaPropertyDto, object?> entry)
+    private async Task OnEntryCreateSubmit(Dictionary<string, object?> entry)
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
+            statusIndicator?.Show("You do not have access to this resource or it does not exist.",
                 StatusIndicator.StatusSeverity.Error);
             return;
         }
@@ -84,7 +85,7 @@ public partial class EntriesPage : ComponentBase
         var dto = new EntryDto
         {
             SchemaId = SchemaId.ToString(),
-            Properties = entry
+            Fields = entry
         };
 
         var result = await EntryService.AddEntryAsync(dto);

@@ -1,4 +1,4 @@
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Entries;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Pagination;
@@ -36,6 +36,13 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private List<EntryDto> SelectedEntries { get; set; } = [];
     
     private StatusIndicator? statusIndicator;
+
+    private List<string> SortableProperties => Properties
+        .Where(p => p.Type == SchemaPropertyType.Text || p.Type == SchemaPropertyType.Number || p.Type == SchemaPropertyType.DateTime)
+        .Select(p => p.Name)
+        .Append("CreatedAt")
+        .Append("UpdatedAt")
+        .ToList();
     
     // Pagination state (mirrors sidebar pattern)
     private readonly int pageSize = 20;
@@ -52,12 +59,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
-            new PaginationParams(1, pageSize),
-            opt =>
-            {
-                opt.SortingOption = EntrySortingOption.CreatedAt;
-                opt.Descending = true;
-            });
+            new PaginationParams(1, pageSize));
 
         if (result.IsSuccess)
         {
@@ -80,19 +82,51 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             queuedStatusSeverity = null;
         }
     }
+
+    // Called whenever the sort property or direction changes
+    private async Task OnSortChangedAsync((string, bool) sortingParams)
+    {
+        var (sortByProperty, descending) = sortingParams;
+
+        var result = await EntryService.GetEntriesForSchema(
+            SchemaId,
+            new PaginationParams(1, pageSize),
+            opt =>
+            {
+                opt.SortByPropertyName = sortByProperty;
+                opt.Descending = descending;
+            });
+
+        if (result.IsSuccess)
+        {
+            (Entries, var pagination) = result.Value;
+            StateHasChanged();
+            totalCount = pagination.TotalCount;
+        }
+        else
+        {
+            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
+            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+        }
+    }
     
     private void EntriesCreated(List<EntryDto> created)
     {
         // Prepend new entries; keep newest-first order consistent with sort
         Entries.InsertRange(0, created);
+        // Keep pagination total in sync when new entries are created elsewhere
+        if (created?.Count > 0)
+        {
+            totalCount = Math.Max(0, totalCount + created.Count);
+        }
         StateHasChanged();
     }
     
     private object? GetEntryPropertyValue(EntryDto entry, string propertyName)
     {
-        foreach (var kv in entry.Properties)
+        foreach (var kv in entry.Fields)
         {
-            if (kv.Key.Name == propertyName)
+            if (kv.Key == propertyName)
                 return kv.Value;
         }
         return null;
@@ -163,7 +197,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         {
             Entries.Remove(entry);
             // Keep pagination metadata in sync with user-visible list
-            if (totalCount > 0) totalCount--;
+            totalCount = Math.Max(0, totalCount - 1);
             statusIndicator?.Show("Successfully deleted entry.", 
                 StatusIndicator.StatusSeverity.Success);
         }
@@ -187,12 +221,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             var nextPage = (Entries.Count / pageSize) + 1;
             var result = await EntryService.GetEntriesForSchema(
                 SchemaId,
-                new PaginationParams(nextPage, pageSize),
-                opt =>
-                {
-                    opt.SortingOption = EntrySortingOption.CreatedAt;
-                    opt.Descending = true;
-                });
+                new PaginationParams(nextPage, pageSize));
 
             if (result.IsSuccess)
             {
@@ -284,15 +313,24 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         if (!isConfirmed)
             return;
 
+        var deletedCount = 0;
         foreach (var entry in SelectedEntries.ToList())
         {
             var result = await EntryService.DeleteEntryAsync(entry.Id);
             if (result.IsSuccess)
             {
                 Entries.RemoveAll(e => e.Id == entry.Id);
+                deletedCount++;
             }
             // Optionally, show error for failed deletes
         }
+
+        // Decrease totalCount by the number of successfully deleted entries
+        if (deletedCount > 0)
+        {
+            totalCount = Math.Max(0, totalCount - deletedCount);
+        }
+
         SelectedEntries.Clear();
         StateHasChanged();
     }

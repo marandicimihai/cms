@@ -12,6 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Schema> Schemas { get; set; }
     public DbSet<SchemaProperty> SchemaProperties { get; set; }
     public DbSet<Entry> Entries { get; set; }
+    public DbSet<ApiKey> ApiKeys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -24,7 +25,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne(p => p.Schema);
 
         builder.Entity<Entry>()
-            .HasOne(s => s.Schema);
+            .HasOne(e => e.Schema);
+
+        builder.Entity<ApiKey>()
+            .HasOne(k => k.Project)
+            .WithMany(p => p.ApiKeys);
 
         // In memory db doesn't have support for json columns
         var provider = Database.ProviderName;
