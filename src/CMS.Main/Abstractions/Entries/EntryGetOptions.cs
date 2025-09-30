@@ -11,7 +11,8 @@ public class EntryGetOptions
 public class EntryFilter
 {
     public string PropertyName { get; set; } = string.Empty;
-    public PropertyFilter? Filter { get; set; }
+    public PropertyFilter? FilterType { get; set; }
+    public object? ReferenceValue { get; set; }
 }
 
 public enum PropertyFilter
@@ -20,5 +21,7 @@ public enum PropertyFilter
     NotEquals,
     GreaterThan,
     LessThan,
-    Contains
+    Contains,
+    StartsWith,
+    EndsWith
 }

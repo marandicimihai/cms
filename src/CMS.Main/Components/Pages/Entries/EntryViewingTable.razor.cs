@@ -6,6 +6,7 @@ using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
+using static CMS.Main.Components.Pages.Entries.SortAndFilterOptions;
 
 namespace CMS.Main.Components.Pages.Entries;
 
@@ -84,17 +85,16 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     }
 
     // Called whenever the sort property or direction changes
-    private async Task OnSortChangedAsync((string, bool) sortingParams)
+    private async Task OnOptionsChangedAsync(SortAndFilterOptionsChangedEventArgs args)
     {
-        var (sortByProperty, descending) = sortingParams;
-
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
             new PaginationParams(1, pageSize),
             opt =>
             {
-                opt.SortByPropertyName = sortByProperty;
-                opt.Descending = descending;
+                opt.SortByPropertyName = args.SortByProperty;
+                opt.Descending = args.Descending;
+                opt.Filters = args.Filters;
             });
 
         if (result.IsSuccess)
@@ -109,7 +109,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
         }
     }
-    
+
     private void EntriesCreated(List<EntryDto> created)
     {
         // Prepend new entries; keep newest-first order consistent with sort

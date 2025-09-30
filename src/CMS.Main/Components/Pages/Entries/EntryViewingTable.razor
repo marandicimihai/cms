@@ -1,8 +1,9 @@
 <StatusIndicator @ref="statusIndicator" />
 
 <SortAndFilterOptions 
-    OnSortChanged="OnSortChangedAsync"
+    OnOptionsChanged="OnOptionsChangedAsync"
     SortableProperties="SortableProperties"
+    FilterableProperties="Properties"
     InitialSortByProperty="CreatedAt"
     InitialDescending="true" />
 

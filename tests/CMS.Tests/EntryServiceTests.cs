@@ -8,7 +8,6 @@ using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Schema;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
-using CMS.Main.Services;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,6 +15,7 @@ using Moq;
 using Xunit;
 using CMS.Main.DTOs.Pagination;
 using CMS.Main.Abstractions.Entries;
+using CMS.Main.Services.Entries;
 
 namespace CMS.Tests;
 

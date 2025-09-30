@@ -10,7 +10,7 @@ using CMS.Main.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace CMS.Main.Services;
+namespace CMS.Main.Services.Entries;
 
 public class EntryService(
     IDbContextConcurrencyHelper dbHelper,
@@ -48,55 +48,12 @@ public class EntryService(
                     .Where(e => e.SchemaId == schemaId)
                     .AsQueryable();
 
-                // Sort the entries
-                switch (options.SortByPropertyName)
-                {
-                    case "CreatedAt":
-                        query = options.Descending
-                            ? query.OrderByDescending(e => e.CreatedAt)
-                            : query.OrderBy(e => e.CreatedAt);
-                        break;
-                    case "UpdatedAt":
-                        query = options.Descending
-                            ? query.OrderByDescending(e => e.UpdatedAt)
-                            : query.OrderBy(e => e.UpdatedAt);
-                        break;
-                    default:
-                        // Sort by custom property
-                        var property = schema.Properties.FirstOrDefault(p => p.Name == options.SortByPropertyName);
-                        if (property is not null && (property.Type == SchemaPropertyType.Text || property.Type == SchemaPropertyType.Number || property.Type == SchemaPropertyType.DateTime))
-                        {
-                            if (property.Type == SchemaPropertyType.Number)
-                            {
-                                query = options.Descending
-                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDecimal())
-                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDecimal());
-                                break;
-                            }
-                            else if (property.Type == SchemaPropertyType.DateTime)
-                            {
-                                query = options.Descending
-                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDateTime())
-                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDateTime());
-                            }
-                            else if (property.Type == SchemaPropertyType.Text)
-                            {
-                                query = options.Descending
-                                    ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetString())
-                                    : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetString());
-                            }
-                        }
-                        else
-                        {
-                            throw new ArgumentException($"Cannot sort by property '{options.SortByPropertyName}'. It does not exist or is of an unsupported type.");
-                        }
-                        break;
-                }
+                query = query.ApplySorting(options, schema);
+                query = query.ApplyFilters(options, schema);
                     
                 // Take relevant entries
                 var entries = await query
-                    .Skip((cappedPageNumber - 1) * cappedPageSize)
-                    .Take(cappedPageSize)
+                    .TakePage(cappedPageNumber, cappedPageSize)
                     .ToListAsync();
 
                 // Construct pagination metadata

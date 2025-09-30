@@ -29,7 +29,7 @@ public class PropertyValidator
     /// Note: this method focuses on conversion/normalization and does not enforce <see cref="SchemaPropertyDto.IsRequired"/> constraints.
     /// Errors are returned as invalid <see cref="Result{T}"/> containing a <see cref="ValidationError"/> with a descriptive message.
     /// </remarks>
-    private static Result<object?> CastToPropertyType(SchemaProperty property, object? value)
+    public static Result<object?> CastToPropertyType(SchemaProperty property, object? value)
     {
         switch (property.Type)
         {
