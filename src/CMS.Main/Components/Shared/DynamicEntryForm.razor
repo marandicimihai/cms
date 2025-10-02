@@ -6,7 +6,7 @@
     @for (var i = 0; i < Properties.Count; i++)
     {
         var j = i; // Capture the current index for use in the field component
-        <DynamicEntryField SchemaProperty="Properties[j]" InitialValue="InitialValues?[j]" UseInitialValue="@(InitialValues != null)" @ref="Fields[j]" />
+        <DynamicEntryField SchemaProperty="Properties[j]" InitialValue="InitialValues?[j]" @ref="Fields[j]" />
     }
 
     <div class="flex gap-2 justify-start mt-2">

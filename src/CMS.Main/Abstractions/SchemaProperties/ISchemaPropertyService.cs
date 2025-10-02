@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using CMS.Main.DTOs.SchemaProperty;
 
-namespace CMS.Main.Abstractions;
+namespace CMS.Main.Abstractions.SchemaProperties;
 
 public interface ISchemaPropertyService
 {

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using Ardalis.Result;
+using CMS.Main.Services.SchemaProperties;
 
 namespace CMS.Main.Models;
 
@@ -41,7 +42,7 @@ public class Entry : IDisposable
                     JsonValueKind.String => value.GetString(),
                     JsonValueKind.False => false,
                     JsonValueKind.True => true,
-                    JsonValueKind.Number => value.TryGetInt32(out var intValue) ? intValue : value.GetDecimal(),
+                    JsonValueKind.Number => value.GetDecimal(),
                     _ => null
                 };
             }
@@ -56,17 +57,16 @@ public class Entry : IDisposable
 
     
     /// <summary>
-    /// Validates and sets entry fields from the provided dictionary using the schema properties.
-    /// Updates the entry's <see cref="Data"/> and returns the normalized fields if all are valid; otherwise returns validation errors.
+    /// Validates and sets entry fields using schema property definitions.
     /// </summary>
-    /// <param name="properties">The schema property definitions.</param>
+    /// <param name="properties">Schema property definitions for validation.</param>
     /// <param name="fields">Field values to validate and set.</param>
-    /// <returns>
-    /// Success with the normalized fields if all are valid; otherwise, an invalid result with validation errors.
-    /// </returns>
+    /// <param name="fieldValidator">Validator for casting and validating field values.</param>
+    /// <returns>Normalized fields on success, or validation errors on failure.</returns>
     public Result<Dictionary<string, object?>> SetFields(
         List<SchemaProperty> properties,
-        Dictionary<string, object?> fields)
+        Dictionary<string, object?> fields,
+        ISchemaPropertyValidator fieldValidator)
     {
         Dictionary<string, object?> validFields = [];
         List<ValidationError> validationErrors = [];
@@ -91,12 +91,13 @@ public class Entry : IDisposable
 
             // Validate the field value
             var fieldValue = field.Value;
-            var validationResult = PropertyValidator.ValidateProperty(property, ref fieldValue);
+            var validationResult = fieldValidator.ValidateAndCast(property, fieldValue);
             if (validationResult.IsInvalid())
             {
                 validationErrors.AddRange(validationResult.ValidationErrors);
                 continue;
             }
+            fieldValue = validationResult.Value;
 
             // If valid, add to the valid fields dictionary
             validFields.Add(fieldName, fieldValue);

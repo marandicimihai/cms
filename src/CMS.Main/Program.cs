@@ -16,6 +16,8 @@ using NSwag;
 using Microsoft.AspNetCore.DataProtection;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.Services.Entries;
+using CMS.Main.Abstractions.SchemaProperties;
+using CMS.Main.Services.SchemaProperties;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -73,7 +75,9 @@ builder.Services
     .AddScoped<IEntryService, EntryService>()
     .AddScoped<IApiKeyService, ApiKeyService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
-    .AddSingleton<ConfirmationService>();
+    .AddSingleton<ConfirmationService>()
+    .AddSingleton<ISchemaPropertyTypeHandlerFactory, SchemaPropertyTypeHandlerFactory>()
+    .AddScoped<ISchemaPropertyValidator, SchemaPropertyValidator>();
 
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);

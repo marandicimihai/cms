@@ -7,6 +7,7 @@ using CMS.Main.DTOs.Pagination;
 using CMS.Main.DTOs.Schema;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
+using CMS.Main.Services.SchemaProperties;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ namespace CMS.Main.Services.Entries;
 
 public class EntryService(
     IDbContextConcurrencyHelper dbHelper,
+    ISchemaPropertyValidator fieldValidator,
     ILogger<EntryService> logger
 ) : IEntryService
 {
@@ -49,7 +51,9 @@ public class EntryService(
                     .AsQueryable();
 
                 query = query.ApplySorting(options, schema);
-                query = query.ApplyFilters(options, schema);
+                query = query.ApplyFilters(options, schema, fieldValidator);
+
+                var count = await query.CountAsync();
                     
                 // Take relevant entries
                 var entries = await query
@@ -58,7 +62,7 @@ public class EntryService(
 
                 // Construct pagination metadata
                 var paginationMetadata = new PaginationMetadata(
-                    await dbContext.Entries.CountAsync(e => e.SchemaId == schemaId),
+                    count,
                     cappedPageNumber,
                     cappedPageSize,
                     IEntryService.MaxPageSize
@@ -137,7 +141,7 @@ public class EntryService(
                 return Result.NotFound();
             
             var entry = dto.Adapt<Entry>();
-            var setResult = entry.SetFields(schema.Properties, dto.Fields);
+            var setResult = entry.SetFields(schema.Properties, dto.Fields, fieldValidator);
 
             if (setResult.IsInvalid())
             {
@@ -185,7 +189,7 @@ public class EntryService(
                 }
             }
 
-            var setResult = entry.SetFields(entry.Schema.Properties, fields);
+            var setResult = entry.SetFields(entry.Schema.Properties, fields, fieldValidator);
 
             if (setResult.IsInvalid())
             {

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Ardalis.Result;
+using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Data;
 using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Schema;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
+using CMS.Main.Services.SchemaProperties;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,6 +25,7 @@ public class EntryServiceTests
 {
     private readonly ApplicationDbContext context;
     private readonly EntryService entryService;
+    private readonly ISchemaPropertyValidator validator;
 
     public EntryServiceTests()
     {
@@ -34,7 +37,12 @@ public class EntryServiceTests
         context = new ApplicationDbContext(options);
         var mockLogger = new Mock<ILogger<EntryService>>();
         var dbHelper = new DbContextConcurrencyHelper(context);
-        entryService = new EntryService(dbHelper, mockLogger.Object);
+        
+        // Setup validator for Entry.SetFields calls
+        var factory = new SchemaPropertyTypeHandlerFactory();
+        validator = new SchemaPropertyValidator(factory);
+        
+        entryService = new EntryService(dbHelper, validator, mockLogger.Object);
     }
 
     [Fact]
@@ -92,7 +100,7 @@ public class EntryServiceTests
 
         // create entry directly
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Published"] = true });
+        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Published"] = true }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 
@@ -118,7 +126,7 @@ public class EntryServiceTests
         for (var i = 0; i < 5; i++)
         {
             var e = new Entry { SchemaId = schema.Id };
-            e.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" });
+            e.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" }, validator);
             // stagger CreatedAt
             e.CreatedAt = DateTime.UtcNow.AddMinutes(i);
             await context.Entries.AddAsync(e);
@@ -155,7 +163,7 @@ public class EntryServiceTests
         for (var i = 0; i < 10; i++)
         {
             var e = new Entry { SchemaId = schema.Id };
-            e.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" });
+            e.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" }, validator);
             await context.Entries.AddAsync(e);
         }
         await context.SaveChangesAsync();
@@ -217,7 +225,7 @@ public class EntryServiceTests
         await context.SaveChangesAsync();
 
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "Initial" });
+        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "Initial" }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 
@@ -249,7 +257,7 @@ public class EntryServiceTests
         await context.SaveChangesAsync();
 
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "Old" });
+        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "Old" }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 
@@ -278,7 +286,7 @@ public class EntryServiceTests
         await context.SaveChangesAsync();
 
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "X" });
+        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "X" }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 

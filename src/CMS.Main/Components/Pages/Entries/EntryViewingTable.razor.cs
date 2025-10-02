@@ -35,7 +35,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     private List<EntryDto> Entries { get; set; } = [];
     private List<EntryDto> SelectedEntries { get; set; } = [];
-    
+
+    private SortAndFilterOptionsChangedEventArgs? cachedArgs;
+
     private StatusIndicator? statusIndicator;
 
     private List<string> SortableProperties => Properties
@@ -96,6 +98,8 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
                 opt.Descending = args.Descending;
                 opt.Filters = args.Filters;
             });
+
+        cachedArgs = args;
 
         if (result.IsSuccess)
         {
@@ -221,7 +225,16 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             var nextPage = (Entries.Count / pageSize) + 1;
             var result = await EntryService.GetEntriesForSchema(
                 SchemaId,
-                new PaginationParams(nextPage, pageSize));
+                new PaginationParams(nextPage, pageSize),
+                opt =>
+                {
+                    if (cachedArgs is not null)
+                    {
+                        opt.SortByPropertyName = cachedArgs.SortByProperty;
+                        opt.Descending = cachedArgs.Descending;
+                        opt.Filters = cachedArgs.Filters;
+                    }
+                });
 
             if (result.IsSuccess)
             {

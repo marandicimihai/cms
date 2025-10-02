@@ -2,6 +2,7 @@ using Ardalis.Result;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
+using CMS.Main.Services.SchemaProperties;
 
 namespace CMS.Main.Services.Entries;
 
@@ -60,69 +61,78 @@ public static class EntryQueryExtensions
         return query;
     }
 
-    public static IQueryable<Entry> ApplyFilters(this IQueryable<Entry> query, EntryGetOptions options, Schema schema)
+    public static IQueryable<Entry> ApplyFilters(this IQueryable<Entry> query, EntryGetOptions options, Schema schema, ISchemaPropertyValidator validator)
     {
         foreach (var filter in options.Filters)
         {
             var property = schema.Properties.FirstOrDefault(p => p.Name == filter.PropertyName);
-            
             if (property is null) continue;
 
-            var castResult = PropertyValidator.CastToPropertyType(property, filter.ReferenceValue);
+            var castResult = validator.ValidateAndCast(property, filter.ReferenceValue, false);
             if (castResult.IsInvalid())
             {
                 throw new ArgumentException($"Invalid reference value for filter on property '{filter.PropertyName}': {string.Join(", ", castResult.ValidationErrors.Select(e => e.ErrorMessage))}");
             }
 
-            var castedReferenceValue = castResult.Value;
+            var value = castResult.Value;
 
-            switch (filter.FilterType)
+            if (value is null)
             {
-                case PropertyFilter.Equals:
-                    query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).ToString() == (string)castedReferenceValue!);
-                    break;
-                case PropertyFilter.NotEquals:
-                    query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).ToString() != (string)castedReferenceValue!);
-                    break;
-                case PropertyFilter.GreaterThan:
-                    if (property.Type == SchemaPropertyType.Number)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() > (decimal)castedReferenceValue!);
-                    }
-                    else if (property.Type == SchemaPropertyType.DateTime)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() > (DateTime)castedReferenceValue!);
-                    }
-                    break;
-                case PropertyFilter.LessThan:
-                    if (property.Type == SchemaPropertyType.Number)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() < (decimal)castedReferenceValue!);
-                    }
-                    else if (property.Type == SchemaPropertyType.DateTime)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() < (DateTime)castedReferenceValue!);
-                    }
-                    break;
-                case PropertyFilter.Contains:
-                    if (property.Type == SchemaPropertyType.Text)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString().Contains((string)castedReferenceValue!));
-                    }
-                    break;
-                case PropertyFilter.StartsWith:
-                    if (property.Type == SchemaPropertyType.Text)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString().StartsWith((string)castedReferenceValue!));
-                    }
-                    break;
-                case PropertyFilter.EndsWith:
-                    if (property.Type == SchemaPropertyType.Text)
-                    {
-                        query = query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString().EndsWith((string)castedReferenceValue!));
-                    }
-                    break;
+                // For equals and not equals, compare property value against null
+                query = filter.FilterType switch
+                {
+                    PropertyFilter.Equals => query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() == null),
+                    PropertyFilter.NotEquals => query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() != null),
+                    _ => throw new ArgumentException($@"Cannot apply filter '{filter.FilterType}' to 
+                            property '{filter.PropertyName}' when the reference value is null.
+                            Only 'Equals' and 'NotEquals' are supported for null comparisons."),
+                };
+                continue;
             }
+
+            query = (property.Type, filter.FilterType) switch
+            {
+                (SchemaPropertyType.Number, PropertyFilter.Equals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() == (decimal)value!),
+                (SchemaPropertyType.Number, PropertyFilter.NotEquals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() != (decimal)value!),
+                (SchemaPropertyType.Number, PropertyFilter.GreaterThan) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() > (decimal)value!),
+                (SchemaPropertyType.Number, PropertyFilter.LessThan) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() < (decimal)value!),
+
+                (SchemaPropertyType.DateTime, PropertyFilter.Equals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() == (DateTime)value!),
+                (SchemaPropertyType.DateTime, PropertyFilter.NotEquals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() != (DateTime)value!),
+                (SchemaPropertyType.DateTime, PropertyFilter.GreaterThan) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() > (DateTime)value!),
+                (SchemaPropertyType.DateTime, PropertyFilter.LessThan) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() < (DateTime)value!),
+
+                (SchemaPropertyType.Text, PropertyFilter.Equals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() == (string)value!),
+                (SchemaPropertyType.Text, PropertyFilter.NotEquals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() != (string)value!),
+                (SchemaPropertyType.Text, PropertyFilter.Contains) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString()!.Contains((string)value!)),
+                (SchemaPropertyType.Text, PropertyFilter.StartsWith) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString()!.StartsWith((string)value!)),
+                (SchemaPropertyType.Text, PropertyFilter.EndsWith) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString()!.EndsWith((string)value!)),
+
+                (SchemaPropertyType.Boolean, PropertyFilter.Equals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetBoolean() == (bool)value!),
+                (SchemaPropertyType.Boolean, PropertyFilter.NotEquals) =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetBoolean() != (bool)value!),
+
+                (SchemaPropertyType.Enum, PropertyFilter.Equals) when value is string enumString =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() == enumString),
+                (SchemaPropertyType.Enum, PropertyFilter.NotEquals) when value is string enumString =>
+                    query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() != enumString),
+
+                _ => query
+            };
         }
 
         return query;

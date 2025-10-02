@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Data;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;

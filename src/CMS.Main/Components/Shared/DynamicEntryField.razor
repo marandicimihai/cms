@@ -2,12 +2,15 @@
 @using Ardalis.Result
 @using CMS.Main.DTOs.SchemaProperty
 @using CMS.Main.Models
+@using CMS.Main.Services.SchemaProperties
 @using Microsoft.EntityFrameworkCore.Metadata.Internal
+
+@inject ISchemaPropertyValidator SchemaPropertyValidator
 
 <div class="flex flex-col gap-1">
     <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@SchemaProperty.Id">
         @SchemaProperty.Name
-        @if (SchemaProperty.IsRequired)
+        @if (CanHaveNullValue == null ? SchemaProperty.IsRequired : !(bool)CanHaveNullValue)
         {
             <span class="text-rose-600">*</span>
         }
@@ -48,7 +51,7 @@
                     break;
             }
         </div>
-        @if (!SchemaProperty.IsRequired)
+        @if (CanHaveNullValue == null ? !SchemaProperty.IsRequired : (bool)CanHaveNullValue)
         {
             <div class="flex items-center gap-1">
                 <input id="toggle-@SchemaProperty.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
@@ -71,12 +74,11 @@
 
     [Parameter]
     public object? InitialValue { get; set; }
-    
+
     [Parameter]
-    public bool UseInitialValue { get; set; }
+    public bool? CanHaveNullValue { get; set; }
 
     private object? Value { get; set; }
-    private object? TempValue { get; set; }
 
     private string? ValidationMessage { get; set; }
     private bool HasError => !string.IsNullOrEmpty(ValidationMessage);
@@ -85,31 +87,20 @@
 
     protected override void OnInitialized()
     {
-        if (!UseInitialValue)
-        {
-            // Handle the case where InitialValue was not passed
-            Value = GetDefaultValue();
-            IsNull = false;
-        }
-        else
-        {
-            Value = InitialValue;
-            IsNull = !SchemaProperty.IsRequired && Value is null;
-        }
+        Value = InitialValue ?? GetDefaultValue();
+        IsNull = !SchemaProperty.IsRequired && Value is null;
     }
 
     private void OnIsNullChanged(ChangeEventArgs e)
     {
-        IsNull = e.Value?.ToString() == "true" || e.Value is true;
+        IsNull = e.Value is true;
         if (IsNull)
         {
-            TempValue = Value;
-            Value = GetDefaultValue();
             ValidationMessage = null;
         }
         else
         {
-            Value = TempValue;
+            Value = GetDefaultValue();
             Validate();
         }
         StateHasChanged();
@@ -146,14 +137,11 @@
         ValidationMessage = null;
         if (!IsNull) 
         {
-            // Treat field as if required if not required already
-            var value = Value is "" ? null : Value;
-
             // Store previous IsRequired value and set to true
             var temp = SchemaProperty.IsRequired;
             SchemaProperty.IsRequired = true;
 
-            var validationResult = PropertyValidator.ValidateProperty(SchemaProperty, ref value);
+            var validationResult = SchemaPropertyValidator.ValidateAndCast(SchemaProperty, Value, CanHaveNullValue != true);
             
             // Restore original IsRequired value
             SchemaProperty.IsRequired = temp;
@@ -165,14 +153,25 @@
         }
     }
 
+    private object? GetDefaultValue() =>
+        SchemaProperty.Type switch
+        {
+            SchemaPropertyType.Text => string.Empty,
+            SchemaPropertyType.Boolean => false,
+            _ => null
+        };
+
     public void Reset()
     {
-        Value = GetDefaultValue();
-        ValidationMessage = null;
+        Value = InitialValue ?? GetDefaultValue();
+        IsNull = !SchemaProperty.IsRequired && Value is null;
     }
 
     public (SchemaPropertyDto, object?) GetPropertyAndValue()
     {
+        if (IsNull)
+            return (SchemaProperty, null);
+
         if (SchemaProperty.Type == SchemaPropertyType.DateTime && Value is DateTime dt)
         {
             // Always return ISO 8601 UTC string for DateTime
@@ -185,16 +184,6 @@
     {
         Validate();
         return !HasError;
-    }
-
-    private object? GetDefaultValue()
-    {
-        return SchemaProperty.Type switch
-        {
-            SchemaPropertyType.Text => string.Empty,
-            SchemaPropertyType.Boolean => false,
-            _ => string.Empty
-        };
     }
 
 }
