@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using CMS.Main.DTOs.Project;
-using CMS.Main.DTOs.SchemaProperty;
 
-namespace CMS.Main.DTOs.Schema;
+namespace CMS.Main.DTOs;
 
 public class SchemaDto
 {

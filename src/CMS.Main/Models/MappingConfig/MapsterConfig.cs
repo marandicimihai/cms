@@ -1,8 +1,6 @@
-using CMS.Main.DTOs.ApiKey;
-using CMS.Main.DTOs.Entry;
-using CMS.Main.DTOs.Project;
-using CMS.Main.DTOs.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.Entries;
+using CMS.Main.DTOs;
+using CMS.Main.Endpoints.Entries;
 using Mapster;
 
 namespace CMS.Main.Models.MappingConfig;

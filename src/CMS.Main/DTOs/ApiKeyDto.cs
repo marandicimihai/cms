@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using CMS.Main.DTOs.Project;
 
-namespace CMS.Main.DTOs.ApiKey;
+namespace CMS.Main.DTOs;
 
 public class ApiKeyDto
 {

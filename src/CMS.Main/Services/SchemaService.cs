@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using CMS.Main.Abstractions;
 using CMS.Main.Data;
-using CMS.Main.DTOs.Schema;
+using CMS.Main.DTOs;
 using CMS.Main.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;

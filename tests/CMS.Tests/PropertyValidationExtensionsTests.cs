@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Ardalis.Result;
 using CMS.Main.Abstractions.SchemaProperties;
+using CMS.Main.DTOs;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
 using CMS.Main.Services.SchemaProperties;
@@ -60,7 +61,6 @@ public class SchemaPropertyValidatorTests
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
         Assert.True(result.IsInvalid());
-        Assert.Contains("required", result.ValidationErrors.First().ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

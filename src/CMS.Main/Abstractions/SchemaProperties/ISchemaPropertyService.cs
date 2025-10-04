@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.DTOs;
 
 namespace CMS.Main.Abstractions.SchemaProperties;
 

@@ -1,8 +1,8 @@
 using Ardalis.Result;
 using CMS.Main.Abstractions;
 using CMS.Main.Data;
+using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
-using CMS.Main.DTOs.Project;
 using CMS.Main.Models;
 using CMS.Main.Models.MappingConfig;
 using CMS.Main.Services.State;

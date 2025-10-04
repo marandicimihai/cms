@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using CMS.Main.DTOs.SchemaProperty;
 
-namespace CMS.Main.DTOs.SchemaProperty;
+namespace CMS.Main.DTOs;
 
 public class SchemaPropertyDto
 {

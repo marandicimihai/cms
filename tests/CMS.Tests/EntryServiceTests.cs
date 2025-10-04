@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Ardalis.Result;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Data;
-using CMS.Main.DTOs.Entry;
 using CMS.Main.DTOs.Schema;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
@@ -18,6 +17,7 @@ using Xunit;
 using CMS.Main.DTOs.Pagination;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.Services.Entries;
+using CMS.Main.DTOs;
 
 namespace CMS.Tests;
 

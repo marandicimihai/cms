@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Data;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.DTOs;
 using CMS.Main.Models;
 using CMS.Main.Models.MappingConfig;
 using Mapster;

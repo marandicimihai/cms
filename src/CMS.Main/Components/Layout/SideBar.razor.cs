@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using CMS.Main.Abstractions;
+using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
-using CMS.Main.DTOs.Project;
 using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;

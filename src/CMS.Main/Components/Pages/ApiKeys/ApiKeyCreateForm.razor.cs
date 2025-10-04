@@ -1,9 +1,9 @@
 using CMS.Main.Abstractions;
-using CMS.Main.DTOs.ApiKey;
 using CMS.Main.Components.Shared;
 using Microsoft.AspNetCore.Components;
 using CMS.Main.Services.State;
 using Mapster;
+using CMS.Main.DTOs;
 
 namespace CMS.Main.Components.Pages.ApiKeys;
 

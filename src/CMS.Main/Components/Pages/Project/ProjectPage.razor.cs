@@ -1,6 +1,6 @@
 using CMS.Main.Abstractions;
 using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.Project;
+using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 

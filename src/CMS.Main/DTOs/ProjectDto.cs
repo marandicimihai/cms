@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using CMS.Main.DTOs.ApiKey;
-using CMS.Main.DTOs.Schema;
 
-namespace CMS.Main.DTOs.Project;
+namespace CMS.Main.DTOs;
 
 public class ProjectDto
 {

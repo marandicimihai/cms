@@ -1,6 +1,6 @@
 using Ardalis.Result;
+using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
-using CMS.Main.DTOs.Project;
 
 namespace CMS.Main.Abstractions;
 

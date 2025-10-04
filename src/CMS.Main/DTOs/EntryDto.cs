@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using CMS.Main.DTOs.Schema;
 
-namespace CMS.Main.DTOs.Entry;
+namespace CMS.Main.DTOs;
 
 public class EntryDto
 {
