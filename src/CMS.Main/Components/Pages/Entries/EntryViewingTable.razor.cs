@@ -6,6 +6,7 @@ using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.QuickGrid;
 using static CMS.Main.Components.Pages.Entries.SortAndFilterOptions;
 
 namespace CMS.Main.Components.Pages.Entries;
@@ -33,46 +34,19 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
     
-    private List<EntryDto> Entries { get; set; } = [];
     private List<EntryDto> SelectedEntries { get; set; } = [];
-
+    private List<EntryDto> CurrentPageEntries { get; set; } = [];
     private SortAndFilterOptionsChangedEventArgs? cachedArgs;
-
     private StatusIndicator? statusIndicator;
-
-    private List<string> SortableProperties => Properties
-        .Where(p => p.Type == SchemaPropertyType.Text || p.Type == SchemaPropertyType.Number || p.Type == SchemaPropertyType.DateTime)
-        .Select(p => p.Name)
-        .Append("CreatedAt")
-        .Append("UpdatedAt")
-        .ToList();
-    
-    private readonly int pageSize = 20;
-    private bool isLoadingMore;
-    private int totalCount;
-    private bool HasMoreEntries => Entries.Count < totalCount;
+    private QuickGrid<EntryDto>? quickGrid;
+    private PaginationState pagination = new() { ItemsPerPage = 2 };
 
     private string? queuedStatusMessage;
     private StatusIndicator.StatusSeverity? queuedStatusSeverity;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         EntryStateService.EntriesCreated += EntriesCreated;
-        
-        var result = await EntryService.GetEntriesForSchema(
-            SchemaId,
-            new PaginationParams(1, pageSize));
-
-        if (result.IsSuccess)
-        {
-            (Entries, var pagination) = result.Value;
-            totalCount = pagination.TotalCount;
-        }
-        else
-        {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
-        }
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -85,44 +59,72 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
     }
 
-    // Called whenever the sort property or direction changes
+    // ItemsProvider for QuickGrid - handles pagination and fetching data
+    private async ValueTask<GridItemsProviderResult<EntryDto>> LoadEntriesAsync(GridItemsProviderRequest<EntryDto> request)
+    {
+        try
+        {
+            // Calculate page number (1-based) from startIndex
+            var pageNumber = (request.StartIndex / pagination.ItemsPerPage) + 1;
+            var pageSize = request.Count ?? pagination.ItemsPerPage;
+
+            var result = await EntryService.GetEntriesForSchema(
+                SchemaId,
+                new PaginationParams(pageNumber, pageSize),
+                opt =>
+                {
+                    if (cachedArgs is not null)
+                    {
+                        opt.SortByPropertyName = cachedArgs.SortByProperty;
+                        opt.Descending = cachedArgs.Descending;
+                        opt.Filters = cachedArgs.Filters;
+                    }
+                    else
+                    {
+                        // Default sort
+                        opt.SortByPropertyName = "CreatedAt";
+                        opt.Descending = true;
+                    }
+                });
+
+            if (result.IsSuccess)
+            {
+                var (entries, paginationInfo) = result.Value;
+                CurrentPageEntries = entries;
+                return GridItemsProviderResult.From(entries, paginationInfo.TotalCount);
+            }
+            else
+            {
+                queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error loading entries";
+                queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+                return GridItemsProviderResult.From(new List<EntryDto>(), 0);
+            }
+        }
+        catch (Exception)
+        {
+            return GridItemsProviderResult.From(new List<EntryDto>(), 0);
+        }
+    }
+
+    // Called whenever the sort property or direction changes from SortAndFilterOptions
     private async Task OnOptionsChangedAsync(SortAndFilterOptionsChangedEventArgs args)
     {
-        var result = await EntryService.GetEntriesForSchema(
-            SchemaId,
-            new PaginationParams(1, pageSize),
-            opt =>
-            {
-                opt.SortByPropertyName = args.SortByProperty;
-                opt.Descending = args.Descending;
-                opt.Filters = args.Filters;
-            });
-
         cachedArgs = args;
-
-        if (result.IsSuccess)
+        
+        // Refresh the grid to apply new sort/filter options
+        if (quickGrid != null)
         {
-            (Entries, var pagination) = result.Value;
-            StateHasChanged();
-            totalCount = pagination.TotalCount;
-        }
-        else
-        {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await quickGrid.RefreshDataAsync();
         }
     }
 
     private void EntriesCreated(List<EntryDto> created)
     {
-        // Prepend new entries; keep newest-first order consistent with sort
-        Entries.InsertRange(0, created);
-        // Keep pagination total in sync when new entries are created elsewhere
-        if (created?.Count > 0)
+        // When new entries are created, refresh the grid
+        if (quickGrid != null && created?.Count > 0)
         {
-            totalCount = Math.Max(0, totalCount + created.Count);
+            _ = quickGrid.RefreshDataAsync();
         }
-        StateHasChanged();
     }
     
     private object? GetEntryPropertyValue(EntryDto entry, string propertyName)
@@ -198,62 +200,19 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         
         if (result.IsSuccess)
         {
-            Entries.Remove(entry);
-            // Keep pagination metadata in sync with user-visible list
-            totalCount = Math.Max(0, totalCount - 1);
             statusIndicator?.Show("Successfully deleted entry.", 
                 StatusIndicator.StatusSeverity.Success);
+            
+            // Refresh the grid
+            if (quickGrid != null)
+            {
+                await quickGrid.RefreshDataAsync();
+            }
         }
         else
         {
             statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
                 StatusIndicator.StatusSeverity.Error);
-        }
-    }
-
-    private async Task LoadMoreEntriesAsync()
-    {
-        if (isLoadingMore || !HasMoreEntries) return;
-        isLoadingMore = true;
-        StateHasChanged();
-        await Task.Yield();
-
-        try
-        {
-            // Calculate next page (1-based)
-            var nextPage = (Entries.Count / pageSize) + 1;
-            var result = await EntryService.GetEntriesForSchema(
-                SchemaId,
-                new PaginationParams(nextPage, pageSize),
-                opt =>
-                {
-                    if (cachedArgs is not null)
-                    {
-                        opt.SortByPropertyName = cachedArgs.SortByProperty;
-                        opt.Descending = cachedArgs.Descending;
-                        opt.Filters = cachedArgs.Filters;
-                    }
-                });
-
-            if (result.IsSuccess)
-            {
-                var (newEntries, pagination) = result.Value;
-                foreach (var e in newEntries)
-                {
-                    if (Entries.All(existing => existing.Id != e.Id))
-                        Entries.Add(e);
-                }
-                totalCount = pagination.TotalCount;
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-        finally
-        {
-            isLoadingMore = false;
-            StateHasChanged();
         }
     }
 
@@ -264,7 +223,8 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private bool IsAllSelected
     {
-        get => Entries.Count > 0 && SelectedEntries.Count == Entries.Count;
+        get => CurrentPageEntries.Count > 0 && SelectedEntries.Count == CurrentPageEntries.Count && 
+               CurrentPageEntries.All(e => SelectedEntries.Any(s => s.Id == e.Id));
         set => ToggleSelectAll(value);
     }
 
@@ -297,11 +257,20 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     {
         if (selected)
         {
-            SelectedEntries = Entries.ToList();
+            // Select all entries on current page
+            foreach (var entry in CurrentPageEntries)
+            {
+                if (SelectedEntries.All(e => e.Id != entry.Id))
+                    SelectedEntries.Add(entry);
+            }
         }
         else
         {
-            SelectedEntries.Clear();
+            // Deselect all entries on current page
+            foreach (var entry in CurrentPageEntries)
+            {
+                SelectedEntries.RemoveAll(e => e.Id == entry.Id);
+            }
         }
         StateHasChanged();
     }
@@ -331,19 +300,24 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             var result = await EntryService.DeleteEntryAsync(entry.Id);
             if (result.IsSuccess)
             {
-                Entries.RemoveAll(e => e.Id == entry.Id);
                 deletedCount++;
             }
-            // Optionally, show error for failed deletes
-        }
-
-        // Decrease totalCount by the number of successfully deleted entries
-        if (deletedCount > 0)
-        {
-            totalCount = Math.Max(0, totalCount - deletedCount);
         }
 
         SelectedEntries.Clear();
+        
+        if (deletedCount > 0)
+        {
+            statusIndicator?.Show($"Successfully deleted {deletedCount} entr{(deletedCount == 1 ? "y" : "ies")}.", 
+                StatusIndicator.StatusSeverity.Success);
+            
+            // Refresh the grid
+            if (quickGrid != null)
+            {
+                await quickGrid.RefreshDataAsync();
+            }
+        }
+        
         StateHasChanged();
     }
 
