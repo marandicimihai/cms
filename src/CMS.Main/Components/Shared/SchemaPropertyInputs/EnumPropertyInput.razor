@@ -1,0 +1,58 @@
+@using CMS.Main.DTOs.SchemaProperty
+@implements ISchemaPropertyInput
+
+<InputSelect @bind-Value="Value"
+    AdditionalAttributes="@(new Dictionary<string, object>() { { "disabled", Disabled },
+    { "class", $"block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 {(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")}"} })" >
+    <option value="">-- select --</option>
+    @if (SchemaProperty.Options != null)
+    {
+        foreach (var opt in SchemaProperty.Options)
+        {
+            <option value="@opt">@opt</option>
+        }
+    }
+</InputSelect>
+
+@code {
+    [Parameter, EditorRequired]
+    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    private string? _value;
+    private string? Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+            _value = value;
+            _ = ValueChanged.InvokeAsync(_value);
+        }
+    }
+
+    private bool Disabled { get; set; } = false;
+
+    protected override void OnParametersSet()
+    {
+        if (SchemaProperty.Type != SchemaPropertyType.Enum)
+        {
+            throw new InvalidOperationException($"EnumPropertyInput can only be used with SchemaPropertyType.Enum, but got {SchemaProperty.Type}");
+        }
+    }
+
+    public object? GetValue() => Value;
+
+    public void SetDisabled(bool disabled)
+    {
+        Disabled = disabled;
+    }
+
+    public void Reset()
+    {
+        Value = string.Empty;
+    }
+}

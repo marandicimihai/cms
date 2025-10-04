@@ -47,7 +47,6 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         .Append("UpdatedAt")
         .ToList();
     
-    // Pagination state (mirrors sidebar pattern)
     private readonly int pageSize = 20;
     private bool isLoadingMore;
     private int totalCount;

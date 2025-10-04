@@ -68,7 +68,7 @@ public static class EntryQueryExtensions
             var property = schema.Properties.FirstOrDefault(p => p.Name == filter.PropertyName);
             if (property is null) continue;
 
-            var castResult = validator.ValidateAndCast(property, filter.ReferenceValue, false);
+            var castResult = validator.ValidateAndCast(property, filter.ReferenceValue);
             if (castResult.IsInvalid())
             {
                 throw new ArgumentException($"Invalid reference value for filter on property '{filter.PropertyName}': {string.Join(", ", castResult.ValidationErrors.Select(e => e.ErrorMessage))}");

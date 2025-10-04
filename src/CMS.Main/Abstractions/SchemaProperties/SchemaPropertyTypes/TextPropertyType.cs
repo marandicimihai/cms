@@ -8,14 +8,14 @@ public class TextPropertyType : ISchemaPropertyTypeHandler
 {
     public SchemaPropertyType TypeName => SchemaPropertyType.Text;
 
-    public Result<object?> CastAndValidate(SchemaProperty property, object? value, bool validateIsRequired = true)
+    public Result<object?> CastAndValidate(SchemaProperty property, object? value)
     {
         // Handle null/empty values first
         if (value is null or "")
         {
-            if (validateIsRequired && property.IsRequired)
+            if (property.IsRequired)
             {
-                return Result.Invalid(new ValidationError($"Property '{property.Name}' is required and cannot be null or empty."));
+                return Result.Invalid(new ValidationError($"Property '{property.Name}' cannot be null or empty."));
             }
             return Result.Success(value);
         }

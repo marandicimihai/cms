@@ -9,14 +9,14 @@ public class NumberPropertyType : ISchemaPropertyTypeHandler
 {
     public SchemaPropertyType TypeName => SchemaPropertyType.Number;
 
-    public Result<object?> CastAndValidate(SchemaProperty property, object? value, bool validateIsRequired = true)
+    public Result<object?> CastAndValidate(SchemaProperty property, object? value)
     {
         // Handle null values first
         if (value is null)
         {
-            if (validateIsRequired && property.IsRequired)
+            if (property.IsRequired)
             {
-                return Result.Invalid(new ValidationError($"Property '{property.Name}' is required and cannot be null."));
+                return Result.Invalid(new ValidationError($"Property '{property.Name}' cannot be null."));
             }
             return Result.Success(value);
         }

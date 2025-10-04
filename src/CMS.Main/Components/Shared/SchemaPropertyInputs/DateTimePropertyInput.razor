@@ -1,0 +1,59 @@
+@using CMS.Main.DTOs.SchemaProperty
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Forms
+@implements ISchemaPropertyInput
+
+<InputDate Type="InputDateType.DateTimeLocal" @bind-Value="Value"
+    AdditionalAttributes="@(new Dictionary<string, object>() { { "disabled", Disabled },
+    { "class", $"block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 {(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")}"} })" />
+
+@code {
+    [Parameter, EditorRequired]
+    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    private DateTime? _value;
+    private DateTime? Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+            _value = value;
+            _ = ValueChanged.InvokeAsync(_value);
+        }
+    }
+
+    private bool Disabled { get; set; } = false;
+
+    protected override void OnParametersSet()
+    {
+        if (SchemaProperty.Type != SchemaPropertyType.DateTime)
+        {
+            throw new InvalidOperationException($"DateTimePropertyInput can only be used with SchemaPropertyType.DateTime, but got {SchemaProperty.Type}");
+        }
+    }
+
+    public object? GetValue()
+    {
+        if (Value is DateTime dt)
+        {
+            var utc = DateTime.SpecifyKind(dt, DateTimeKind.Local).ToUniversalTime();
+            return utc.ToString("o");
+        }
+        return null;
+    }
+
+    public void SetDisabled(bool disabled)
+    {
+        Disabled = disabled;
+    }
+
+    public void Reset()
+    {
+        Value = null;
+    }
+}

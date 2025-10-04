@@ -1,54 +1,54 @@
+
 using CMS.Main.Abstractions.Entries;
 using Microsoft.AspNetCore.Components;
 using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Components.Shared;
+using Mapster;
 
 namespace CMS.Main.Components.Pages.Entries;
 
 public partial class SortAndFilterOptions : ComponentBase
 {
+    // Event args for sort/filter changes
     public record SortAndFilterOptionsChangedEventArgs(string SortByProperty, bool Descending, List<EntryFilter> Filters);
 
     [Parameter]
     public EventCallback<SortAndFilterOptionsChangedEventArgs> OnOptionsChanged { get; set; }
 
-    protected override void OnInitialized()
-    {
-        SortByProperty = InitialSortByProperty;
-        Descending = InitialDescending;
-    }
-
-    #region Sorting
-
+    // Sorting
     [Parameter]
     public List<string> SortableProperties { get; set; } = [];
-
     [Parameter]
     public string InitialSortByProperty { get; set; } = "CreatedAt";
-
     [Parameter]
     public bool InitialDescending { get; set; } = false;
 
     private string SortByProperty { get; set; } = "CreatedAt";
     private bool Descending { get; set; }
 
-    #endregion
-
-    #region Filtering
-
+    // Filtering
     [Parameter]
     public List<SchemaPropertyDto> FilterableProperties { get; set; } = [];
-
+    private List<SchemaPropertyDto> FilterablePropertiesCopy { get; set; } = [];
     private List<FilterRow> FilterRows { get; set; } = [];
-
     private List<EntryFilter> Filters => FilterRows.Select(r => r.Filter).ToList();
+
+    protected override void OnParametersSet()
+    {
+        // Defensive copy for UI state
+        FilterablePropertiesCopy = FilterableProperties.Adapt<List<SchemaPropertyDto>>();
+        FilterablePropertiesCopy.ForEach(p => p.IsRequired = false);
+        SortByProperty = InitialSortByProperty;
+        Descending = InitialDescending;
+    }
 
     private void AddFilter()
     {
-        var row = new FilterRow();
-        row.Filter.PropertyName = FilterableProperties.FirstOrDefault()?.Name ?? string.Empty;
-        row.Filter.FilterType = PropertyFilter.Equals;
-        FilterRows.Add(row);
+        var firstProp = FilterableProperties.FirstOrDefault()?.Name ?? string.Empty;
+        FilterRows.Add(new FilterRow
+        {
+            Filter = new EntryFilter { PropertyName = firstProp, FilterType = PropertyFilter.Equals }
+        });
     }
 
     private void RemoveFilter(FilterRow row)
@@ -58,71 +58,66 @@ public partial class SortAndFilterOptions : ComponentBase
 
     private void OnFilterPropertyChanged(FilterRow row, ChangeEventArgs e)
     {
-        if (e.Value is not string propertyName)
-            return;
-
-        row.Filter.PropertyName = propertyName;
+        if (e.Value is string propertyName)
+        {
+            row.Filter.PropertyName = propertyName;
+            row.Filter.FilterType = PropertyFilter.Equals;
+            
+            var property = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == propertyName);
+            if (property != null)
+            {
+                property.IsRequired = !(row.Filter.FilterType is PropertyFilter.Equals or PropertyFilter.NotEquals);
+                StateHasChanged();
+            }
+        }
     }
 
     private void OnFilterTypeChanged(FilterRow row, ChangeEventArgs e)
     {
-        var val = e.Value!.ToString();
-        if (val is null)
+        if (e.Value is not string val)
             return;
-
         row.Filter.FilterType = Enum.Parse<PropertyFilter>(val);
-        
+        var property = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == row.Filter.PropertyName);
+        if (property != null)
+        {
+            property.IsRequired = !(row.Filter.FilterType is PropertyFilter.Equals or PropertyFilter.NotEquals);
+            StateHasChanged();
+        }
     }
 
-    private List<PropertyFilter> GetFilterOptionsForProperty(SchemaPropertyDto property)
+    private static List<PropertyFilter> GetFilterOptionsForProperty(SchemaPropertyDto property)
     {
-        switch (property.Type)
+        return property.Type switch
         {
-            case SchemaPropertyType.Text:
-                return [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.StartsWith, PropertyFilter.EndsWith, PropertyFilter.Contains];
-            case SchemaPropertyType.Number:
-                return [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan];
-            case SchemaPropertyType.Boolean:
-                return [PropertyFilter.Equals, PropertyFilter.NotEquals];
-            case SchemaPropertyType.DateTime:
-                return [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan];
-            case SchemaPropertyType.Enum:
-                return [PropertyFilter.Equals, PropertyFilter.NotEquals];
-            default:
-                return [];
-        }
+            SchemaPropertyType.Text => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.StartsWith, PropertyFilter.EndsWith, PropertyFilter.Contains],
+            SchemaPropertyType.Number => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
+            SchemaPropertyType.Boolean => [PropertyFilter.Equals, PropertyFilter.NotEquals],
+            SchemaPropertyType.DateTime => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
+            SchemaPropertyType.Enum => [PropertyFilter.Equals, PropertyFilter.NotEquals],
+            _ => []
+        };
     }
 
     private record FilterRow
     {
         public Guid Id { get; init; } = Guid.NewGuid();
-        public EntryFilter Filter { get; set; } = new EntryFilter();
+        public EntryFilter Filter { get; set; } = new();
         public DynamicEntryField? Field { get; set; }
     }
-
-    #endregion
 
     private void ApplySortAndFilterOptions()
     {
         var args = new SortAndFilterOptionsChangedEventArgs(SortByProperty, Descending, Filters);
-
-        var allValid = true;
-        foreach (var row in FilterRows)
+        var allValid = FilterRows.All(row => row.Field is not null && row.Field.IsValid());
+        if (allValid)
         {
-            if (row.Field is null || !row.Field.IsValid())
+            foreach (var row in FilterRows)
             {
-                allValid = false;
-                break;
+                var (_, val) = row.Field!.GetPropertyAndValue();
+                row.Filter.ReferenceValue = val;
             }
-
-            var (_, val) = row.Field.GetPropertyAndValue();
-
-            row.Filter.ReferenceValue = val;
-        }
-
-        if (allValid && OnOptionsChanged.HasDelegate)
-        {
-            OnOptionsChanged.InvokeAsync(args);
+            if (OnOptionsChanged.HasDelegate)
+                OnOptionsChanged.InvokeAsync(args);
         }
     }
 }

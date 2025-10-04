@@ -1,0 +1,48 @@
+@using CMS.Main.DTOs.SchemaProperty
+@implements ISchemaPropertyInput
+
+<InputNumber @bind-Value="Value"
+    AdditionalAttributes="@(new Dictionary<string, object>() { { "disabled", Disabled },
+    { "class", $"block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 {(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")}"} })" />
+
+@code {
+    [Parameter, EditorRequired]
+    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    private decimal? _value;
+    private decimal? Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+            _value = value;
+            _ = ValueChanged.InvokeAsync(_value);
+        }
+    }
+
+    private bool Disabled { get; set; } = false;
+
+    protected override void OnParametersSet()
+    {
+        if (SchemaProperty.Type != SchemaPropertyType.Number)
+        {
+            throw new InvalidOperationException($"NumberPropertyInput can only be used with SchemaPropertyType.Number, but got {SchemaProperty.Type}");
+        }
+    }
+
+    public object? GetValue() => Value;
+
+    public void SetDisabled(bool disabled)
+    {
+        Disabled = disabled;
+    }
+
+    public void Reset()
+    {
+        Value = null;
+    }
+}

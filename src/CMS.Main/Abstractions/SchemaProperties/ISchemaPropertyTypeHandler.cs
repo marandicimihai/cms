@@ -16,10 +16,10 @@ public interface ISchemaPropertyTypeHandler
     /// <param name="property">The schema property definition with type, options, and constraints</param>
     /// <param name="value">The value to cast and validate</param>
     /// <returns>Success with the cast and validated value, or Invalid with validation errors</returns>
-    Result<object?> CastAndValidate(SchemaProperty property, object? value, bool validateIsRequired = true);
+    Result<object?> CastAndValidate(SchemaProperty property, object? value);
 
-    Result<object?> CastAndValidate(SchemaPropertyDto property, object? value, bool validateIsRequired = true)
-        => CastAndValidate(property.Adapt<SchemaProperty>(), value, validateIsRequired);
+    Result<object?> CastAndValidate(SchemaPropertyDto property, object? value)
+        => CastAndValidate(property.Adapt<SchemaProperty>(), value);
 }
 
 /// <summary>
