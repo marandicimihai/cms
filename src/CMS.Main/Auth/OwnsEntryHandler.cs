@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Main.Auth;
 
-public class CanEditEntryHandler(
+public class OwnsEntryHandler(
     IDbContextConcurrencyHelper dbHelper
-) : AuthorizationHandler<CanEditEntryRequirement, string>
+) : AuthorizationHandler<OwnsEntryRequirement, string>
 {
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context, 
-        CanEditEntryRequirement requirement, 
+        OwnsEntryRequirement requirement, 
         string entryId)
     {
         if (context.User.Identity?.IsAuthenticated == true)

@@ -51,7 +51,7 @@ public partial class ProjectSchemasSection : ComponentBase
 
     public async Task HandleAddSchema()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId))
+        if (!await AuthHelper.OwnsProject(ProjectId))
         {
             await Notifications.NotifyAsync(new()
             {
@@ -88,7 +88,7 @@ public partial class ProjectSchemasSection : ComponentBase
 
     private async Task OnDeleteSchemaAsync(SchemaDto schema)
     {
-        if (!await AuthHelper.CanEditProject(ProjectId))
+        if (!await AuthHelper.OwnsProject(ProjectId))
         {
             await Notifications.NotifyAsync(new()
             {

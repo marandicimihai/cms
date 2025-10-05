@@ -102,7 +102,7 @@ public class GetEntries(
 
     public override async Task HandleAsync(GetEntriesRequest req, CancellationToken ct)
     {
-        var authResult = await authService.AuthorizeAsync(User, req.SchemaId, AuthConstants.CanEditSchema);
+        var authResult = await authService.AuthorizeAsync(User, req.SchemaId, AuthConstants.OwnsSchema);
         if (!authResult.Succeeded)
         {
             // Don't hint if the schema exists

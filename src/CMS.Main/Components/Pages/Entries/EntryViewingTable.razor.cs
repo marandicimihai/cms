@@ -227,7 +227,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private async Task OnDeleteEntry(EntryDto entry)
     {
-        if (!await AuthHelper.CanEditSchema(SchemaId))
+        if (!await AuthHelper.OwnsSchema(SchemaId))
         {
             await Notifications.NotifyAsync(new()
             {

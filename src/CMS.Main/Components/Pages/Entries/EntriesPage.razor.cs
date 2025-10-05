@@ -37,7 +37,7 @@ public partial class EntriesPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
+        if (!await AuthHelper.OwnsSchema(SchemaId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {
@@ -66,7 +66,7 @@ public partial class EntriesPage : ComponentBase
     
     private async Task OnEntryCreateSubmit(Dictionary<string, object?> entry)
     {
-        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
+        if (!await AuthHelper.OwnsSchema(SchemaId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {

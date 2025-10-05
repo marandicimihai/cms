@@ -30,7 +30,7 @@ public partial class ManageApiKeysPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {

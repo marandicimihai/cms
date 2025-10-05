@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Main.Auth;
 
-public class CanEditSchemaRequirement : IAuthorizationRequirement
+public class OwnsProjectRequirement : IAuthorizationRequirement
 {
-    
 }

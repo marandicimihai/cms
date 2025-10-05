@@ -30,7 +30,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
 
     private async Task OnDeletePropertyClicked(PropertyDto property)
     {
-        if (!await AuthHelper.CanEditSchema(Schema.Id))
+        if (!await AuthHelper.OwnsSchema(Schema.Id))
         {
             await Notifications.NotifyAsync(new()
             {

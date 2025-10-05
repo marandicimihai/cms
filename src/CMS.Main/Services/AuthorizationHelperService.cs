@@ -7,7 +7,7 @@ public class AuthorizationHelperService(
     IAuthorizationService authorizationService,
     AuthenticationStateProvider authenticationStateProvider)
 {
-    public async Task<bool> CanEditProject(string projectId)
+    public async Task<bool> OwnsProject(string projectId)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -17,7 +17,7 @@ public class AuthorizationHelperService(
         return authorizationResult.Succeeded;
     }
     
-    public async Task<bool> CanEditSchema(string schemaId)
+    public async Task<bool> OwnsSchema(string schemaId)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -27,7 +27,7 @@ public class AuthorizationHelperService(
         return authorizationResult.Succeeded;
     }
     
-    public async Task<bool> CanEditEntry(string entryId)
+    public async Task<bool> OwnsEntry(string entryId)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;

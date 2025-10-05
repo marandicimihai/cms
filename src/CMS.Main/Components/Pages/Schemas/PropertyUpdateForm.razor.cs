@@ -48,7 +48,7 @@ public partial class PropertyUpdateForm : ComponentBase
 
     private async Task HandleUpdatePropertySubmit()
     {
-        if (!await AuthHelper.CanEditSchema(Schema.Id))
+        if (!await AuthHelper.OwnsSchema(Schema.Id))
         {
             await Notifications.NotifyAsync(new()
             {

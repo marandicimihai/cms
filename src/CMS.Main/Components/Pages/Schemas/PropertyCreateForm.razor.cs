@@ -63,7 +63,7 @@ public partial class PropertyCreateForm : ComponentBase
 
     private async Task HandleCreatePropertySubmit()
     {
-        if (!await AuthHelper.CanEditSchema(Schema.Id))
+        if (!await AuthHelper.OwnsSchema(Schema.Id))
         {
             await Notifications.NotifyAsync(new()
             {

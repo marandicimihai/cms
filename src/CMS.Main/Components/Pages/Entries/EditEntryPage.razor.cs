@@ -24,7 +24,7 @@ public partial class EditEntryPage : ComponentBase
     
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
+        if (!await AuthHelper.OwnsEntry(EntryId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {
@@ -55,7 +55,7 @@ public partial class EditEntryPage : ComponentBase
         if (Entry is null)
             return;
 
-        if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
+        if (!await AuthHelper.OwnsEntry(EntryId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {

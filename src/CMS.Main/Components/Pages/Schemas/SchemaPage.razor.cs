@@ -33,7 +33,7 @@ public partial class SchemaPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
+        if (!await AuthHelper.OwnsSchema(SchemaId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {

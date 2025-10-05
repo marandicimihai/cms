@@ -4,24 +4,20 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Main.Auth;
 
-public class CanEditSchemaHandler(
-    ISchemaService schemaService
-) : AuthorizationHandler<CanEditSchemaRequirement, string>
+public class OwnsProjectHandler(IProjectService projectService)
+    : AuthorizationHandler<OwnsProjectRequirement, string>
 {
-    protected override async Task HandleRequirementAsync(
-        AuthorizationHandlerContext context, 
-        CanEditSchemaRequirement requirement, 
-        string schemaId)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+        OwnsProjectRequirement requirement, string projectId)
     {
         if (context.User.Identity?.IsAuthenticated == true)
         {
             var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userId))
             {
-                var result = await schemaService.GetSchemaByIdAsync(schemaId,
-                    opt => opt.IncludeProject = true);
+                var result = await projectService.GetProjectByIdAsync(projectId);
 
-                if (result.IsSuccess && result.Value.Project.OwnerId == userId)
+                if (result.IsSuccess && result.Value.OwnerId == userId)
                 {
                     context.Succeed(requirement);
                     return;

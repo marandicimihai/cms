@@ -32,7 +32,7 @@ public partial class ProjectPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {
@@ -62,7 +62,7 @@ public partial class ProjectPage : ComponentBase
 
     private async Task OnSaveName()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {
@@ -87,7 +87,7 @@ public partial class ProjectPage : ComponentBase
 
     private async Task OnDeleteProject()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
             await Notifications.NotifyAsync(new()
             {

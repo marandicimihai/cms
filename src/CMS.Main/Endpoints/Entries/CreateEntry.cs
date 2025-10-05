@@ -55,7 +55,7 @@ public class CreateEntry(
 
     public override async Task HandleAsync(CreateEntryRequest req, CancellationToken ct)
     {
-        var authResult = await authService.AuthorizeAsync(User, req.SchemaId, AuthConstants.CanEditSchema);
+        var authResult = await authService.AuthorizeAsync(User, req.SchemaId, AuthConstants.OwnsSchema);
         if (!authResult.Succeeded)
         {
             await Send.NotFoundAsync(ct);
