@@ -74,15 +74,7 @@ public partial class ProjectPage : ComponentBase
 
         var result = await ProjectService.UpdateProjectAsync(ProjectDto);
 
-        if (result.IsSuccess)
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = "Project updated successfully.",
-                Type = NotificationType.Success
-            });
-        }
-        else
+        if (!result.IsSuccess)
         {
             await Notifications.NotifyAsync(new()
             {

@@ -90,10 +90,6 @@
         {
             ValidationMessage = null;
         }
-        else
-        {
-            Validate();
-        }
         StateHasChanged();
     }
 
@@ -124,6 +120,9 @@
     public void Reset()
     {
         Input.Reset();
+        IsNull = false;
+        Input.SetDisabled(IsNull);
+        StateHasChanged();
     }
 
     public (PropertyDto, object?) GetPropertyAndValue()

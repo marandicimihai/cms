@@ -92,11 +92,6 @@ public partial class PropertyCreateForm : ComponentBase
         if (result.IsSuccess)
         {
             Schema.Properties.Add(result.Value);
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Created property named {PropertyDto.Name}.",
-                Type = NotificationType.Info
-            });
             await OnSuccess.InvokeAsync();
         }
         else

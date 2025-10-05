@@ -63,12 +63,6 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
         {
             ApiKeys.Remove(key);
             StateHasChanged();
-            
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Deleted API key named {key.Name}.",
-                Type = NotificationType.Info
-            });
         }
         else
         {

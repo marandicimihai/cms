@@ -70,15 +70,7 @@ public partial class EditEntryPage : ComponentBase
 
         var result = await EntryService.UpdateEntryAsync(Entry);
 
-        if (result.IsSuccess)
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Updated entry with id {Entry.Id}.",
-                Type = NotificationType.Info
-            });
-        }
-        else
+        if (!result.IsSuccess)
         {
             await Notifications.NotifyAsync(new()
             {

@@ -3,6 +3,7 @@ using CMS.Main.Abstractions.Entries;
 using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Models;
 using CMS.Main.Services.SchemaProperties;
+using Mapster;
 
 namespace CMS.Main.Services.Entries;
 
@@ -63,10 +64,21 @@ public static class EntryQueryExtensions
 
     public static IQueryable<Entry> ApplyFilters(this IQueryable<Entry> query, EntryGetOptions options, Schema schema, IPropertyValidator validator)
     {
+        // Create copy to not accidentally modify the original schema
+        schema = schema.Adapt<Schema>();
         foreach (var filter in options.Filters)
         {
             var property = schema.Properties.FirstOrDefault(p => p.Name == filter.PropertyName);
             if (property is null) continue;
+
+            if (filter.FilterType is PropertyFilter.Equals or PropertyFilter.NotEquals)
+            {
+                property.IsRequired = false; // Allow null comparisons
+            }
+            else
+            {
+                property.IsRequired = true; // Other comparisons require a value
+            }
 
             var castResult = validator.ValidateAndCast(property, filter.ReferenceValue);
             if (castResult.IsInvalid())

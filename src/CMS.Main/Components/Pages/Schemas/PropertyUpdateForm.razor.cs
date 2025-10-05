@@ -76,11 +76,6 @@ public partial class PropertyUpdateForm : ComponentBase
 
         if (result.IsSuccess)
         {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Updated property named {PropertyDto.Name}.",
-                Type = NotificationType.Info
-            });
             await OnSuccess.InvokeAsync();
         }
         else

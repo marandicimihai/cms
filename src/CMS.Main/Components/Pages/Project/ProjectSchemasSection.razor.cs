@@ -69,12 +69,6 @@ public partial class ProjectSchemasSection : ComponentBase
 
         if (result.IsSuccess)
         {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Created schema named {NewSchema.Name}.",
-                Type = NotificationType.Info
-            });
-
             IsAddFormVisible = false;
             NewSchema = new SchemaDto { ProjectId = ProjectId };
             Schemas.Add(result.Value);
@@ -116,11 +110,6 @@ public partial class ProjectSchemasSection : ComponentBase
 
             if (result.IsSuccess)
             {
-                await Notifications.NotifyAsync(new()
-                {
-                    Message = $"Deleted schema named {schema.Name}.",
-                    Type = NotificationType.Info
-                });
                 Schemas.Remove(schema);
             }
             else

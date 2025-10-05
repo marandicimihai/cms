@@ -54,12 +54,6 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
 
         if (result.IsSuccess)
         {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Deleted property named {property.Name}.",
-                Type = NotificationType.Info
-            });
-
             Schema.Properties.Remove(property);
         }
         else

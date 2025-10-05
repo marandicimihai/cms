@@ -88,11 +88,6 @@ public partial class EntriesPage : ComponentBase
         {
             EntryStateService.NotifyCreated([result.Value]);
 
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Created entry with id {result.Value.Id}.",
-                Type = NotificationType.Info
-            });
             showCreateForm = false;
 
             entryCreateForm?.Reset();

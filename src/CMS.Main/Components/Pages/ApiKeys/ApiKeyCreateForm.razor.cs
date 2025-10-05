@@ -61,11 +61,6 @@ public partial class ApiKeyCreateForm : ComponentBase
             rawKey = result.Value.Item1;
             
             ApiKeyStateService.NotifyCreated(result.Value.Item2);
-            await Notifications.NotifyAsync(new()
-            {
-                Message = $"Created API key named {result.Value.Item2.Name}.",
-                Type = NotificationType.Info
-            });
             await OnSuccess.InvokeAsync();
         }
         else
