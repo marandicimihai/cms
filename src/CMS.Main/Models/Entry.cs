@@ -28,7 +28,7 @@ public class Entry : IDisposable
         Data?.Dispose();
     }
 
-    public Dictionary<string, object?> GetFields(List<SchemaProperty> properties)
+    public Dictionary<string, object?> GetFields(List<Property> properties)
     {
         var dictionary = new Dictionary<string, object?>();
         
@@ -64,7 +64,7 @@ public class Entry : IDisposable
     /// <param name="fieldValidator">Validator for casting and validating field values.</param>
     /// <returns>Normalized fields on success, or validation errors on failure.</returns>
     public Result<Dictionary<string, object?>> SetFields(
-        List<SchemaProperty> properties,
+        List<Property> properties,
         Dictionary<string, object?> fields,
         ISchemaPropertyValidator fieldValidator)
     {

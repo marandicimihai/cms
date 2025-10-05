@@ -1,15 +1,15 @@
 using System.Globalization;
 using Ardalis.Result;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Models;
 
-namespace CMS.Main.Abstractions.SchemaProperties.SchemaPropertyTypes;
+namespace CMS.Main.Abstractions.Properties.PropertyTypes;
 
-public class NumberPropertyType : ISchemaPropertyTypeHandler
+public class NumberPropertyType : IPropertyTypeHandler
 {
-    public SchemaPropertyType TypeName => SchemaPropertyType.Number;
+    public PropertyType TypeName => PropertyType.Number;
 
-    public Result<object?> CastAndValidate(SchemaProperty property, object? value)
+    public Result<object?> CastAndValidate(Property property, object? value)
     {
         // Handle null values first
         if (value is null)

@@ -16,12 +16,12 @@ public class SchemaPropertyValidatorTests
 
     public SchemaPropertyValidatorTests()
     {
-        var factory = new SchemaPropertyTypeHandlerFactory();
+        var factory = new PropertyTypeHandlerFactory();
         _validator = new SchemaPropertyValidator(factory);
     }
 
-    private static SchemaPropertyDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)
-        => new SchemaPropertyDto
+    private static PropertyDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)
+        => new PropertyDto
         {
             Id = Guid.NewGuid().ToString(),
             SchemaId = Guid.NewGuid().ToString(),

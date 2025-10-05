@@ -17,5 +17,5 @@ public class Schema
     public string ProjectId { get; set; } = default!;
     public Project Project { get; set; } = default!;
 
-    public List<SchemaProperty> Properties { get; set; } = [];
+    public List<Property> Properties { get; set; } = [];
 }

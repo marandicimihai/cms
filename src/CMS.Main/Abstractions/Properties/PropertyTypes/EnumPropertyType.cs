@@ -1,14 +1,15 @@
 using Ardalis.Result;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.SchemaProperties;
+using CMS.Main.DTOs;
 using CMS.Main.Models;
 
-namespace CMS.Main.Abstractions.SchemaProperties.SchemaPropertyTypes;
+namespace CMS.Main.Abstractions.Properties.PropertyTypes;
 
-public class EnumPropertyType : ISchemaPropertyTypeHandler
+public class EnumPropertyType : IPropertyTypeHandler
 {
-    public SchemaPropertyType TypeName => SchemaPropertyType.Enum;
+    public PropertyType TypeName => PropertyType.Enum;
 
-    public Result<object?> CastAndValidate(SchemaProperty property, object? value)
+    public Result<object?> CastAndValidate(Property property, object? value)
     {
         // Handle null values first
         if (value is null)

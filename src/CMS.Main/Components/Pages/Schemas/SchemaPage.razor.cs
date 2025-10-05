@@ -80,7 +80,7 @@ public partial class SchemaPage : ComponentBase
         createFormVisible = false;
     }
     
-    private void ShowUpdateForm(SchemaPropertyDto property)
+    private void ShowUpdateForm(PropertyDto property)
     {
         updateForm?.SetModel(property);
         updateFormVisible = true;

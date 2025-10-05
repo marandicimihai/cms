@@ -1,14 +1,15 @@
 using Ardalis.Result;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.SchemaProperties;
+using CMS.Main.DTOs;
 using CMS.Main.Models;
 
-namespace CMS.Main.Abstractions.SchemaProperties.SchemaPropertyTypes;
+namespace CMS.Main.Abstractions.Properties.PropertyTypes;
 
-public class TextPropertyType : ISchemaPropertyTypeHandler
+public class TextPropertyType : IPropertyTypeHandler
 {
-    public SchemaPropertyType TypeName => SchemaPropertyType.Text;
+    public PropertyType TypeName => PropertyType.Text;
 
-    public Result<object?> CastAndValidate(SchemaProperty property, object? value)
+    public Result<object?> CastAndValidate(Property property, object? value)
     {
         // Handle null/empty values first
         if (value is null or "")

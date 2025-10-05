@@ -1,10 +1,10 @@
 
 using CMS.Main.Abstractions.Entries;
 using Microsoft.AspNetCore.Components;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Components.Shared;
 using Mapster;
 using CMS.Main.DTOs;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 
 namespace CMS.Main.Components.Pages.Entries;
 
@@ -29,15 +29,15 @@ public partial class SortAndFilterOptions : ComponentBase
 
     // Filtering
     [Parameter]
-    public List<SchemaPropertyDto> FilterableProperties { get; set; } = [];
-    private List<SchemaPropertyDto> FilterablePropertiesCopy { get; set; } = [];
+    public List<PropertyDto> FilterableProperties { get; set; } = [];
+    private List<PropertyDto> FilterablePropertiesCopy { get; set; } = [];
     private List<FilterRow> FilterRows { get; set; } = [];
     private List<EntryFilter> Filters => FilterRows.Select(r => r.Filter).ToList();
 
     protected override void OnParametersSet()
     {
         // Defensive copy for UI state
-        FilterablePropertiesCopy = FilterableProperties.Adapt<List<SchemaPropertyDto>>();
+        FilterablePropertiesCopy = FilterableProperties.Adapt<List<PropertyDto>>();
         FilterablePropertiesCopy.ForEach(p => p.IsRequired = false);
         SortByProperty = InitialSortByProperty;
         Descending = InitialDescending;
@@ -86,15 +86,15 @@ public partial class SortAndFilterOptions : ComponentBase
         }
     }
 
-    private static List<PropertyFilter> GetFilterOptionsForProperty(SchemaPropertyDto property)
+    private static List<PropertyFilter> GetFilterOptionsForProperty(PropertyDto property)
     {
         return property.Type switch
         {
-            SchemaPropertyType.Text => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.StartsWith, PropertyFilter.EndsWith, PropertyFilter.Contains],
-            SchemaPropertyType.Number => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
-            SchemaPropertyType.Boolean => [PropertyFilter.Equals, PropertyFilter.NotEquals],
-            SchemaPropertyType.DateTime => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
-            SchemaPropertyType.Enum => [PropertyFilter.Equals, PropertyFilter.NotEquals],
+            PropertyType.Text => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.StartsWith, PropertyFilter.EndsWith, PropertyFilter.Contains],
+            PropertyType.Number => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
+            PropertyType.Boolean => [PropertyFilter.Equals, PropertyFilter.NotEquals],
+            PropertyType.DateTime => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
+            PropertyType.Enum => [PropertyFilter.Equals, PropertyFilter.NotEquals],
             _ => []
         };
     }

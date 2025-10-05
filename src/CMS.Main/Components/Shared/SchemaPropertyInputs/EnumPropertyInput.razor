@@ -1,13 +1,14 @@
-@using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.Abstractions.Properties.PropertyTypes
+@using CMS.Main.DTOs
 @implements ISchemaPropertyInput
 
 <InputSelect @bind-Value="Value"
     AdditionalAttributes="@(new Dictionary<string, object>() { { "disabled", Disabled },
     { "class", $"block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 {(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")}"} })" >
     <option value="">-- select --</option>
-    @if (SchemaProperty.Options != null)
+    @if (Property.Options != null)
     {
-        foreach (var opt in SchemaProperty.Options)
+        foreach (var opt in Property.Options)
         {
             <option value="@opt">@opt</option>
         }
@@ -16,7 +17,7 @@
 
 @code {
     [Parameter, EditorRequired]
-    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+    public PropertyDto Property { get; set; } = default!;
 
 
     [Parameter]
@@ -38,9 +39,9 @@
 
     protected override void OnParametersSet()
     {
-        if (SchemaProperty.Type != SchemaPropertyType.Enum)
+        if (Property.Type != PropertyType.Enum)
         {
-            throw new InvalidOperationException($"EnumPropertyInput can only be used with SchemaPropertyType.Enum, but got {SchemaProperty.Type}");
+            throw new InvalidOperationException($"EnumPropertyInput can only be used with PropertyType.Enum, but got {Property.Type}");
         }
     }
 

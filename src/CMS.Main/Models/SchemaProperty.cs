@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 
 namespace CMS.Main.Models;
 
-public class SchemaProperty
+public class Property
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public string Id { get; set; } = default!;
@@ -20,7 +20,7 @@ public class SchemaProperty
     public string Name { get; set; } = default!;
     
     [Required]
-    public SchemaPropertyType Type { get; set; }
+    public PropertyType Type { get; set; }
     
     // For enums
     public string[]? Options { get; set; }

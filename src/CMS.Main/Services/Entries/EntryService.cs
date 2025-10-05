@@ -4,7 +4,6 @@ using CMS.Main.Abstractions.Entries;
 using CMS.Main.Data;
 using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
 using CMS.Main.Services.SchemaProperties;
 using Mapster;

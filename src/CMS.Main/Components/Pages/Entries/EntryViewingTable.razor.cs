@@ -1,8 +1,8 @@
 using CMS.Main.Abstractions.Entries;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
@@ -16,7 +16,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     public string SchemaId { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public List<SchemaPropertyDto> Properties { get; set; } = default!;
+    public List<PropertyDto> Properties { get; set; } = default!;
     
     [Inject]
     private IEntryService EntryService { get; set; } = default!;
@@ -41,7 +41,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private StatusIndicator? statusIndicator;
 
     private List<string> SortableProperties => Properties
-        .Where(p => p.Type == SchemaPropertyType.Text || p.Type == SchemaPropertyType.Number || p.Type == SchemaPropertyType.DateTime)
+        .Where(p => p.Type == PropertyType.Text || p.Type == PropertyType.Number || p.Type == PropertyType.DateTime)
         .Select(p => p.Name)
         .Append("CreatedAt")
         .Append("UpdatedAt")

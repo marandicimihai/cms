@@ -1,7 +1,7 @@
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -31,17 +31,17 @@ public partial class PropertyUpdateForm : ComponentBase
     private ISchemaPropertyService PropertyService { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private SchemaPropertyDto PropertyDto { get; set; } = new();
+    private PropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
 
-    public void SetModel(SchemaPropertyDto propertyDto)
+    public void SetModel(PropertyDto propertyDto)
     {
         PropertyDto = propertyDto;
         EnumOptions = PropertyDto.Options is { Length: > 0 } ? string.Join(", ", PropertyDto.Options) : string.Empty;
     }
 
     private bool IsEnumOptionsValid =>
-        PropertyDto.Type != SchemaPropertyType.Enum ||
+        PropertyDto.Type != PropertyType.Enum ||
         (!string.IsNullOrWhiteSpace(EnumOptions) &&
          EnumOptions.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Length > 0);
 
@@ -53,8 +53,8 @@ public partial class PropertyUpdateForm : ComponentBase
                 StatusIndicator.StatusSeverity.Error);
             return;
         }
-        
-        if (PropertyDto.Type == SchemaPropertyType.Enum)
+
+        if (PropertyDto.Type == PropertyType.Enum)
         {
             var options = string.IsNullOrWhiteSpace(EnumOptions)
                 ? []

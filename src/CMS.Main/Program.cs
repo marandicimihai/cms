@@ -76,7 +76,7 @@ builder.Services
     .AddScoped<IApiKeyService, ApiKeyService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>()
-    .AddSingleton<ISchemaPropertyTypeHandlerFactory, SchemaPropertyTypeHandlerFactory>()
+    .AddSingleton<IPropertyTypeHandlerFactory, PropertyTypeHandlerFactory>()
     .AddScoped<ISchemaPropertyValidator, SchemaPropertyValidator>();
 
 builder.Services

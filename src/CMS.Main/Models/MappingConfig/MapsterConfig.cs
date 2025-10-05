@@ -11,7 +11,7 @@ public class MapsterConfig
     {
         TypeAdapterConfig.GlobalSettings.Default.PreserveReference(true);
 
-        TypeAdapterConfig<SchemaPropertyDto, SchemaProperty>
+        TypeAdapterConfig<PropertyDto, Property>
             .NewConfig()
             .Ignore(s => s.Id)
             .Ignore(s => s.Schema)
@@ -46,7 +46,7 @@ public class MapsterConfig
     }
 
     public static readonly TypeAdapterConfig EditSchemaPropertyConfig = new TypeAdapterConfig()
-        .NewConfig<SchemaPropertyDto, SchemaProperty>()
+        .NewConfig<PropertyDto, Property>()
         .Ignore(s => s.Id)
         .Ignore(s => s.Schema)
         .Ignore(s => s.CreatedAt)

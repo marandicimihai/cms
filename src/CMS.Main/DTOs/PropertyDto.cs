@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 
 namespace CMS.Main.DTOs;
 
-public class SchemaPropertyDto
+public class PropertyDto
 {
     public string Id { get; set; } = default!;
     
@@ -17,7 +17,7 @@ public class SchemaPropertyDto
     public string Name { get; set; } = default!;
     
     [Required]
-    public SchemaPropertyType Type { get; set; }
+    public PropertyType Type { get; set; }
     
     // For enums
     public string[]? Options { get; set; }

@@ -14,8 +14,8 @@ public class SchemaPropertyService(
     ILogger<SchemaPropertyService> logger
 ) : ISchemaPropertyService
 {
-    public async Task<Result<SchemaPropertyDto>> CreateSchemaPropertyAsync(
-        SchemaPropertyDto dto)
+    public async Task<Result<PropertyDto>> CreateSchemaPropertyAsync(
+        PropertyDto dto)
     {
         try
         {
@@ -30,7 +30,7 @@ public class SchemaPropertyService(
             if (schema.Properties.Any(p => p.Name == dto.Name))
                 return Result.Error("Property name must be unique within the schema.");
 
-            var property = dto.Adapt<SchemaProperty>();
+            var property = dto.Adapt<Property>();
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -38,7 +38,7 @@ public class SchemaPropertyService(
                 await dbContext.SaveChangesAsync();
             });
 
-            var resultDto = property.Adapt<SchemaPropertyDto>();
+            var resultDto = property.Adapt<PropertyDto>();
             return Result.Success(resultDto);
         }
         catch (Exception ex)
@@ -48,12 +48,12 @@ public class SchemaPropertyService(
         }
     }
 
-    public async Task<Result<SchemaPropertyDto>> UpdateSchemaPropertyAsync(SchemaPropertyDto dto)
+    public async Task<Result<PropertyDto>> UpdateSchemaPropertyAsync(PropertyDto dto)
     {
         try
         {
             var property = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.SchemaProperties.FindAsync(dto.Id));
+                await dbContext.Properties.FindAsync(dto.Id));
 
             if (property is null)
                 return Result.NotFound();
@@ -75,7 +75,7 @@ public class SchemaPropertyService(
                 await dbContext.SaveChangesAsync();
             });
 
-            return Result.Success(property.Adapt<SchemaPropertyDto>());
+            return Result.Success(property.Adapt<PropertyDto>());
         }
         catch (Exception ex)
         {
@@ -89,7 +89,7 @@ public class SchemaPropertyService(
         try
         {
             var property = await dbHelper.ExecuteAsync(async dbContext =>
-                await dbContext.SchemaProperties.FindAsync(propertyId));
+                await dbContext.Properties.FindAsync(propertyId));
 
             if (property is null)
                 return Result.NotFound();

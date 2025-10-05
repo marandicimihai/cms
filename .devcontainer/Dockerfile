@@ -2,6 +2,8 @@ FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
 
 ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/cert.pfx
 
+RUN su vscode -c "dotnet tool install --global dotnet-ef"
+
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>

@@ -39,7 +39,7 @@ public class EntryServiceTests
         var dbHelper = new DbContextConcurrencyHelper(context);
         
         // Setup validator for Entry.SetFields calls
-        var factory = new SchemaPropertyTypeHandlerFactory();
+        var factory = new PropertyTypeHandlerFactory();
         validator = new SchemaPropertyValidator(factory);
         
         entryService = new EntryService(dbHelper, validator, mockLogger.Object);
@@ -63,8 +63,8 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text, IsRequired = true };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text, IsRequired = true };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         var dto = new EntryDto { SchemaId = schema.Id, Fields = new Dictionary<string, object?> { ["Title"] = "Hello" } };
@@ -94,13 +94,13 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = SchemaPropertyType.Boolean };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = SchemaPropertyType.Boolean };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         // create entry directly
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Published"] = true }, validator);
+        entry.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Published"] = true }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 
@@ -118,15 +118,15 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         // add multiple entries
         for (var i = 0; i < 5; i++)
         {
             var e = new Entry { SchemaId = schema.Id };
-            e.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" }, validator);
+            e.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" }, validator);
             // stagger CreatedAt
             e.CreatedAt = DateTime.UtcNow.AddMinutes(i);
             await context.Entries.AddAsync(e);
@@ -155,15 +155,15 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         // Add some entries fewer than the requested oversized page size
         for (var i = 0; i < 10; i++)
         {
             var e = new Entry { SchemaId = schema.Id };
-            e.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" }, validator);
+            e.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Title"] = $"T{i}" }, validator);
             await context.Entries.AddAsync(e);
         }
         await context.SaveChangesAsync();
@@ -186,8 +186,8 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         var dto = new EntryDto
@@ -209,7 +209,7 @@ public class EntryServiceTests
         // Verify stored entry also does not include the unknown property
         var saved = await context.Entries.FindAsync(result.Value.Id);
         Assert.NotNull(saved);
-        var savedFields = saved.GetFields(new List<SchemaProperty> { prop });
+        var savedFields = saved.GetFields(new List<Property> { prop });
         Assert.False(savedFields.ContainsKey("NotAProperty"));
     }
 
@@ -220,12 +220,12 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "Initial" }, validator);
+        entry.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Title"] = "Initial" }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 
@@ -240,7 +240,7 @@ public class EntryServiceTests
 
         var updated = await context.Entries.FindAsync(entry.Id);
         Assert.NotNull(updated);
-        var fields = updated!.GetFields(new List<SchemaProperty> { prop });
+        var fields = updated!.GetFields(new List<Property> { prop });
         Assert.Equal("Updated", fields["Title"]);
         Assert.False(fields.ContainsKey("Unknown"));
     }
@@ -252,12 +252,12 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "Old" }, validator);
+        entry.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Title"] = "Old" }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 
@@ -270,7 +270,7 @@ public class EntryServiceTests
 
     var updated = await context.Entries.FindAsync(entry.Id);
     Assert.NotNull(updated);
-    var fields = updated!.GetFields(new List<SchemaProperty> { prop });
+    var fields = updated!.GetFields(new List<Property> { prop });
     Assert.Equal("New", fields["Title"]);
     }
 
@@ -281,12 +281,12 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(prop);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
         var entry = new Entry { SchemaId = schema.Id };
-        entry.SetFields(new List<SchemaProperty> { prop }, new Dictionary<string, object?> { ["Title"] = "X" }, validator);
+        entry.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Title"] = "X" }, validator);
         await context.Entries.AddAsync(entry);
         await context.SaveChangesAsync();
 

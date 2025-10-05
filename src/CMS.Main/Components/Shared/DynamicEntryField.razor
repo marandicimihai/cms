@@ -1,56 +1,56 @@
 @using System.Globalization
 @using Ardalis.Result
+@using CMS.Main.Abstractions.Properties.PropertyTypes
 @using CMS.Main.Components.Shared.SchemaPropertyInputs
-@using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.DTOs
 @using CMS.Main.Models
 @using CMS.Main.Services.SchemaProperties
 @using Mapster
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
 
 @inject ISchemaPropertyValidator SchemaPropertyValidator
 
 <div class="flex flex-col gap-1">
-    <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@SchemaProperty.Id">
-        @SchemaProperty.Name
-        @if (SchemaProperty.IsRequired)
+    <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@Property.Id">
+        @Property.Name
+        @if (Property.IsRequired)
         {
             <span class="text-rose-600">*</span>
         }
     </label>
     <div class="flex items-center gap-2">
         <div class="flex-1">
-            @switch (SchemaProperty.Type)
+            @switch (Property.Type)
             {
-                case SchemaPropertyType.Text:
+                case PropertyType.Text:
                     <TextPropertyInput 
-                        SchemaProperty="SchemaProperty" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.Number:
+                case PropertyType.Number:
                     <NumberPropertyInput 
-                        SchemaProperty="SchemaProperty" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.Boolean:
+                case PropertyType.Boolean:
                     <BooleanPropertyInput 
-                        SchemaProperty="SchemaProperty" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.DateTime:
+                case PropertyType.DateTime:
                     <DateTimePropertyInput 
-                        SchemaProperty="SchemaProperty" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.Enum:
+                case PropertyType.Enum:
                     <EnumPropertyInput 
-                        SchemaProperty="SchemaProperty" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 default:
-                    <div class="text-rose-600 text-sm">Unsupported type: @SchemaProperty.Type</div>
+                    <div class="text-rose-600 text-sm">Unsupported type: @Property.Type</div>
                     break;
             }
         </div>
-        @if (!SchemaProperty.IsRequired)
+        @if (!Property.IsRequired)
         {
             <div class="flex items-center gap-1">
-                <input id="toggle-@SchemaProperty.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
-                <label class="text-xs text-slate-600" for="toggle-@SchemaProperty.Id">null</label>
+                <input id="toggle-@Property.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
+                <label class="text-xs text-slate-600" for="toggle-@Property.Id">null</label>
             </div>
         }
     </div>
@@ -65,7 +65,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+    public PropertyDto Property { get; set; } = default!;
 
     [Parameter]
     public object? InitialValue { get; set; }
@@ -79,7 +79,7 @@
 
     protected override void OnInitialized()
     {
-        SchemaProperty = SchemaProperty.Adapt<SchemaPropertyDto>();
+        Property = Property.Adapt<PropertyDto>();
     }
 
     private void OnIsNullChanged(ChangeEventArgs e)
@@ -107,12 +107,12 @@
         ValidationMessage = null;
         if (!IsNull) 
         {
-            var temp = SchemaProperty.IsRequired;
-            SchemaProperty.IsRequired = true; // Temporarily disable required validation to allow empty values
+            var temp = Property.IsRequired;
+            Property.IsRequired = true; // Temporarily disable required validation to allow empty values
 
-            var validationResult = SchemaPropertyValidator.ValidateAndCast(SchemaProperty, Input.GetValue());
+            var validationResult = SchemaPropertyValidator.ValidateAndCast(Property, Input.GetValue());
 
-            SchemaProperty.IsRequired = temp; // Restore original required setting
+            Property.IsRequired = temp; // Restore original required setting
 
             if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
             {
@@ -126,12 +126,12 @@
         Input.Reset();
     }
 
-    public (SchemaPropertyDto, object?) GetPropertyAndValue()
+    public (PropertyDto, object?) GetPropertyAndValue()
     {
         if (IsNull)
-            return (SchemaProperty, null);
+            return (Property, null);
 
-        return (SchemaProperty, Input.GetValue());
+        return (Property, Input.GetValue());
     }
 
     public bool IsValid()

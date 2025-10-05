@@ -1,7 +1,5 @@
-﻿
-@using System.Linq
+﻿@using System.Linq
 @using CMS.Main.Abstractions.Entries
-@using CMS.Main.DTOs.SchemaProperty
 
 <div class="flex flex-col gap-4">
     <!-- Sorting Section -->
@@ -76,7 +74,7 @@
                             <!-- Dynamic Field -->
                             <DynamicEntryField 
                                 @ref="row.Field"
-                                SchemaProperty="property" />
+                                Property="property" />
                             <!-- Remove Filter Button -->
                             <div class="flex items-center">
                                 <button type="button"

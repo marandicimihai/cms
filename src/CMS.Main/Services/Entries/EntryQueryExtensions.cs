@@ -1,6 +1,6 @@
 using Ardalis.Result;
 using CMS.Main.Abstractions.Entries;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Models;
 using CMS.Main.Services.SchemaProperties;
 
@@ -27,24 +27,24 @@ public static class EntryQueryExtensions
                 // Sort by custom property
                 var property = schema.Properties.FirstOrDefault(p => p.Name == options.SortByPropertyName);
                 if (property is not null &&
-                        (property.Type == SchemaPropertyType.Text ||
-                         property.Type == SchemaPropertyType.Number ||
-                         property.Type == SchemaPropertyType.DateTime))
+                        (property.Type == PropertyType.Text ||
+                         property.Type == PropertyType.Number ||
+                         property.Type == PropertyType.DateTime))
                 {
-                    if (property.Type == SchemaPropertyType.Number)
+                    if (property.Type == PropertyType.Number)
                     {
                         query = options.Descending
                             ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDecimal())
                             : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDecimal());
                         break;
                     }
-                    else if (property.Type == SchemaPropertyType.DateTime)
+                    else if (property.Type == PropertyType.DateTime)
                     {
                         query = options.Descending
                             ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDateTime())
                             : query.OrderBy(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetDateTime());
                     }
-                    else if (property.Type == SchemaPropertyType.Text)
+                    else if (property.Type == PropertyType.Text)
                     {
                         query = options.Descending
                             ? query.OrderByDescending(e => e.Data.RootElement.GetProperty(options.SortByPropertyName).GetString())
@@ -92,43 +92,43 @@ public static class EntryQueryExtensions
 
             query = (property.Type, filter.FilterType) switch
             {
-                (SchemaPropertyType.Number, PropertyFilter.Equals) =>
+                (PropertyType.Number, PropertyFilter.Equals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() == (decimal)value!),
-                (SchemaPropertyType.Number, PropertyFilter.NotEquals) =>
+                (PropertyType.Number, PropertyFilter.NotEquals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() != (decimal)value!),
-                (SchemaPropertyType.Number, PropertyFilter.GreaterThan) =>
+                (PropertyType.Number, PropertyFilter.GreaterThan) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() > (decimal)value!),
-                (SchemaPropertyType.Number, PropertyFilter.LessThan) =>
+                (PropertyType.Number, PropertyFilter.LessThan) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDecimal() < (decimal)value!),
 
-                (SchemaPropertyType.DateTime, PropertyFilter.Equals) =>
+                (PropertyType.DateTime, PropertyFilter.Equals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() == (DateTime)value!),
-                (SchemaPropertyType.DateTime, PropertyFilter.NotEquals) =>
+                (PropertyType.DateTime, PropertyFilter.NotEquals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() != (DateTime)value!),
-                (SchemaPropertyType.DateTime, PropertyFilter.GreaterThan) =>
+                (PropertyType.DateTime, PropertyFilter.GreaterThan) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() > (DateTime)value!),
-                (SchemaPropertyType.DateTime, PropertyFilter.LessThan) =>
+                (PropertyType.DateTime, PropertyFilter.LessThan) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetDateTime() < (DateTime)value!),
 
-                (SchemaPropertyType.Text, PropertyFilter.Equals) =>
+                (PropertyType.Text, PropertyFilter.Equals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() == (string)value!),
-                (SchemaPropertyType.Text, PropertyFilter.NotEquals) =>
+                (PropertyType.Text, PropertyFilter.NotEquals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() != (string)value!),
-                (SchemaPropertyType.Text, PropertyFilter.Contains) =>
+                (PropertyType.Text, PropertyFilter.Contains) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString()!.Contains((string)value!)),
-                (SchemaPropertyType.Text, PropertyFilter.StartsWith) =>
+                (PropertyType.Text, PropertyFilter.StartsWith) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString()!.StartsWith((string)value!)),
-                (SchemaPropertyType.Text, PropertyFilter.EndsWith) =>
+                (PropertyType.Text, PropertyFilter.EndsWith) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString()!.EndsWith((string)value!)),
 
-                (SchemaPropertyType.Boolean, PropertyFilter.Equals) =>
+                (PropertyType.Boolean, PropertyFilter.Equals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetBoolean() == (bool)value!),
-                (SchemaPropertyType.Boolean, PropertyFilter.NotEquals) =>
+                (PropertyType.Boolean, PropertyFilter.NotEquals) =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetBoolean() != (bool)value!),
 
-                (SchemaPropertyType.Enum, PropertyFilter.Equals) when value is string enumString =>
+                (PropertyType.Enum, PropertyFilter.Equals) when value is string enumString =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() == enumString),
-                (SchemaPropertyType.Enum, PropertyFilter.NotEquals) when value is string enumString =>
+                (PropertyType.Enum, PropertyFilter.NotEquals) when value is string enumString =>
                     query.Where(e => e.Data.RootElement.GetProperty(filter.PropertyName).GetString() != enumString),
 
                 _ => query

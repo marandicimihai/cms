@@ -63,7 +63,7 @@ public class SchemaPropertyServiceTests
         var result = await propertyService.CreateSchemaPropertyAsync(dto);
         Assert.True(result.IsSuccess);
         Assert.Equal("Title", result.Value.Name);
-        Assert.NotNull(await context.SchemaProperties.FindAsync(result.Value.Id));
+        Assert.NotNull(await context.Properties.FindAsync(result.Value.Id));
     }
 
     [Fact]
@@ -80,14 +80,14 @@ public class SchemaPropertyServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var property = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(property);
+        var property = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(property);
         await context.SaveChangesAsync();
 
         var result = await propertyService.DeleteSchemaPropertyAsync(property.Id);
 
         Assert.True(result.IsSuccess);
-        Assert.Null(await context.SchemaProperties.FindAsync(property.Id));
+        Assert.Null(await context.Properties.FindAsync(property.Id));
     }
 
     [Fact]
@@ -111,8 +111,8 @@ public class SchemaPropertyServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var property = new SchemaProperty { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        await context.SchemaProperties.AddAsync(property);
+        var property = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        await context.Properties.AddAsync(property);
         await context.SaveChangesAsync();
 
         var updateDto = new SchemaPropertyDto
@@ -134,7 +134,7 @@ public class SchemaPropertyServiceTests
         var brokenDbHelper = new Mock<IDbContextConcurrencyHelper>();
         brokenDbHelper.Setup(h => h.ExecuteAsync<object>(It.IsAny<Func<ApplicationDbContext, Task<object>>>()))
             .ThrowsAsync(new Exception("DB error"));
-        brokenDbHelper.Setup(h => h.ExecuteAsync(It.IsAny<Func<ApplicationDbContext, Task<SchemaProperty>>>() ))
+        brokenDbHelper.Setup(h => h.ExecuteAsync(It.IsAny<Func<ApplicationDbContext, Task<Property>>>() ))
             .ThrowsAsync(new Exception("DB error"));
         brokenDbHelper.Setup(h => h.ExecuteAsync(It.IsAny<Func<ApplicationDbContext, Task>>()))
             .ThrowsAsync(new Exception("DB error"));

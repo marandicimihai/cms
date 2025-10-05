@@ -1,4 +1,5 @@
-﻿@using CMS.Main.DTOs.SchemaProperty
+﻿@using CMS.Main.Abstractions.Properties.PropertyTypes
+@using CMS.Main.DTOs
 @implements ISchemaPropertyInput
 
 <InputText @bind-Value="Value" 
@@ -8,7 +9,7 @@
 
 @code {
     [Parameter, EditorRequired]
-    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+    public PropertyDto Property { get; set; } = default!;
 
     [Parameter]
     public EventCallback<object?> ValueChanged { get; set; }
@@ -29,9 +30,9 @@
 
     protected override void OnParametersSet()
     {
-        if (SchemaProperty.Type != SchemaPropertyType.Text) 
+        if (Property.Type != PropertyType.Text) 
         {
-            throw new InvalidOperationException($"TextPropertyInput can only be used with SchemaPropertyType.Text, but got {SchemaProperty.Type}");
+            throw new InvalidOperationException($"TextPropertyInput can only be used with PropertyType.Text, but got {Property.Type}");
         }
     }
 

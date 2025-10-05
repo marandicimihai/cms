@@ -15,8 +15,8 @@ public class SchemaDto
     public string ProjectId { get; set; } = default!;
     public ProjectDto Project { get; set; } = default!;
 
-    private List<SchemaPropertyDto> properties = [];
-    public List<SchemaPropertyDto> Properties
+    private List<PropertyDto> properties = [];
+    public List<PropertyDto> Properties
     {
         get => properties;
         set

@@ -1,7 +1,7 @@
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -30,17 +30,17 @@ public partial class PropertyCreateForm : ComponentBase
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
 
-    private SchemaPropertyDto PropertyDto { get; set; } = new();
+    private PropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
-    private SchemaPropertyType[] PropertyTypes { get; } = Enum.GetValues<SchemaPropertyType>();
+    private PropertyType[] PropertyTypes { get; } = Enum.GetValues<PropertyType>();
 
     public void ResetForm()
     {
-        PropertyDto = new SchemaPropertyDto
+        PropertyDto = new PropertyDto
         {
             SchemaId = Schema.Id,
             Name = string.Empty,
-            Type = SchemaPropertyType.Text,
+            Type = PropertyType.Text,
             Options = null
         };
         EnumOptions = string.Empty;
@@ -48,7 +48,7 @@ public partial class PropertyCreateForm : ComponentBase
 
     private void OnTypeChanged(ChangeEventArgs _)
     {
-        if (PropertyDto.Type != SchemaPropertyType.Enum)
+        if (PropertyDto.Type != PropertyType.Enum)
         {
             EnumOptions = string.Empty;
             PropertyDto.Options = null;
@@ -56,7 +56,7 @@ public partial class PropertyCreateForm : ComponentBase
     }
     
     private bool IsEnumOptionsValid =>
-        PropertyDto.Type != SchemaPropertyType.Enum ||
+        PropertyDto.Type != PropertyType.Enum ||
         (!string.IsNullOrWhiteSpace(EnumOptions) &&
          EnumOptions.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Length > 0);
 
@@ -68,8 +68,8 @@ public partial class PropertyCreateForm : ComponentBase
                 StatusIndicator.StatusSeverity.Error);
             return;
         }
-        
-        if (PropertyDto.Type == SchemaPropertyType.Enum)
+
+        if (PropertyDto.Type == PropertyType.Enum)
         {
             var options = string.IsNullOrWhiteSpace(EnumOptions)
                 ? []

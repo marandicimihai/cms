@@ -1,5 +1,6 @@
-@using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.Abstractions.Properties.PropertyTypes
 @using System.Globalization
+@using CMS.Main.DTOs
 @using Microsoft.AspNetCore.Components.Forms
 @implements ISchemaPropertyInput
 
@@ -9,7 +10,7 @@
 
 @code {
     [Parameter, EditorRequired]
-    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+    public PropertyDto Property { get; set; } = default!;
 
 
     [Parameter]
@@ -31,9 +32,9 @@
 
     protected override void OnParametersSet()
     {
-        if (SchemaProperty.Type != SchemaPropertyType.DateTime)
+        if (Property.Type != PropertyType.DateTime)
         {
-            throw new InvalidOperationException($"DateTimePropertyInput can only be used with SchemaPropertyType.DateTime, but got {SchemaProperty.Type}");
+            throw new InvalidOperationException($"DateTimePropertyInput can only be used with PropertyType.DateTime, but got {Property.Type}");
         }
     }
 

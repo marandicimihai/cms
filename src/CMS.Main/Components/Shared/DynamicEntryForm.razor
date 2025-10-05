@@ -1,4 +1,4 @@
-@using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.DTOs
 @rendermode InteractiveServer
 
 <EditForm Model="Model" OnValidSubmit="HandleValidSubmit" class="flex flex-col gap-4">
@@ -6,7 +6,7 @@
     @for (var i = 0; i < Properties.Count; i++)
     {
         var j = i; // Capture the current index for use in the field component
-        <DynamicEntryField SchemaProperty="Properties[j]" InitialValue="InitialValues?[j]" @ref="Fields[j]" />
+        <DynamicEntryField Property="Properties[j]" InitialValue="InitialValues?[j]" @ref="Fields[j]" />
     }
 
     <div class="flex gap-2 justify-start mt-2">
@@ -26,7 +26,7 @@
     private object Model { get; set; } = new();
 
     [Parameter]
-    public List<SchemaPropertyDto> Properties { get; set; } = [];
+    public List<PropertyDto> Properties { get; set; } = [];
     
     [Parameter]
     public List<object?>? InitialValues { get; set; }

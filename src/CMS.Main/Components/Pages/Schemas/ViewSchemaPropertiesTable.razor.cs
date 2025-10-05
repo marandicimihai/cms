@@ -1,8 +1,8 @@
 using System.Text.Json;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -14,7 +14,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
     public SchemaDto Schema { get; set; } = default!;
     
     [Parameter]
-    public EventCallback<SchemaPropertyDto> OnEditProperty { get; set; }
+    public EventCallback<PropertyDto> OnEditProperty { get; set; }
 
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
@@ -27,7 +27,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
 
     private StatusIndicator? statusIndicator;
     
-    private async Task OnDeletePropertyClicked(SchemaPropertyDto property)
+    private async Task OnDeletePropertyClicked(PropertyDto property)
     {
         if (!await AuthHelper.CanEditSchema(Schema.Id))
         {
@@ -73,11 +73,11 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
             {
                 dict[p.Name] = p.Type switch
                 {
-                    SchemaPropertyType.Text => $"Sample {p.Name}",
-                    SchemaPropertyType.Boolean => true,
-                    SchemaPropertyType.DateTime => DateTime.UtcNow.ToString("o"),
-                    SchemaPropertyType.Number => 123.45,
-                    SchemaPropertyType.Enum => p.Options is { Length: > 0 } ? p.Options[0] : "ExampleOption",
+                    PropertyType.Text => $"Sample {p.Name}",
+                    PropertyType.Boolean => true,
+                    PropertyType.DateTime => DateTime.UtcNow.ToString("o"),
+                    PropertyType.Number => 123.45,
+                    PropertyType.Enum => p.Options is { Length: > 0 } ? p.Options[0] : "ExampleOption",
                     _ => null
                 };
             }

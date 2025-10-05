@@ -1,9 +1,8 @@
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Ardalis.Result;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.Auth;
-using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
