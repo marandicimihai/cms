@@ -55,8 +55,16 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Add auth here
-        
+        if (!await AuthHelper.OwnsSchema(SchemaId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
+
         EntryStateService.EntriesCreated += EntriesCreated;
         
         var result = await EntryService.GetEntriesForSchema(
@@ -82,7 +90,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     // Called whenever the sort property or direction changes
     private async Task OnOptionsChangedAsync(SortAndFilterOptionsChangedEventArgs args)
     {
-        // TODO: Add auth here
+        if (!await AuthHelper.OwnsSchema(SchemaId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
 
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
@@ -115,7 +131,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private async Task LoadMoreEntriesAsync()
     {
-        // TODO: Add auth here
+        if (!await AuthHelper.OwnsSchema(SchemaId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
 
         if (isLoadingMore || !HasMoreEntries) return;
         isLoadingMore = true;
@@ -316,7 +340,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private async Task DeleteSelectedEntriesAsync()
     {
-        // TODO: Add auth here
+        if (!await AuthHelper.OwnsSchema(SchemaId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
 
         if (SelectedEntries.Count == 0)
             return;

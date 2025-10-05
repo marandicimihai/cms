@@ -17,6 +17,9 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
     public EventCallback<ApiKeyDto> OnEdit { get; set; }
     
     [Inject]
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
+
+    [Inject]
     private ApiKeyStateService ApiKeyStateService { get; set; } = default!;
     
     [Inject]
@@ -47,7 +50,15 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
 
     private async Task OnDeleteKey(ApiKeyDto key)
     {
-        // TODO: Add auth here
+        if (!await AuthHelper.OwnsProject(key.ProjectId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
 
         var confirmed = await ConfirmationService.ShowAsync(
             "Delete API Key",
@@ -77,11 +88,21 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
 
     private async Task OnToggleKeyState(ApiKeyDto key, object? newValue)
     {
+        if (!await AuthHelper.OwnsProject(key.ProjectId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
+
         if (newValue is bool isActive)
         {
             var toUpdate = key.Adapt<ApiKeyDto>();
             toUpdate.IsActive = isActive;
-            
+
             var result = await ApiKeyService.UpdateApiKeyAsync(toUpdate);
             if (result.IsSuccess)
             {

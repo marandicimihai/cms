@@ -4,6 +4,7 @@ using CMS.Main.Services.State;
 using Mapster;
 using CMS.Main.DTOs;
 using CMS.Main.Abstractions.Notifications;
+using CMS.Main.Services;
 
 namespace CMS.Main.Components.Pages.ApiKeys;
 
@@ -20,6 +21,9 @@ public partial class ApiKeyCreateForm : ComponentBase
     
     [Parameter]
     public bool Visible { get; set; } = true;
+
+    [Inject]
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
 
     [Inject]
     private IApiKeyService ApiKeyService { get; set; } = default!;
@@ -52,7 +56,15 @@ public partial class ApiKeyCreateForm : ComponentBase
 
     private async Task HandleCreateApiKeySubmit()
     {
-        // TODO: Add auth here
+        if (!await AuthHelper.OwnsProject(ProjectId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
 
         var toCreate = ApiKeyDto.Adapt<ApiKeyDto>();
         var result = await ApiKeyService.CreateApiKeyAsync(toCreate);
