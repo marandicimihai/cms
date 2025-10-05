@@ -1,0 +1,109 @@
+﻿@using CMS.Main.Abstractions.Notifications
+@implements IDisposable
+@rendermode InteractiveServer
+@inject INotificationService NotificationService
+
+    <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2" style="max-width: 400px;">
+    @foreach (var notification in _notifications)
+    {
+        var bgColor = notification.Type switch
+        {
+            NotificationType.Success => "bg-emerald-600",
+            NotificationType.Error => "bg-rose-600",
+            NotificationType.Warning => "bg-amber-500",
+            _ => "bg-blue-600"
+        };
+
+        var icon = notification.Type switch
+        {
+            NotificationType.Success => "check_circle",
+            NotificationType.Error => "error",
+            NotificationType.Warning => "warning",
+            _ => "info"
+        };
+
+    <div class="@bgColor text-white rounded-lg shadow-lg p-4 flex items-start gap-3 @(notification.IsClosing ? "animate-slide-out" : "animate-slide-in")">
+            <span class="material-symbols-outlined icons-default flex-shrink-0">@icon</span>
+            <p class="text-sm flex-1">@notification.Message</p>
+            <button 
+                type="button"
+                @onclick="() => RemoveNotification(notification.Id)"
+                class="flex-shrink-0 hover:bg-white/20 rounded p-1 transition-colors"
+                aria-label="Close notification">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<NotificationItem> _notifications = new();
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotify += HandleNotification;
+        
+        // Check for expired notifications every 100ms
+        _timer = new System.Threading.Timer(_ =>
+        {
+            var now = DateTime.UtcNow;
+            var expired = _notifications
+                .Where(n => n.ExpiresAt <= now)
+                .Select(n => n.Id)
+                .ToList();
+            if (expired.Any())
+            {
+                // Schedule removal to allow exit animation
+                foreach (var id in expired)
+                {
+                    _ = InvokeAsync(() => RemoveNotification(id));
+                }
+            }
+        }, null, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
+    }
+
+    private void HandleNotification(Notification notification)
+    {
+        var notificationItem = new NotificationItem
+        {
+            Id = Guid.NewGuid(),
+            Message = notification.Message,
+            Type = notification.Type,
+            ExpiresAt = DateTime.UtcNow.AddSeconds(4) // Auto-dismiss after 4 seconds
+        };
+
+        _notifications.Add(notificationItem);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RemoveNotification(Guid id)
+    {
+        var notification = _notifications.FirstOrDefault(n => n.Id == id);
+        if (notification != null && !notification.IsClosing)
+        {
+            notification.IsClosing = true;
+            await InvokeAsync(StateHasChanged);
+            // Wait for exit animation (300ms) before removing
+            await Task.Delay(300);
+            _notifications.Remove(notification);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnNotify -= HandleNotification;
+        _timer?.Dispose();
+    }
+
+    private class NotificationItem
+    {
+        public Guid Id { get; set; }
+        public string? Message { get; set; }
+        public NotificationType Type { get; set; }
+        public DateTime ExpiresAt { get; set; }
+        public bool IsClosing { get; set; }
+    }
+}
+

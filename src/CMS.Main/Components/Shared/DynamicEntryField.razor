@@ -1,13 +1,13 @@
 @using System.Globalization
 @using Ardalis.Result
 @using CMS.Main.Abstractions.Properties.PropertyTypes
-@using CMS.Main.Components.Shared.SchemaPropertyInputs
+@using CMS.Main.Components.Shared.PropertyInputs
 @using CMS.Main.DTOs
 @using CMS.Main.Models
 @using CMS.Main.Services.SchemaProperties
 @using Mapster
 
-@inject ISchemaPropertyValidator SchemaPropertyValidator
+@inject IPropertyValidator SchemaPropertyValidator
 
 <div class="flex flex-col gap-1">
     <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@Property.Id">
@@ -70,7 +70,7 @@
     [Parameter]
     public object? InitialValue { get; set; }
 
-    private ISchemaPropertyInput Input { get; set; } = default!;
+    private IPropertyInput Input { get; set; } = default!;
 
     private string? ValidationMessage { get; set; }
     private bool HasError => !string.IsNullOrEmpty(ValidationMessage);

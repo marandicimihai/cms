@@ -1,5 +1,6 @@
 using CMS.Main.Abstractions;
 using CMS.Main.Abstractions.Entries;
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
@@ -27,26 +28,24 @@ public partial class EntriesPage : ComponentBase
     [Inject]
     private EntryStateService EntryStateService { get; set; } = default!;
 
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
+
     private DynamicEntryForm? entryCreateForm;
     
-    private StatusIndicator? statusIndicator;
-
     private bool showCreateForm;
-    private bool hasAccess;
-
-    private string? queuedStatusMessage;
-    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
 
     protected override async Task OnInitializedAsync()
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
-
-        hasAccess = true;
 
         var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
 
@@ -56,27 +55,24 @@ public partial class EntriesPage : ComponentBase
         }
         else
         {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
         }
     }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (queuedStatusMessage != null && queuedStatusSeverity != null)
-        {
-            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
-            queuedStatusMessage = null;
-            queuedStatusSeverity = null;
-        }
-    }
-
+    
     private async Task OnEntryCreateSubmit(Dictionary<string, object?> entry)
     {
         if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this resource or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
@@ -91,9 +87,12 @@ public partial class EntriesPage : ComponentBase
         if (result.IsSuccess)
         {
             EntryStateService.NotifyCreated([result.Value]);
-            
-            statusIndicator?.Show("Entry created successfully.",
-                StatusIndicator.StatusSeverity.Success);
+
+            await Notifications.NotifyAsync(new()
+            {
+                Message = $"Created entry with id {result.Value.Id}.",
+                Type = NotificationType.Info
+            });
             showCreateForm = false;
 
             entryCreateForm?.Reset();
@@ -101,8 +100,12 @@ public partial class EntriesPage : ComponentBase
         }
         else
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "There was an error when creating the entry.",
+                Type = NotificationType.Error
+            });
         }
     }
 

@@ -32,3 +32,33 @@
 .status-success {
     @apply bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-md mb-4 flex items-center;
 }
+
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+}
+
+@keyframes slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.animate-slide-out {
+    animation: slide-out 0.3s ease-in forwards;
+}

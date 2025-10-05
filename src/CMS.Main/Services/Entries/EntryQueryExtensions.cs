@@ -61,7 +61,7 @@ public static class EntryQueryExtensions
         return query;
     }
 
-    public static IQueryable<Entry> ApplyFilters(this IQueryable<Entry> query, EntryGetOptions options, Schema schema, ISchemaPropertyValidator validator)
+    public static IQueryable<Entry> ApplyFilters(this IQueryable<Entry> query, EntryGetOptions options, Schema schema, IPropertyValidator validator)
     {
         foreach (var filter in options.Filters)
         {

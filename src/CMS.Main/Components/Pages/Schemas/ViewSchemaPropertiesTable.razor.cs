@@ -1,7 +1,7 @@
 using System.Text.Json;
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
@@ -25,19 +25,23 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
 
-    private StatusIndicator? statusIndicator;
-    
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
+
     private async Task OnDeletePropertyClicked(PropertyDto property)
     {
         if (!await AuthHelper.CanEditSchema(Schema.Id))
         {
-            statusIndicator?.Show("You do not have access to this schema or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
-        
+
         var isConfirmed = await ConfirmationService.ShowAsync(
-            title: "Delete Schema Property",
+            title: "Delete Property",
             message: $"Are you sure you want to delete the property '{property.Name}'? This action cannot be undone and may result in the loss of data.",
             confirmText: "Delete",
             cancelText: "Cancel"
@@ -45,20 +49,26 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
 
         if (!isConfirmed)
             return;
-        
+
         var result = await PropertyService.DeleteSchemaPropertyAsync(property.Id);
 
         if (result.IsSuccess)
         {
-            statusIndicator?.Show("Successfully deleted schema property.",
-                StatusIndicator.StatusSeverity.Success);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = $"Deleted property named {property.Name}.",
+                Type = NotificationType.Info
+            });
 
             Schema.Properties.Remove(property);
         }
         else
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ?? "There was an error",
+                Type = NotificationType.Error
+            });
         }
     }
 

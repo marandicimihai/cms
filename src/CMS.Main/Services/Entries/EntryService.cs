@@ -13,7 +13,7 @@ namespace CMS.Main.Services.Entries;
 
 public class EntryService(
     IDbContextConcurrencyHelper dbHelper,
-    ISchemaPropertyValidator fieldValidator,
+    IPropertyValidator fieldValidator,
     ILogger<EntryService> logger
 ) : IEntryService
 {
@@ -39,7 +39,7 @@ public class EntryService(
                     .FirstOrDefaultAsync(s => s.Id == schemaId));
             
             if (schema is null) 
-                return Result.NotFound();
+                return Result.NotFound($"Schema {schemaId} was not found.");
 
             var (entries, paginationMetadata) = await dbHelper.ExecuteAsync(async dbContext =>
             {
@@ -110,7 +110,7 @@ public class EntryService(
                     .FirstOrDefaultAsync(e => e.Id == entryId));
 
             if (entry is null)
-                return Result.NotFound();
+                return Result.NotFound($"Entry {entryId} was not found.");
             
             var dto = entry.Adapt<EntryDto>();
             dto.Fields = entry.GetFields(entry.Schema.Properties);
@@ -136,7 +136,7 @@ public class EntryService(
                     .FirstOrDefaultAsync(s => s.Id == dto.SchemaId));
             
             if (schema is null) 
-                return Result.NotFound();
+                return Result.NotFound($"Schema {dto.SchemaId} was not found.");
             
             var entry = dto.Adapt<Entry>();
             var setResult = entry.SetFields(schema.Properties, dto.Fields, fieldValidator);
@@ -175,7 +175,7 @@ public class EntryService(
                     .FirstOrDefaultAsync(e => e.Id == dto.Id));
 
             if (entry is null)
-                return Result.NotFound();
+                return Result.NotFound($"Entry {dto.Id} was not found.");
             
             // Get current fields and update with new values
             var fields = entry.GetFields(entry.Schema.Properties);
@@ -218,7 +218,7 @@ public class EntryService(
                 await dbContext.Entries.FindAsync(entryId));
 
             if (entry is null)
-                return Result.NotFound();
+                return Result.NotFound($"Entry {entryId} was not found.");
 
             await dbHelper.ExecuteAsync(async dbContext =>
             {

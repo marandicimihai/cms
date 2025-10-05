@@ -1,3 +1,4 @@
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Components.Shared;
@@ -19,9 +20,6 @@ public partial class PropertyCreateForm : ComponentBase
     public EventCallback OnCancel { get; set; }
     
     [Parameter]
-    public StatusIndicator? StatusIndicator { get; set; }
-    
-    [Parameter]
     public bool Visible { get; set; } = true;
     
     [Inject]
@@ -29,6 +27,9 @@ public partial class PropertyCreateForm : ComponentBase
     
     [Inject]
     private ISchemaPropertyService PropertyService { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
 
     private PropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
@@ -64,8 +65,11 @@ public partial class PropertyCreateForm : ComponentBase
     {
         if (!await AuthHelper.CanEditSchema(Schema.Id))
         {
-            StatusIndicator?.Show("You do not have access to this schema or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
@@ -88,14 +92,21 @@ public partial class PropertyCreateForm : ComponentBase
         if (result.IsSuccess)
         {
             Schema.Properties.Add(result.Value);
-            StatusIndicator?.Show("Successfully created schema property.",
-                StatusIndicator.StatusSeverity.Success);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = $"Created property named {PropertyDto.Name}.",
+                Type = NotificationType.Info
+            });
             await OnSuccess.InvokeAsync();
         }
         else
         {
-            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when creating property named {PropertyDto.Name}.",
+                Type = NotificationType.Error
+            });
         }
         
         StateHasChanged();

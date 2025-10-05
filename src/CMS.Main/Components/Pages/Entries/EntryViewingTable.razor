@@ -1,5 +1,3 @@
-<StatusIndicator @ref="statusIndicator" />
-
 <SortAndFilterOptions 
     OnOptionsChanged="OnOptionsChangedAsync"
     SortableProperties="SortableProperties"
@@ -32,7 +30,7 @@
             {
                 <TableRow>
                     <TableData Class="px-3 py-2">
-                        <input type="checkbox" aria-label="Select entry @entry.Id" checked="@IsEntrySelected(entry)" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
+                        <input type="checkbox" aria-label="Select entry @entry.Id" checked="@(() => SelectedEntries.Any(e => e.Id == entry.Id))" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
                     </TableData>
                     <TableData Class="font-mono text-xs whitespace-nowrap">@entry.Id</TableData>
                     @foreach (var prop in Properties)
@@ -49,7 +47,7 @@
                         @FormatCell(entry.UpdatedAt)
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">
-                        <button class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-xs px-2.5 py-1.5" aria-label="Edit Entry" @onclick="() => RedirectToEdit(entry.Id)">
+                        <button class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-xs px-2.5 py-1.5" aria-label="Edit Entry" @onclick="@(() => NavigationManager.NavigateTo($"/entry/{entry.Id}/edit"))">
                             <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
                             Edit
                         </button>
@@ -104,4 +102,3 @@
         </div>
     }
 }
-<div class="hidden whitespace-pre"></div>

@@ -3,50 +3,40 @@
 
 @attribute [Authorize]
 
-@if (hasAccess)
+@if (ProjectDto is not null)
 {
     <Paper>
-            <h2 class="text-lg font-medium mb-3">Edit project properties:</h2>
-            <StatusIndicator @ref="statusIndicator"/>
-            <EditForm Model="ProjectDto" OnValidSubmit="OnSaveName" class="flex flex-col gap-2">
-                <div class="flex flex-col gap-2 flex-1">
-                    <label for="ProjectDto_Name" class="text-xs uppercase tracking-wide text-slate-600">Project Name</label>
-                    <InputText @bind-Value="ProjectDto.Name" id="ProjectDto_Name"
-                               class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
-                               placeholder="Enter project name" aria-label="Project Name"/>
-                    <ValidationMessage For="() => ProjectDto.Name" class="text-rose-600 text-xs"/>
-                </div>
-                <div class="flex gap-2">
-                    <button
-                        class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2"
-                        type="submit" aria-label="Save project name">
-                        <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
-                        Save
-                    </button>
-                    <button
-                        class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2"
-                        @onclick="@(() => NavigationManager.NavigateTo($"/{ProjectDto.Id}/manageApiKeys"))"
-                        aria-label="Manage API Keys">
-                        <span class="material-symbols-outlined icons-default text-base mr-2">vpn_key</span>
-                        Manage API Keys
-                    </button>
-                    <button
-                        class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-sm px-3 py-2"
-                        @onclick="OnDeleteProject" aria-label="Delete project" type="button">
-                        <span class="material-symbols-outlined icons-default text-base mr-2">delete</span>
-                        Delete Project
-                    </button>
-                </div>
-            </EditForm>
-        </Paper>
-        <ProjectSchemasSection Schemas="@ProjectDto.Schemas" ProjectId="@ProjectDto.Id"/>
-}
-else
-{
-    <Paper>
-        <StatusIndicator
-            InitialMessage="You do not have access to this resource or it does not exist"
-            InitialSeverity="StatusIndicator.StatusSeverity.Error" />
+        <h2 class="text-lg font-medium mb-3">Edit project properties:</h2>
+        <EditForm Model="ProjectDto" OnValidSubmit="OnSaveName" class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 flex-1">
+                <label for="ProjectDto_Name" class="text-xs uppercase tracking-wide text-slate-600">Project Name</label>
+                <InputText @bind-Value="ProjectDto.Name" id="ProjectDto_Name"
+                            class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="Enter project name" aria-label="Project Name"/>
+                <ValidationMessage For="() => ProjectDto.Name" class="text-rose-600 text-xs"/>
+            </div>
+            <div class="flex gap-2">
+                <button
+                    class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2"
+                    type="submit" aria-label="Save project name">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
+                    Save
+                </button>
+                <button
+                    class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2"
+                    @onclick="@(() => NavigationManager.NavigateTo($"/{ProjectDto.Id}/manageApiKeys"))"
+                    aria-label="Manage API Keys">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">vpn_key</span>
+                    Manage API Keys
+                </button>
+                <button
+                    class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-sm px-3 py-2"
+                    @onclick="OnDeleteProject" aria-label="Delete project" type="button">
+                    <span class="material-symbols-outlined icons-default text-base mr-2">delete</span>
+                    Delete Project
+                </button>
+            </div>
+        </EditForm>
     </Paper>
+    <ProjectSchemasSection Schemas="@ProjectDto.Schemas" ProjectId="@ProjectDto.Id"/>
 }
-

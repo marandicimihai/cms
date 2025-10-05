@@ -6,7 +6,7 @@ using Mapster;
 
 namespace CMS.Main.Services.SchemaProperties;
 
-public interface ISchemaPropertyValidator
+public interface IPropertyValidator
 {
     /// <summary>
     /// Validates and converts a value for the given schema property.
@@ -20,7 +20,7 @@ public interface ISchemaPropertyValidator
     Result<object?> ValidateAndCast(PropertyDto property, object? value);
 }
 
-public class SchemaPropertyValidator(IPropertyTypeHandlerFactory handlerFactory) : ISchemaPropertyValidator
+public class PropertyValidator(IPropertyTypeHandlerFactory handlerFactory) : IPropertyValidator
 {
     private readonly IPropertyTypeHandlerFactory handlerFactory = handlerFactory;
 

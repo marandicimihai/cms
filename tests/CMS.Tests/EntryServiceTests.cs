@@ -25,7 +25,7 @@ public class EntryServiceTests
 {
     private readonly ApplicationDbContext context;
     private readonly EntryService entryService;
-    private readonly ISchemaPropertyValidator validator;
+    private readonly IPropertyValidator validator;
 
     public EntryServiceTests()
     {
@@ -40,7 +40,7 @@ public class EntryServiceTests
         
         // Setup validator for Entry.SetFields calls
         var factory = new PropertyTypeHandlerFactory();
-        validator = new SchemaPropertyValidator(factory);
+        validator = new PropertyValidator(factory);
         
         entryService = new EntryService(dbHelper, validator, mockLogger.Object);
     }

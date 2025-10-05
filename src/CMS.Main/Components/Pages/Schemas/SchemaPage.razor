@@ -26,20 +26,14 @@
             }
         </div>
 
-        <StatusIndicator @ref="statusIndicator" />
-        <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" StatusIndicator="statusIndicator" @ref="createForm" Visible="createFormVisible" />
-        <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" StatusIndicator="statusIndicator" @ref="updateForm" Visible="updateFormVisible" />
+        <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" @ref="createForm" Visible="createFormVisible" />
+        <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" @ref="updateForm" Visible="updateFormVisible" />
         <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/>
     </Paper>
 }
 else
 {
     <BackButton/>
-    <Paper>
-        <StatusIndicator
-            InitialMessage="You do not have access to this resource or it does not exist."
-            InitialSeverity="StatusIndicator.StatusSeverity.Error"/>
-    </Paper>
 }
 
 

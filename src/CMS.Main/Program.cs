@@ -18,6 +18,7 @@ using CMS.Main.Abstractions.Entries;
 using CMS.Main.Services.Entries;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Services.SchemaProperties;
+using CMS.Main.Abstractions.Notifications;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -74,10 +75,11 @@ builder.Services
     .AddScoped<ISchemaPropertyService, SchemaPropertyService>()
     .AddScoped<IEntryService, EntryService>()
     .AddScoped<IApiKeyService, ApiKeyService>()
+    .AddScoped<IPropertyValidator, PropertyValidator>()
+    .AddScoped<INotificationService, NotificationService>()
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>()
     .AddSingleton<ConfirmationService>()
-    .AddSingleton<IPropertyTypeHandlerFactory, PropertyTypeHandlerFactory>()
-    .AddScoped<ISchemaPropertyValidator, SchemaPropertyValidator>();
+    .AddSingleton<IPropertyTypeHandlerFactory, PropertyTypeHandlerFactory>();
 
 builder.Services
     .ConfigureFluentEmail(config, builder.Environment);

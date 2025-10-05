@@ -12,12 +12,12 @@ namespace CMS.Tests;
 
 public class SchemaPropertyValidatorTests
 {
-    private readonly ISchemaPropertyValidator _validator;
+    private readonly IPropertyValidator _validator;
 
     public SchemaPropertyValidatorTests()
     {
         var factory = new PropertyTypeHandlerFactory();
-        _validator = new SchemaPropertyValidator(factory);
+        _validator = new PropertyValidator(factory);
     }
 
     private static PropertyDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)

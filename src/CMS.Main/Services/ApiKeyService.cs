@@ -41,8 +41,8 @@ public class ApiKeyService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating api key for project {projectId}", dto.ProjectId);
-            return Result.Error($"Error creating api key for project {dto.ProjectId}");
+            logger.LogError(ex, "Error creating api key '{apiKeyName}' for project {projectId}", dto.Name, dto.ProjectId);
+            return Result.Error($"Error creating api key '{dto.Name}'");
         }
     }
 
@@ -64,8 +64,8 @@ public class ApiKeyService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error updating api key for project {projectId}", dto.ProjectId);
-            return Result.Error($"Error updating api key for project {dto.ProjectId}");
+            logger.LogError(ex, "Error updating api key '{apiKeyName}' for project {projectId}", dto.Name, dto.ProjectId);
+            return Result.Error($"Error updating api key '{dto.Name}'");
         }
     }
 
@@ -90,7 +90,7 @@ public class ApiKeyService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error deleting api key {apiKey}", apiKeyId);
-            return Result.Error($"Error deleting api key  {apiKeyId}");
+            return Result.Error($"Error deleting api key {apiKeyId}");
         }
     }
 }

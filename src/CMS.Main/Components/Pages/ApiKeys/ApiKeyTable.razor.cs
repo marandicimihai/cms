@@ -1,5 +1,5 @@
 using CMS.Main.Abstractions;
-using CMS.Main.Components.Shared;
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
@@ -16,9 +16,6 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
     [Parameter]
     public EventCallback<ApiKeyDto> OnEdit { get; set; }
     
-    [Parameter]
-    public StatusIndicator? StatusIndicator { get; set; }
-    
     [Inject]
     private ApiKeyStateService ApiKeyStateService { get; set; } = default!;
     
@@ -27,6 +24,9 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
     
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -47,6 +47,8 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
 
     private async Task OnDeleteKey(ApiKeyDto key)
     {
+        // TODO: Add auth here
+
         var confirmed = await ConfirmationService.ShowAsync(
             "Delete API Key",
             "Are you sure you want to delete this API key? This action cannot be undone.",
@@ -61,13 +63,21 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
         {
             ApiKeys.Remove(key);
             StateHasChanged();
-            StatusIndicator?.Show("Successfully deleted API key.", 
-                StatusIndicator.StatusSeverity.Success);
+            
+            await Notifications.NotifyAsync(new()
+            {
+                Message = $"Deleted API key named {key.Name}.",
+                Type = NotificationType.Info
+            });
         }
         else
         {
-            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when deleting API key named {key.Name}.",
+                Type = NotificationType.Error
+            });
         }
     }
 
@@ -85,8 +95,12 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
             }
             else
             {
-                StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                    StatusIndicator.StatusSeverity.Error);
+                await Notifications.NotifyAsync(new()
+                {
+                    Message = result.Errors.FirstOrDefault() ??
+                        $"There was an error when updating the state of API key named {key.Name}.",
+                    Type = NotificationType.Error
+                });
             }
         }
 

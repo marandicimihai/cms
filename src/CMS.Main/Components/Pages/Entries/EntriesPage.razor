@@ -3,7 +3,7 @@
 
 @attribute [Authorize]
 
-@if (hasAccess)
+@if (Schema is not null)
 {
     <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>
 
@@ -27,17 +27,10 @@
             </div>
         }
 
-        <StatusIndicator @ref="statusIndicator"/>
-
         <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
     </Paper>
 }
 else
 {
     <BackButton />
-    <Paper>
-        <StatusIndicator
-            InitialMessage="You do not have access to this resource or it does not exist."
-            InitialSeverity="StatusIndicator.StatusSeverity.Error" />
-    </Paper>
 }

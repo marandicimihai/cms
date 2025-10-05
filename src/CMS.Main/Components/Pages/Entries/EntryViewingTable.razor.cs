@@ -1,6 +1,6 @@
 using CMS.Main.Abstractions.Entries;
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Abstractions.Properties.PropertyTypes;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
 using CMS.Main.Services;
@@ -29,6 +29,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
     
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
@@ -37,8 +40,6 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private List<EntryDto> SelectedEntries { get; set; } = [];
 
     private SortAndFilterOptionsChangedEventArgs? cachedArgs;
-
-    private StatusIndicator? statusIndicator;
 
     private List<string> SortableProperties => Properties
         .Where(p => p.Type == PropertyType.Text || p.Type == PropertyType.Number || p.Type == PropertyType.DateTime)
@@ -52,11 +53,10 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private int totalCount;
     private bool HasMoreEntries => Entries.Count < totalCount;
 
-    private string? queuedStatusMessage;
-    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
-
     protected override async Task OnInitializedAsync()
     {
+        // TODO: Add auth here
+        
         EntryStateService.EntriesCreated += EntriesCreated;
         
         var result = await EntryService.GetEntriesForSchema(
@@ -70,24 +70,20 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
         else
         {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (queuedStatusMessage != null && queuedStatusSeverity != null)
-        {
-            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
-            queuedStatusMessage = null;
-            queuedStatusSeverity = null;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
         }
     }
 
     // Called whenever the sort property or direction changes
     private async Task OnOptionsChangedAsync(SortAndFilterOptionsChangedEventArgs args)
     {
+        // TODO: Add auth here
+
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
             new PaginationParams(1, pageSize),
@@ -108,8 +104,60 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
         else
         {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+        }
+    }
+
+    private async Task LoadMoreEntriesAsync()
+    {
+        // TODO: Add auth here
+
+        if (isLoadingMore || !HasMoreEntries) return;
+        isLoadingMore = true;
+        StateHasChanged();
+        await Task.Yield();
+
+        try
+        {
+            // Calculate next page (1-based)
+            var nextPage = (Entries.Count / pageSize) + 1;
+            var result = await EntryService.GetEntriesForSchema(
+                SchemaId,
+                new PaginationParams(nextPage, pageSize),
+                opt =>
+                {
+                    if (cachedArgs is not null)
+                    {
+                        opt.SortByPropertyName = cachedArgs.SortByProperty;
+                        opt.Descending = cachedArgs.Descending;
+                        opt.Filters = cachedArgs.Filters;
+                    }
+                });
+
+            if (result.IsSuccess)
+            {
+                var (newEntries, pagination) = result.Value;
+                foreach (var e in newEntries)
+                {
+                    if (Entries.All(existing => existing.Id != e.Id))
+                        Entries.Add(e);
+                }
+                totalCount = pagination.TotalCount;
+            }
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            isLoadingMore = false;
+            StateHasChanged();
         }
     }
 
@@ -181,8 +229,11 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     {
         if (!await AuthHelper.CanEditSchema(SchemaId))
         {
-            statusIndicator?.Show("You can not delete entries.", 
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "You do not have permission to delete entries.",
+                Type = NotificationType.Error
+            });
             return;
         }
         
@@ -201,76 +252,27 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             Entries.Remove(entry);
             // Keep pagination metadata in sync with user-visible list
             totalCount = Math.Max(0, totalCount - 1);
-            statusIndicator?.Show("Successfully deleted entry.", 
-                StatusIndicator.StatusSeverity.Success);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = $"Deleted entry with id {entry.Id}.",
+                Type = NotificationType.Info
+            });
         }
         else
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
-                StatusIndicator.StatusSeverity.Error);
-        }
-    }
-
-    private async Task LoadMoreEntriesAsync()
-    {
-        if (isLoadingMore || !HasMoreEntries) return;
-        isLoadingMore = true;
-        StateHasChanged();
-        await Task.Yield();
-
-        try
-        {
-            // Calculate next page (1-based)
-            var nextPage = (Entries.Count / pageSize) + 1;
-            var result = await EntryService.GetEntriesForSchema(
-                SchemaId,
-                new PaginationParams(nextPage, pageSize),
-                opt =>
-                {
-                    if (cachedArgs is not null)
-                    {
-                        opt.SortByPropertyName = cachedArgs.SortByProperty;
-                        opt.Descending = cachedArgs.Descending;
-                        opt.Filters = cachedArgs.Filters;
-                    }
-                });
-
-            if (result.IsSuccess)
+            await Notifications.NotifyAsync(new()
             {
-                var (newEntries, pagination) = result.Value;
-                foreach (var e in newEntries)
-                {
-                    if (Entries.All(existing => existing.Id != e.Id))
-                        Entries.Add(e);
-                }
-                totalCount = pagination.TotalCount;
-            }
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when deleting entry with id {entry.Id}.",
+                Type = NotificationType.Error
+            });
         }
-        catch
-        {
-            // ignored
-        }
-        finally
-        {
-            isLoadingMore = false;
-            StateHasChanged();
-        }
-    }
-
-    private void RedirectToEdit(string entryId)
-    {
-        NavigationManager.NavigateTo($"/entry/{entryId}/edit");
     }
 
     private bool IsAllSelected
     {
         get => Entries.Count > 0 && SelectedEntries.Count == Entries.Count;
         set => ToggleSelectAll(value);
-    }
-
-    private bool IsEntrySelected(EntryDto entry)
-    {
-        return SelectedEntries.Any(e => e.Id == entry.Id);
     }
 
     private void ToggleEntrySelection(EntryDto entry, bool selected)
@@ -314,6 +316,8 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private async Task DeleteSelectedEntriesAsync()
     {
+        // TODO: Add auth here
+
         if (SelectedEntries.Count == 0)
             return;
 

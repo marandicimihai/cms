@@ -3,6 +3,7 @@ using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
+using CMS.Main.Abstractions.Notifications;
 
 namespace CMS.Main.Components.Pages.ApiKeys;
 
@@ -15,32 +16,29 @@ public partial class ManageApiKeysPage : ComponentBase
     private IProjectService ProjectService { get; set; } = default!;
 
     [Inject]
-    private IApiKeyService ApiKeyService { get; set; } = default!;
-    
-    [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
     
-    private ProjectDto ProjectDto { get; set; } = new();
+    private ProjectDto? ProjectDto { get; set; } = new();
     
-    private StatusIndicator? statusIndicator;
     private ApiKeyCreateForm? createForm;
     
     // queued status for showing after render when initialized
-    private string? queuedStatusMessage;
-    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
     private bool createFormVisible;
-    private bool hasAccess;
 
     protected override async Task OnInitializedAsync()
     {
         if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
-
-        hasAccess = true;
 
         var result =
             await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeApiKeys = true; });
@@ -51,18 +49,12 @@ public partial class ManageApiKeysPage : ComponentBase
         }
         else
         {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (queuedStatusMessage != null && queuedStatusSeverity != null)
-        {
-            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
-            queuedStatusMessage = null;
-            queuedStatusSeverity = null;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
         }
     }
 

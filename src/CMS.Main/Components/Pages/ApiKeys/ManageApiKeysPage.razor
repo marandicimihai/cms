@@ -3,7 +3,7 @@
 
 @attribute [Authorize]
 
-@if (hasAccess)
+@if (ProjectDto is not null)
 {
     <BackButton Href="@($"/project/{ProjectId}")" Text="Back to Project" />
 
@@ -19,20 +19,13 @@
             }
         </div>
 
-        <StatusIndicator @ref="statusIndicator" />
+        <ApiKeyCreateForm @ref="createForm" ProjectId="@ProjectId.ToString()" Visible="@createFormVisible" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" />
 
-        <ApiKeyCreateForm @ref="createForm" ProjectId="@ProjectId.ToString()" StatusIndicator="statusIndicator" Visible="@createFormVisible" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" />
-
-        <ApiKeyTable ApiKeys="ProjectDto.ApiKeys" StatusIndicator="statusIndicator" />
+        <ApiKeyTable ApiKeys="ProjectDto.ApiKeys" />
     </Paper>
 }
 else
 {
     <BackButton />
-    <Paper>
-        <StatusIndicator 
-            InitialMessage="You do not have access to manage API keys for this project." 
-            InitialSeverity="StatusIndicator.StatusSeverity.Error" />
-    </Paper>
 }
 

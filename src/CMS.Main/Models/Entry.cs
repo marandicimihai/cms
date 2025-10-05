@@ -66,7 +66,7 @@ public class Entry : IDisposable
     public Result<Dictionary<string, object?>> SetFields(
         List<Property> properties,
         Dictionary<string, object?> fields,
-        ISchemaPropertyValidator fieldValidator)
+        IPropertyValidator fieldValidator)
     {
         Dictionary<string, object?> validFields = [];
         List<ValidationError> validationErrors = [];

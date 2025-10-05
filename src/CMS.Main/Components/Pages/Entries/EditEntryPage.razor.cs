@@ -1,5 +1,5 @@
 using CMS.Main.Abstractions.Entries;
-using CMS.Main.Components.Shared;
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
@@ -16,23 +16,23 @@ public partial class EditEntryPage : ComponentBase
 
     [Inject]
     private IEntryService EntryService { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
     
     private EntryDto? Entry { get; set; }
     
-    private StatusIndicator? statusIndicator;
-
-    private bool hasAccess;
-
     protected override async Task OnInitializedAsync()
     {
         if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this entry or it does not exist.", 
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
-
-        hasAccess = true;
 
         var result = await EntryService.GetEntryByIdAsync(EntryId.ToString());
 
@@ -42,8 +42,11 @@ public partial class EditEntryPage : ComponentBase
         }
         else
         {
-            statusIndicator?.Show("Failed to load entry.", 
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ?? "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
         }
     }
 
@@ -54,8 +57,11 @@ public partial class EditEntryPage : ComponentBase
 
         if (!await AuthHelper.CanEditEntry(EntryId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this entry or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
@@ -66,13 +72,20 @@ public partial class EditEntryPage : ComponentBase
 
         if (result.IsSuccess)
         {
-            statusIndicator?.Show("Entry updated successfully.",
-                StatusIndicator.StatusSeverity.Success);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = $"Updated entry with id {Entry.Id}.",
+                Type = NotificationType.Info
+            });
         }
         else
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when updating entry with id {Entry.Id}.",
+                Type = NotificationType.Error
+            });
         }
     }
 }

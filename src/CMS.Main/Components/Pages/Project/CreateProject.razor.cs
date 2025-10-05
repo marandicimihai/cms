@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using CMS.Main.Abstractions;
-using CMS.Main.Components.Shared;
+using CMS.Main.Abstractions.Notifications;
 using CMS.Main.DTOs;
 using Microsoft.AspNetCore.Components;
 
@@ -18,7 +18,8 @@ public partial class CreateProject : ComponentBase
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
 
-    private StatusIndicator? statusIndicator;
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,30 +39,27 @@ public partial class CreateProject : ComponentBase
         isLoading = true;
         StateHasChanged();
         await Task.Yield();
-        try
-        {
-            var result = await ProjectService.CreateProjectAsync(ProjectDto);
 
-            if (!result.IsSuccess)
+        var result = await ProjectService.CreateProjectAsync(ProjectDto);
+
+        if (!result.IsSuccess)
+        {
+            await Notifications.NotifyAsync(new()
             {
-                statusIndicator?.Show("Something went wrong when creating the project.",
-                    StatusIndicator.StatusSeverity.Error);
-                return;
-            }
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when creating project named {ProjectDto.Name}.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
 
-            statusIndicator?.Show("The project was successfully created.",
-                StatusIndicator.StatusSeverity.Success);
+        await Notifications.NotifyAsync(new()
+        {
+            Message = $"Created project named {result.Value.Name}.",
+            Type = NotificationType.Info
+        });
 
-            projectUrl = $"/project/{result.Value.Id}";
-        }
-        catch
-        {
-            statusIndicator?.Show("Something went wrong when creating the project.",
-                StatusIndicator.StatusSeverity.Error);
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        projectUrl = $"/project/{result.Value.Id}";
+        isLoading = false;
     }
 }
