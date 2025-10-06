@@ -26,8 +26,8 @@
 
 <div>
     <form @formname="disable-2fa" @onsubmit="OnSubmitAsync" method="post">
-        <AntiforgeryToken/>
-        <button class="btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md" type="submit">Disable 2FA</button>
+    <AntiforgeryToken/>
+    <PrimaryButton Type="submit" Variant="ButtonVariant.Danger" aria-label="Disable 2FA">Disable 2FA</PrimaryButton>
     </form>
 </div>
 

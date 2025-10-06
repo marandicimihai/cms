@@ -31,9 +31,7 @@
                             <div>
                                 <input type="hidden" name="@nameof(LoginProvider)" value="@login.LoginProvider"/>
                                 <input type="hidden" name="@nameof(ProviderKey)" value="@login.ProviderKey"/>
-                                <button type="submit" class="btn bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium px-3 py-2 rounded-md" title="Remove this @login.ProviderDisplayName login from your account">
-                                    <span class="material-symbols-outlined text-base mr-2">delete</span>Remove
-                                </button>
+                                <PrimaryButton Type="submit" Variant="ButtonVariant.Danger" Icon="delete" title="@($"Remove this {login.ProviderDisplayName} login from your account")">Remove</PrimaryButton>
                             </div>
                         </form>
                     }
@@ -57,9 +55,7 @@
             <p class="flex flex-wrap gap-2">
                 @foreach (var provider in otherLogins)
                 {
-                    <button type="submit" class="btn bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium px-3 py-2 rounded-md" name="Provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
-                        <span class="material-symbols-outlined text-base mr-2">login</span>@provider.DisplayName
-                    </button>
+                    <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="login" name="Provider" value="@provider.Name" title="@($"Log in using your {provider.DisplayName} account")">@provider.DisplayName</PrimaryButton>
                 }
             </p>
         </div>

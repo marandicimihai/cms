@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 using Ardalis.Result;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.DTOs;
-using CMS.Main.DTOs.SchemaProperty;
-using CMS.Main.Models;
 using CMS.Main.Services.SchemaProperties;
 using Xunit;
 
@@ -20,7 +19,7 @@ public class SchemaPropertyValidatorTests
         _validator = new PropertyValidator(factory);
     }
 
-    private static PropertyDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)
+    private static PropertyDto MakeProp(string name, PropertyType type, bool required = false, string[]? options = null)
         => new PropertyDto
         {
             Id = Guid.NewGuid().ToString(),
@@ -34,7 +33,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Text_Allows_String_Value()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text);
+        var prop = MakeProp("Title", PropertyType.Text);
         object? val = "Hello";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -45,7 +44,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Text_NonString_Fails_When_NotString()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text);
+        var prop = MakeProp("Title", PropertyType.Text);
         object? val = 123;
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -56,7 +55,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Text_Required_Null_Fails()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text, required: true);
+        var prop = MakeProp("Title", PropertyType.Text, required: true);
         object? val = null;
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -66,7 +65,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Boolean_Accepts_True_String()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required: true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = "TrUe";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -80,7 +79,7 @@ public class SchemaPropertyValidatorTests
     [InlineData("FaLsE", false)]
     public void Boolean_Varied_Casing_Parses(string input, bool expected)
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required: true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = input;
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -91,7 +90,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Boolean_Invalid_String_Fails()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required: true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = "yes";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -102,7 +101,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Boolean_Required_Blank_Fails()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required: true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = "   ";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -112,7 +111,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void DateTime_Utc_DateTime_Serializes()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required: true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         var original = new DateTime(2025, 8, 20, 12, 30, 0, DateTimeKind.Utc);
         object? val = original;
         var result = _validator.ValidateAndCast(prop, val);
@@ -126,7 +125,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void DateTime_Local_DateTime_ConvertsToUtc()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required: true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         var original = new DateTime(2025, 8, 20, 12, 30, 0, DateTimeKind.Local);
         object? val = original;
         var result = _validator.ValidateAndCast(prop, val);
@@ -140,7 +139,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void DateTime_Utc_String_Parses()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required: true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         object? val = "2025-08-20T12:30:00Z";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -153,7 +152,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Decimal_String_Parses()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number, required: true);
+        var prop = MakeProp("Price", PropertyType.Number, required: true);
         object? val = "1.23";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -168,7 +167,7 @@ public class SchemaPropertyValidatorTests
     [InlineData("  .5  ", 0.5)]
     public void Decimal_Fraction_Forms_Parse(string input, decimal expected)
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number, required: true);
+        var prop = MakeProp("Price", PropertyType.Number, required: true);
         object? val = input;
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -179,7 +178,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Decimal_Invalid_String_Fails()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number, required: true);
+        var prop = MakeProp("Price", PropertyType.Number, required: true);
         object? val = "1.2.3";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -190,7 +189,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Enum_Valid_Case_Insensitive()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new[] { "Red", "Green", "Blue" });
+        var prop = MakeProp("Color", PropertyType.Enum, true, new[] { "Red", "Green", "Blue" });
         object? val = "green";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -201,7 +200,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Enum_Whitespace_Case_Insensitive_Match()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new[] { "Red", "Green", "Blue" });
+        var prop = MakeProp("Color", PropertyType.Enum, true, new[] { "Red", "Green", "Blue" });
         object? val = "  RED  ";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -212,7 +211,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Enum_Invalid_Value_Fails()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new[] { "Red", "Green" });
+        var prop = MakeProp("Color", PropertyType.Enum, true, new[] { "Red", "Green" });
         object? val = "Blue";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -223,7 +222,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void DateTime_Optional_String_WithOffset_ConvertsToUtc()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime);
         object? val = "2025-08-20T12:30:00+02:00";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -236,7 +235,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void DateTime_String_Unspecified_With_AssumeUniversal_Accepts()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required: true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         object? val = "2025-08-20T12:30:00"; // unspecified kind, assumed universal
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -248,7 +247,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void DateTime_Required_Blank_Fails()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required: true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         object? val = "   ";
         var result = _validator.ValidateAndCast(prop, val);
         val = result.Value;
@@ -258,7 +257,7 @@ public class SchemaPropertyValidatorTests
     [Fact]
     public void Text_Required_Whitespace_Passes()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text, required: true);
+        var prop = MakeProp("Title", PropertyType.Text, required: true);
         object? val = "   ";
         var result = _validator.ValidateAndCast(prop, val);
         Assert.True(result.IsSuccess);

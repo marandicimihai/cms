@@ -51,7 +51,7 @@ else
                 <InputText @bind-Value="Input.Code" id="Input.Code" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" autocomplete="one-time-code" inputmode="numeric" placeholder="123456" />
                 <ValidationMessage For="() => Input.Code" class="text-rose-600 text-xs" />
             </div>
-            <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2">Verify</button>
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="check" aria-label="Verify">Verify</PrimaryButton>
             <ValidationSummary class="text-rose-600 text-xs" role="alert" />
         </EditForm>
     </div>

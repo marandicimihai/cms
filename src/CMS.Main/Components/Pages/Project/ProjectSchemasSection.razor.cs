@@ -30,11 +30,10 @@ public partial class ProjectSchemasSection : ComponentBase
     public SchemaDto NewSchema { get; set; } = new();
     private bool IsAddFormVisible { get; set; }
 
-    private bool IsCreatingSchema { get; set; }
-
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         NewSchema = new SchemaDto { ProjectId = ProjectId };
+        StateHasChanged();
     }
 
     private void ShowAddForm()
@@ -61,7 +60,6 @@ public partial class ProjectSchemasSection : ComponentBase
             return;
         }
 
-        IsCreatingSchema = true;
         StateHasChanged();
         await Task.Yield();
 
@@ -82,7 +80,6 @@ public partial class ProjectSchemasSection : ComponentBase
             });
         }
 
-        IsCreatingSchema = false;
         StateHasChanged();
     }
 

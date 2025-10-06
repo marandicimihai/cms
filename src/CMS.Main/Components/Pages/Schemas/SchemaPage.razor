@@ -16,12 +16,7 @@
             @if (!createFormVisible && !updateFormVisible)
             {
                 <div class="flex items-center gap-2">
-                    <button
-                        class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        aria-label="Create Property" @onclick="ShowCreateForm">
-                        <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
-                        Create Property
-                    </button>
+                    <PrimaryButton Type="button" Variant="ButtonVariant.Info" Icon="add" aria-label="Create Property" @onclick="ShowCreateForm">Create Property</PrimaryButton>
                 </div>
             }
         </div>

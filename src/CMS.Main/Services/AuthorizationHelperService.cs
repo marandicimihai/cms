@@ -1,3 +1,4 @@
+using CMS.Main.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -12,7 +13,7 @@ public class AuthorizationHelperService(
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var authorizationResult =
-            await authorizationService.AuthorizeAsync(user, projectId, "ProjectPolicies.CanEditProject");
+            await authorizationService.AuthorizeAsync(user, projectId, AuthConstants.OwnsProject);
 
         return authorizationResult.Succeeded;
     }
@@ -22,7 +23,7 @@ public class AuthorizationHelperService(
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var authorizationResult =
-            await authorizationService.AuthorizeAsync(user, schemaId, "SchemaPolicies.CanEditSchema");
+            await authorizationService.AuthorizeAsync(user, schemaId, AuthConstants.OwnsSchema);
 
         return authorizationResult.Succeeded;
     }
@@ -32,7 +33,7 @@ public class AuthorizationHelperService(
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var authorizationResult =
-            await authorizationService.AuthorizeAsync(user, entryId, "EntryPolicies.CanEditEntry");
+            await authorizationService.AuthorizeAsync(user, entryId, AuthConstants.OwnsEntry);
 
         return authorizationResult.Succeeded;
     }

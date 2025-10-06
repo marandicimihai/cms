@@ -25,13 +25,7 @@
     <div class="@bgColor text-white rounded-lg shadow-lg p-4 flex items-start gap-3 @(notification.IsClosing ? "animate-slide-out" : "animate-slide-in")">
             <span class="material-symbols-outlined icons-default flex-shrink-0">@icon</span>
             <p class="text-sm flex-1">@notification.Message</p>
-            <button 
-                type="button"
-                @onclick="() => RemoveNotification(notification.Id)"
-                class="flex-shrink-0 hover:bg-white/20 rounded p-1 transition-colors"
-                aria-label="Close notification">
-                <span class="material-symbols-outlined text-base">close</span>
-            </button>
+            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="() => RemoveNotification(notification.Id)" aria-label="Close notification" />
         </div>
     }
 </div>

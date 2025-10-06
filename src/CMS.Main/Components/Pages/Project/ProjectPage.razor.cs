@@ -1,6 +1,5 @@
 using CMS.Main.Abstractions;
 using CMS.Main.Abstractions.Notifications;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
@@ -28,7 +27,7 @@ public partial class ProjectPage : ComponentBase
     private INotificationService Notifications { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private ProjectDto ProjectDto { get; set; } = new();
+    private ProjectDto ProjectDto { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {

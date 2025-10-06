@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Ardalis.Result;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Data;
-using CMS.Main.DTOs.Schema;
-using CMS.Main.DTOs.SchemaProperty;
 using CMS.Main.Models;
 using CMS.Main.Services.SchemaProperties;
 using Mapster;
@@ -18,6 +16,7 @@ using CMS.Main.DTOs.Pagination;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.Services.Entries;
 using CMS.Main.DTOs;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 
 namespace CMS.Tests;
 
@@ -63,7 +62,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text, IsRequired = true };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text, IsRequired = true };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -94,7 +93,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = SchemaPropertyType.Boolean };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = PropertyType.Boolean };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -118,7 +117,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -155,7 +154,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -186,7 +185,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -220,7 +219,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -252,7 +251,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
@@ -281,7 +280,7 @@ public class EntryServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 

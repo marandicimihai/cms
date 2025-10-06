@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Ardalis.Result;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Data;
-using CMS.Main.DTOs.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.DTOs;
 using CMS.Main.Models;
 using CMS.Main.Services;
 using Mapster;
@@ -46,8 +46,8 @@ public class SchemaServiceTests
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Content", ProjectId = project.Id };
         await context.Schemas.AddAsync(schema);
-        var prop1 = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = SchemaPropertyType.Text };
-        var prop2 = new Property { Id = Guid.NewGuid().ToString(), Name = "PublishedOn", SchemaId = schema.Id, Type = SchemaPropertyType.DateTime };
+        var prop1 = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
+        var prop2 = new Property { Id = Guid.NewGuid().ToString(), Name = "PublishedOn", SchemaId = schema.Id, Type = PropertyType.DateTime };
         await context.Properties.AddRangeAsync(prop1, prop2);
         await context.SaveChangesAsync();
 

@@ -1,9 +1,6 @@
 @rendermode InteractiveServer
 
-<button class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1 mb-2 cursor-pointer" @onclick="NavigateToDestination" aria-label="Back">
-    <span class="material-symbols-outlined icons-default text-base mr-1">arrow_back</span>
-    @ButtonText
-</button>
+<SecondaryButton @onclick="NavigateToDestination" Variant="ButtonVariant.Neutral" Icon="arrow_back" aria-label="Back">@ButtonText</SecondaryButton>
 
 @code {
     [Parameter]
