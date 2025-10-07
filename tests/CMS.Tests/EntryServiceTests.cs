@@ -44,6 +44,7 @@ public class EntryServiceTests
         entryService = new EntryService(dbHelper, validator, mockLogger.Object);
     }
 
+
     [Fact]
     public async Task AddEntryAsync_NotFound_WhenSchemaMissing()
     {
@@ -52,6 +53,42 @@ public class EntryServiceTests
         var result = await entryService.AddEntryAsync(dto);
 
         Assert.True(result.IsNotFound());
+    }
+
+    [Fact]
+    public async Task AddEntry_IgnoresFields_NotInSchema()
+    {
+        // Arrange: create schema and one property
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
+        await context.Schemas.AddAsync(schema);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
+        await context.Properties.AddAsync(prop);
+        await context.SaveChangesAsync();
+
+        // Add entry with one valid and one invalid field
+        var dto = new EntryDto
+        {
+            SchemaId = schema.Id,
+            Fields = new Dictionary<string, object?>
+            {
+                ["Title"] = "Valid",
+                ["NotInSchema"] = "ShouldBeIgnored"
+            }
+        };
+
+        var result = await entryService.AddEntryAsync(dto);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Valid", result.Value.Fields["Title"]);
+        Assert.False(result.Value.Fields.ContainsKey("NotInSchema"));
+
+        // Verify stored entry also does not include the unknown property
+        var saved = await context.Entries.FindAsync(result.Value.Id);
+        Assert.NotNull(saved);
+        var savedFields = saved.GetFields(new List<Property> { prop });
+        Assert.False(savedFields.ContainsKey("NotInSchema"));
     }
 
     [Fact]
@@ -80,10 +117,81 @@ public class EntryServiceTests
     }
 
     [Fact]
+    public async Task AddEntryAsync_Ignores_Unknown_Properties()
+    {
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
+        await context.Schemas.AddAsync(schema);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
+        await context.Properties.AddAsync(prop);
+        await context.SaveChangesAsync();
+
+        var dto = new EntryDto
+        {
+            SchemaId = schema.Id,
+            Fields = new Dictionary<string, object?>
+            {
+                ["Title"] = "Allowed",
+                ["NotAProperty"] = "ShouldBeIgnored"
+            }
+        };
+
+        var result = await entryService.AddEntryAsync(dto);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Allowed", result.Value.Fields["Title"]);
+        Assert.False(result.Value.Fields.ContainsKey("NotAProperty"));
+
+        // Verify stored entry also does not include the unknown property
+        var saved = await context.Entries.FindAsync(result.Value.Id);
+        Assert.NotNull(saved);
+        var savedFields = saved.GetFields(new List<Property> { prop });
+        Assert.False(savedFields.ContainsKey("NotAProperty"));
+    }
+
+    [Fact]
     public async Task GetEntryByIdAsync_NotFound_WhenMissing()
     {
         var result = await entryService.GetEntryByIdAsync(Guid.NewGuid().ToString());
         Assert.True(result.IsNotFound());
+    }
+
+    [Fact]
+    public async Task GetEntryByIdAsync_Includes_PropertiesAndProject()
+    {
+        // Arrange: create project, schema, and properties
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
+        await context.Schemas.AddAsync(schema);
+        var prop1 = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
+        var prop2 = new Property { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = PropertyType.Boolean };
+        await context.Properties.AddAsync(prop1);
+        await context.Properties.AddAsync(prop2);
+        await context.SaveChangesAsync();
+
+        // create entry directly
+        var entry = new Entry { SchemaId = schema.Id };
+        entry.SetFields(new List<Property> { prop1, prop2 }, new Dictionary<string, object?> { ["Title"] = "Hello", ["Published"] = true }, validator);
+        await context.Entries.AddAsync(entry);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await entryService.GetEntryByIdAsync(entry.Id);
+
+    // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(entry.Id, result.Value.Id);
+        Assert.Equal("Hello", result.Value.Fields["Title"]);
+        Assert.True((bool)result.Value.Fields["Published"]!);
+        Assert.Equal(schema.Id, result.Value.SchemaId);
+        // Check that the schema includes the correct properties
+        Assert.NotNull(result.Value.Schema);
+        Assert.Equal(schema.Id, result.Value.Schema.Id);
+        Assert.Equal(2, result.Value.Schema.Properties.Count);
+        Assert.Contains(result.Value.Schema.Properties, p => p.Name == "Title");
+        Assert.Contains(result.Value.Schema.Properties, p => p.Name == "Published");
     }
 
     [Fact]
@@ -148,6 +256,44 @@ public class EntryServiceTests
     }
 
     [Fact]
+    public async Task GetEntriesForSchema_Includes_PropertiesAndProject()
+    {
+        // Arrange: create project, schema, and properties
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
+        await context.Schemas.AddAsync(schema);
+        var prop1 = new Property { Id = Guid.NewGuid().ToString(), Name = "Title", SchemaId = schema.Id, Type = PropertyType.Text };
+        var prop2 = new Property { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = PropertyType.Boolean };
+        await context.Properties.AddAsync(prop1);
+        await context.Properties.AddAsync(prop2);
+        await context.SaveChangesAsync();
+
+        // Add entry
+        var entry = new Entry { SchemaId = schema.Id };
+        entry.SetFields(new List<Property> { prop1, prop2 }, new Dictionary<string, object?> { ["Title"] = "Hello", ["Published"] = true }, validator);
+        await context.Entries.AddAsync(entry);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await entryService.GetEntriesForSchema(schema.Id, new PaginationParams(1, 10));
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var entries = result.Value.Item1;
+        Assert.Single(entries);
+        var dto = entries[0];
+        Assert.Equal(entry.Id, dto.Id);
+        Assert.Equal("Hello", dto.Fields["Title"]);
+        Assert.True((bool)dto.Fields["Published"]!);
+        Assert.NotNull(dto.Schema);
+        Assert.Equal(schema.Id, dto.Schema.Id);
+        Assert.Equal(2, dto.Schema.Properties.Count);
+        Assert.Contains(dto.Schema.Properties, p => p.Name == "Title");
+        Assert.Contains(dto.Schema.Properties, p => p.Name == "Published");
+    }
+
+    [Fact]
     public async Task GetEntriesForSchema_ClampsPageSize_ToMax()
     {
         var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
@@ -179,8 +325,9 @@ public class EntryServiceTests
     }
 
     [Fact]
-    public async Task AddEntryAsync_Ignores_Unknown_Properties()
+    public async Task GetEntriesForSchema_SortsByProperty()
     {
+        // Arrange
         var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
         await context.Projects.AddAsync(project);
         var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
@@ -189,27 +336,66 @@ public class EntryServiceTests
         await context.Properties.AddAsync(prop);
         await context.SaveChangesAsync();
 
-        var dto = new EntryDto
+        // Add entries with different titles
+        var titles = new[] { "C", "A", "B" };
+        foreach (var t in titles)
         {
-            SchemaId = schema.Id,
-            Fields = new Dictionary<string, object?>
-            {
-                ["Title"] = "Allowed",
-                ["NotAProperty"] = "ShouldBeIgnored"
-            }
-        };
+            var e = new Entry { SchemaId = schema.Id };
+            e.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Title"] = t }, validator);
+            await context.Entries.AddAsync(e);
+        }
+        await context.SaveChangesAsync();
 
-        var result = await entryService.AddEntryAsync(dto);
+        // Act: sort ascending
+        var resultAsc = await entryService.GetEntriesForSchema(schema.Id, new PaginationParams(1, 10), opt =>
+        {
+            opt.SortByPropertyName = "Title";
+            opt.Descending = false;
+        });
+    var ascTitles = resultAsc.Value.Item1.Select(e => e.Fields["Title"]?.ToString()).ToList();
+    Assert.Equal(new[] { "A", "B", "C" }, ascTitles);
 
-        Assert.True(result.IsSuccess);
-        Assert.Equal("Allowed", result.Value.Fields["Title"]);
-        Assert.False(result.Value.Fields.ContainsKey("NotAProperty"));
+        // Act: sort descending
+        var resultDesc = await entryService.GetEntriesForSchema(schema.Id, new PaginationParams(1, 10), opt =>
+        {
+            opt.SortByPropertyName = "Title";
+            opt.Descending = true;
+        });
+    var descTitles = resultDesc.Value.Item1.Select(e => e.Fields["Title"]?.ToString()).ToList();
+    Assert.Equal(new[] { "C", "B", "A" }, descTitles);
+    }
 
-        // Verify stored entry also does not include the unknown property
-        var saved = await context.Entries.FindAsync(result.Value.Id);
-        Assert.NotNull(saved);
-        var savedFields = saved.GetFields(new List<Property> { prop });
-        Assert.False(savedFields.ContainsKey("NotAProperty"));
+    [Fact]
+    public async Task GetEntriesForSchema_FiltersByProperty()
+    {
+        // Arrange
+        var project = new Project { Id = Guid.NewGuid().ToString(), Name = "P", OwnerId = Guid.NewGuid().ToString() };
+        await context.Projects.AddAsync(project);
+        var schema = new Schema { Id = Guid.NewGuid().ToString(), Name = "Article", ProjectId = project.Id };
+        await context.Schemas.AddAsync(schema);
+        var prop = new Property { Id = Guid.NewGuid().ToString(), Name = "Published", SchemaId = schema.Id, Type = PropertyType.Boolean };
+        await context.Properties.AddAsync(prop);
+        await context.SaveChangesAsync();
+
+        // Add entries with different Published values
+        var e1 = new Entry { SchemaId = schema.Id };
+        e1.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Published"] = true }, validator);
+        var e2 = new Entry { SchemaId = schema.Id };
+        e2.SetFields(new List<Property> { prop }, new Dictionary<string, object?> { ["Published"] = false }, validator);
+        await context.Entries.AddAsync(e1);
+        await context.Entries.AddAsync(e2);
+        await context.SaveChangesAsync();
+
+        // Act: filter for Published = true
+        var result = await entryService.GetEntriesForSchema(schema.Id, new PaginationParams(1, 10), opt =>
+        {
+            opt.Filters = [
+                new() { PropertyName = "Published", FilterType = PropertyFilter.Equals, ReferenceValue = true }
+            ];
+        });
+        var filtered = result.Value.Item1;
+        Assert.Single(filtered);
+        Assert.True((bool)filtered[0].Fields["Published"]!);
     }
 
     [Fact]

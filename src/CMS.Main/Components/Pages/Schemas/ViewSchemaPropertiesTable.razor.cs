@@ -17,7 +17,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
     public EventCallback<PropertyDto> OnEditProperty { get; set; }
 
     [Inject]
-    private ISchemaPropertyService PropertyService { get; set; } = default!;
+    private IPropertyService PropertyService { get; set; } = default!;
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -50,7 +50,7 @@ public partial class ViewSchemaPropertiesTable : ComponentBase
         if (!isConfirmed)
             return;
 
-        var result = await PropertyService.DeleteSchemaPropertyAsync(property.Id);
+        var result = await PropertyService.DeletePropertyAsync(property.Id);
 
         if (result.IsSuccess)
         {

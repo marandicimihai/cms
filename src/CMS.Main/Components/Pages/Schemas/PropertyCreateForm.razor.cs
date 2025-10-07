@@ -26,7 +26,7 @@ public partial class PropertyCreateForm : ComponentBase
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
     
     [Inject]
-    private ISchemaPropertyService PropertyService { get; set; } = default!;
+    private IPropertyService PropertyService { get; set; } = default!;
 
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
@@ -87,7 +87,7 @@ public partial class PropertyCreateForm : ComponentBase
         
         PropertyDto.SchemaId = Schema.Id;
 
-        var result = await PropertyService.CreateSchemaPropertyAsync(PropertyDto);
+        var result = await PropertyService.CreatePropertyAsync(PropertyDto);
 
         if (result.IsSuccess)
         {

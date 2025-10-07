@@ -3,14 +3,14 @@ using CMS.Main.DTOs;
 
 namespace CMS.Main.Abstractions.SchemaProperties;
 
-public interface ISchemaPropertyService
+public interface IPropertyService
 {
-    Task<Result<PropertyDto>> CreateSchemaPropertyAsync(
+    Task<Result<PropertyDto>> CreatePropertyAsync(
         PropertyDto dto);
 
-    Task<Result<PropertyDto>> UpdateSchemaPropertyAsync(
+    Task<Result<PropertyDto>> UpdatePropertyAsync(
         PropertyDto dto);
-    
-    Task<Result> DeleteSchemaPropertyAsync(
-            string propertyId);
+
+    Task<Result> DeletePropertyAsync(
+        string propertyId);
 }

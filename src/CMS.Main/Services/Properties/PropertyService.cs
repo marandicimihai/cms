@@ -9,12 +9,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Main.Services;
 
-public class SchemaPropertyService(
+public class PropertyService(
     IDbContextConcurrencyHelper dbHelper,
-    ILogger<SchemaPropertyService> logger
-) : ISchemaPropertyService
+    ILogger<PropertyService> logger
+) : IPropertyService
 {
-    public async Task<Result<PropertyDto>> CreateSchemaPropertyAsync(
+    public async Task<Result<PropertyDto>> CreatePropertyAsync(
         PropertyDto dto)
     {
         try
@@ -48,7 +48,7 @@ public class SchemaPropertyService(
         }
     }
 
-    public async Task<Result<PropertyDto>> UpdateSchemaPropertyAsync(PropertyDto dto)
+    public async Task<Result<PropertyDto>> UpdatePropertyAsync(PropertyDto dto)
     {
         try
         {
@@ -84,7 +84,7 @@ public class SchemaPropertyService(
         }
     }
 
-    public async Task<Result> DeleteSchemaPropertyAsync(string propertyId)
+    public async Task<Result> DeletePropertyAsync(string propertyId)
     {
         try
         {

@@ -26,7 +26,7 @@ public partial class PropertyUpdateForm : ComponentBase
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
     
     [Inject]
-    private ISchemaPropertyService PropertyService { get; set; } = default!;
+    private IPropertyService PropertyService { get; set; } = default!;
 
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
@@ -72,7 +72,7 @@ public partial class PropertyUpdateForm : ComponentBase
         
         PropertyDto.SchemaId = Schema.Id;
 
-        var result = await PropertyService.UpdateSchemaPropertyAsync(PropertyDto);
+        var result = await PropertyService.UpdatePropertyAsync(PropertyDto);
 
         if (result.IsSuccess)
         {

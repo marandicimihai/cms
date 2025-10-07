@@ -72,7 +72,7 @@ builder.Services
     .AddScoped<AuthorizationHelperService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ISchemaService, SchemaService>()
-    .AddScoped<ISchemaPropertyService, SchemaPropertyService>()
+    .AddScoped<IPropertyService, PropertyService>()
     .AddScoped<IEntryService, EntryService>()
     .AddScoped<IApiKeyService, ApiKeyService>()
     .AddScoped<IPropertyValidator, PropertyValidator>()
