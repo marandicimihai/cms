@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.Auth;
-using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -38,7 +38,7 @@ public class GetEntryById(
 
     public override async Task HandleAsync(GetEntryByIdRequest req, CancellationToken ct)
     {
-        var authResult = await authService.AuthorizeAsync(User, req.EntryId, AuthConstants.CanEditEntry);
+        var authResult = await authService.AuthorizeAsync(User, req.EntryId, AuthConstants.OwnsEntry);
         if (!authResult.Succeeded)
         {
             await Send.NotFoundAsync(ct);

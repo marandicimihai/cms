@@ -19,6 +19,7 @@
 
 <body class="noto-sans">
 <script src="_framework/blazor.web.js"></script>
+<script src="js/notifications.js"></script>
 </body>
 <Routes/>
 </html>
@@ -52,7 +53,9 @@
         "help",
         "arrow_forward",
         "edit",
-        "vpn_key"
+        "vpn_key",
+        "check",
+        "info"
     ];
 
     private string IconNamesSorted => string.Join(',', iconNames.OrderBy(x => x));

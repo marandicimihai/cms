@@ -84,7 +84,7 @@ public class DbContextConcurrencyHelperTests
         var helper = new DbContextConcurrencyHelper(ctx);
 
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await helper.ExecuteAsync(async _ => throw new InvalidOperationException("Boom")));
+            await helper.ExecuteAsync(_ => throw new InvalidOperationException("Boom")));
 
         var ran = false;
         await helper.ExecuteAsync(async _ =>

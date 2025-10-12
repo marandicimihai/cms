@@ -1,6 +1,6 @@
 using CMS.Main.Abstractions;
-using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.Schema;
+using CMS.Main.Abstractions.Notifications;
+using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -22,18 +22,18 @@ public partial class ProjectSchemasSection : ComponentBase
     
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
-    
-    private StatusIndicator? statusIndicator;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
 
     [SupplyParameterFromForm]
     public SchemaDto NewSchema { get; set; } = new();
     private bool IsAddFormVisible { get; set; }
 
-    private bool IsCreatingSchema { get; set; }
-
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         NewSchema = new SchemaDto { ProjectId = ProjectId };
+        StateHasChanged();
     }
 
     private void ShowAddForm()
@@ -44,51 +44,54 @@ public partial class ProjectSchemasSection : ComponentBase
 
     private void HideAddForm()
     {
-        statusIndicator?.Hide();
         IsAddFormVisible = false;
         NewSchema = new SchemaDto { ProjectId = ProjectId };
     }
 
     public async Task HandleAddSchema()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId))
+        if (!await AuthHelper.OwnsProject(ProjectId))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
-        IsCreatingSchema = true;
         StateHasChanged();
         await Task.Yield();
 
         var result = await SchemaService.CreateSchemaAsync(NewSchema);
 
-        if (!result.IsSuccess)
+        if (result.IsSuccess)
         {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                StatusIndicator.StatusSeverity.Error);
-        }
-        else
-        {
-            statusIndicator?.Show("Successfully created schema.",
-                StatusIndicator.StatusSeverity.Success);
-
             IsAddFormVisible = false;
             NewSchema = new SchemaDto { ProjectId = ProjectId };
             Schemas.Add(result.Value);
         }
+        else
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ?? "There was an error",
+                Type = NotificationType.Error
+            });
+        }
 
-        IsCreatingSchema = false;
         StateHasChanged();
     }
 
     private async Task OnDeleteSchemaAsync(SchemaDto schema)
     {
-        if (!await AuthHelper.CanEditProject(ProjectId))
+        if (!await AuthHelper.OwnsProject(ProjectId))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
@@ -104,14 +107,16 @@ public partial class ProjectSchemasSection : ComponentBase
 
             if (result.IsSuccess)
             {
-                statusIndicator?.Show("Schema deleted successfully.",
-                    StatusIndicator.StatusSeverity.Success);
                 Schemas.Remove(schema);
             }
             else
             {
-                statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                    StatusIndicator.StatusSeverity.Error);
+                await Notifications.NotifyAsync(new()
+                {
+                    Message = result.Errors.FirstOrDefault() ??
+                        $"There was an error when deleting schema named {schema.Name}.",
+                    Type = NotificationType.Error
+                });
             }
         }
     }

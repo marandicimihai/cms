@@ -1,4 +1,4 @@
-@using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.Abstractions.Properties.PropertyTypes
 @rendermode InteractiveServer
 
 <div class="@(Visible ? "" : "hidden")">
@@ -14,7 +14,7 @@
                 <label class="text-xs uppercase tracking-wide text-slate-600">Required</label>
                 <InputCheckbox @bind-Value="PropertyDto.IsRequired" class="h-5 w-5 text-blue-600 focus:ring-blue-500"/>
             </div>
-            @if (PropertyDto.Type == SchemaPropertyType.Enum)
+            @if (PropertyDto.Type == PropertyType.Enum)
             {
                 <div class="flex flex-col gap-2 md:col-span-1">
                     <label class="text-xs uppercase tracking-wide text-slate-600">Options (comma separated)</label>
@@ -27,14 +27,8 @@
             }
         </div>
         <div class="flex gap-2 mt-4">
-            <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 min-w-[140px]" aria-label="Save Property" disabled="@(PropertyDto.Type == SchemaPropertyType.Enum && !IsEnumOptionsValid)">
-                <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
-                Save Property
-            </button>
-            <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" aria-label="Cancel" @onclick="async () => await OnCancel.InvokeAsync()">
-                <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
-                Cancel
-            </button>
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Save Property" disabled="@(PropertyDto.Type == PropertyType.Enum && !IsEnumOptionsValid)">Save Property</PrimaryButton>
+            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="async () => await OnCancel.InvokeAsync()" aria-label="Cancel">Cancel</SecondaryButton>
         </div>
     </EditForm>
 </div>

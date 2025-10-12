@@ -1,0 +1,83 @@
+@using CMS.Main.Abstractions.Properties.PropertyTypes
+@using System.Globalization
+@using CMS.Main.DTOs
+@implements IPropertyInput
+
+<input @onchange="HandleChange"
+    id="field-@Property.Id"
+    value="@FormattedValue"
+    type="datetime-local"
+    class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")"
+    disabled="@Disabled" />
+
+@code {
+    [Parameter, EditorRequired]
+    public PropertyDto Property { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    [Parameter]
+    public object? InitialValue { get; set; }
+
+    private DateTime? Value { get; set; }
+
+    private bool Disabled { get; set; } = false;
+
+    private string? FormattedValue => Value?.ToString("yyyy-MM-ddTHH:mm");
+
+    protected override void OnInitialized()
+    {
+        if (Property.Type != PropertyType.DateTime)
+        {
+            throw new InvalidOperationException($"DateTimePropertyInput can only be used with PropertyType.DateTime, but got {Property.Type}");
+        }
+
+        if (InitialValue is not null and DateTime dt)
+        {
+            Value = dt;
+        }
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        var stringValue = e.Value?.ToString();
+        
+        if (string.IsNullOrWhiteSpace(stringValue))
+        {
+            Value = null;
+        }
+        else if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedValue))
+        {
+            Value = parsedValue;
+        }
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    public object? GetValue()
+    {
+        if (Value is DateTime dt)
+        {
+            var utc = DateTime.SpecifyKind(dt, DateTimeKind.Local).ToUniversalTime();
+            return utc.ToString("o");
+        }
+        return null;
+    }
+
+    public void SetDisabled(bool disabled)
+    {
+        Disabled = disabled;
+    }
+
+    public void Reset()
+    {
+        if (InitialValue is not null and DateTime dt)
+        {
+            Value = dt;
+        }
+    }
+}

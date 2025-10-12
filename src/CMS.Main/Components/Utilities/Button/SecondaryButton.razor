@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+
+<button @attributes="AdditionalAttributes"
+    class="inline-flex gap-2 items-center justify-center rounded-md font-medium text-sm px-3 py-2 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed @VariantClass"
+    @onclick="OnClick"
+    disabled="@Disabled"
+    type="@Type">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <span class="material-symbols-outlined icons-default text-base" aria-hidden="true">@Icon</span>
+    }
+    <span>@ChildContent</span>
+</button>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public string? Icon { get; set; }
+
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Neutral;
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public string Type { get; set; } = "button";
+
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string VariantClass => Variant switch
+    {
+        ButtonVariant.Info => "bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50 focus:ring-blue-500",
+        ButtonVariant.Danger => "bg-transparent border border-rose-600 text-rose-600 hover:bg-rose-50 focus:ring-rose-500",
+        ButtonVariant.Neutral => "bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-blue-500",
+        _ => string.Empty
+    };
+}

@@ -10,15 +10,15 @@ public static class AuthConfiguration
     public static void ConfigureAuth(this IServiceCollection services)
     {
         services.AddAuthorizationBuilder()
-            .AddPolicy(AuthConstants.CanEditProject, policy =>
-                policy.Requirements.Add(new CanEditProjectRequirement()))
-            .AddPolicy(AuthConstants.CanEditSchema, policy =>
-                policy.Requirements.Add(new CanEditSchemaRequirement()))
-            .AddPolicy(AuthConstants.CanEditEntry, policy =>
-                policy.Requirements.Add(new CanEditEntryRequirement()));
-        services.AddScoped<IAuthorizationHandler, CanEditProjectHandler>();
-        services.AddScoped<IAuthorizationHandler, CanEditSchemaHandler>();
-        services.AddScoped<IAuthorizationHandler, CanEditEntryHandler>();
+            .AddPolicy(AuthConstants.OwnsProject, policy =>
+                policy.Requirements.Add(new OwnsProjectRequirement()))
+            .AddPolicy(AuthConstants.OwnsSchema, policy =>
+                policy.Requirements.Add(new OwnsSchemaRequirement()))
+            .AddPolicy(AuthConstants.OwnsEntry, policy =>
+                policy.Requirements.Add(new OwnsEntryRequirement()));
+        services.AddScoped<IAuthorizationHandler, OwnsProjectHandler>();
+        services.AddScoped<IAuthorizationHandler, OwnsSchemaHandler>();
+        services.AddScoped<IAuthorizationHandler, OwnsEntryHandler>();
 
         services.AddAuthentication(options =>
             {

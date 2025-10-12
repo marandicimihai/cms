@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
 
 namespace CMS.Main.Models;
 
-public class SchemaProperty : IValidatableObject
+public class Property
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public string Id { get; set; } = default!;
@@ -20,7 +20,7 @@ public class SchemaProperty : IValidatableObject
     public string Name { get; set; } = default!;
     
     [Required]
-    public SchemaPropertyType Type { get; set; }
+    public PropertyType Type { get; set; }
     
     // For enums
     public string[]? Options { get; set; }
@@ -28,17 +28,4 @@ public class SchemaProperty : IValidatableObject
     public bool IsRequired { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (Options == null) yield break;
-        
-        foreach (var option in Options)
-        {
-            if (option.Contains(' '))
-            {
-                yield return new ValidationResult("Options cannot contain spaces.", [nameof(Options)]);
-            }
-        }
-    }
 }

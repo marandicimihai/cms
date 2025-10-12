@@ -1,0 +1,64 @@
+@using CMS.Main.Abstractions.Properties.PropertyTypes
+@using CMS.Main.DTOs
+@implements IPropertyInput
+
+<select @onchange="HandleChange"
+    id="field-@Property.Id"
+    class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")"
+    disabled="@Disabled">
+    <option value="">-- select --</option>
+    @if (Property.Options != null)
+    {
+        foreach (var opt in Property.Options)
+        {
+            <option value="@opt" selected="@(Value == opt)">@opt</option>
+        }
+    }
+</select>
+
+@code {
+    [Parameter, EditorRequired]
+    public PropertyDto Property { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    [Parameter]
+    public object? InitialValue { get; set; }
+
+    private string? Value { get; set; }
+
+    private bool Disabled { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        if (Property.Type != PropertyType.Enum)
+        {
+            throw new InvalidOperationException($"EnumPropertyInput can only be used with PropertyType.Enum, but got {Property.Type}");
+        }
+        
+        Value = InitialValue?.ToString() ?? string.Empty;
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString() ?? string.Empty;
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    public object? GetValue() => Value;
+
+    public void SetDisabled(bool disabled)
+    {
+        Disabled = disabled;
+    }
+
+    public void Reset()
+    {
+        Value = InitialValue?.ToString() ?? string.Empty;
+    }
+}

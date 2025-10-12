@@ -1,17 +1,26 @@
 using System;
 using System.Linq;
 using Ardalis.Result;
-using CMS.Main.DTOs.SchemaProperty;
-using CMS.Main.Models;
-using CMS.Main.Services;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
+using CMS.Main.Abstractions.SchemaProperties;
+using CMS.Main.DTOs;
+using CMS.Main.Services.SchemaProperties;
 using Xunit;
 
 namespace CMS.Tests;
 
-public class PropertyValidationExtensionsTests
+public class SchemaPropertyValidatorTests
 {
-    private static SchemaPropertyDto MakeProp(string name, SchemaPropertyType type, bool required = false, string[]? options = null)
-        => new SchemaPropertyDto
+    private readonly IPropertyValidator _validator;
+
+    public SchemaPropertyValidatorTests()
+    {
+        var factory = new PropertyTypeHandlerFactory();
+        _validator = new PropertyValidator(factory);
+    }
+
+    private static PropertyDto MakeProp(string name, PropertyType type, bool required = false, string[]? options = null)
+        => new PropertyDto
         {
             Id = Guid.NewGuid().ToString(),
             SchemaId = Guid.NewGuid().ToString(),
@@ -24,40 +33,42 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Text_Allows_String_Value()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text);
+        var prop = MakeProp("Title", PropertyType.Text);
         object? val = "Hello";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal("Hello", val);
     }
 
     [Fact]
-    public void Text_NonString_Unchanged_When_Optional()
+    public void Text_NonString_Fails_When_NotString()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text);
+        var prop = MakeProp("Title", PropertyType.Text);
         object? val = 123;
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess);
-        // Optional fields are not type-cast; value remains unchanged
-        Assert.Equal(123, val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
+        Assert.True(result.IsInvalid());
+        Assert.Contains("Invalid text value", result.ValidationErrors.First().ErrorMessage);
     }
 
     [Fact]
     public void Text_Required_Null_Fails()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text, required:true);
+        var prop = MakeProp("Title", PropertyType.Text, required: true);
         object? val = null;
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsInvalid());
-        Assert.Contains("required", result.ValidationErrors.First().ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void Boolean_Accepts_True_String()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = "TrUe";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal(true, val);
     }
@@ -68,9 +79,10 @@ public class PropertyValidationExtensionsTests
     [InlineData("FaLsE", false)]
     public void Boolean_Varied_Casing_Parses(string input, bool expected)
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = input;
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal(expected, val);
     }
@@ -78,9 +90,10 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Boolean_Invalid_String_Fails()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = "yes";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid boolean", result.ValidationErrors.First().ErrorMessage);
     }
@@ -88,50 +101,61 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Boolean_Required_Blank_Fails()
     {
-        var prop = MakeProp("Active", SchemaPropertyType.Boolean, required:true);
+        var prop = MakeProp("Active", PropertyType.Boolean, required: true);
         object? val = "   ";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsInvalid());
     }
 
     [Fact]
     public void DateTime_Utc_DateTime_Serializes()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
-        object? val = new DateTime(2025,8,20,12,30,0, DateTimeKind.Utc);
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
+        var original = new DateTime(2025, 8, 20, 12, 30, 0, DateTimeKind.Utc);
+        object? val = original;
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
-        var str = Assert.IsType<string>(val);
-        Assert.EndsWith("Z", str);
+        var dt = Assert.IsType<DateTime>(val);
+        Assert.Equal(DateTimeKind.Utc, dt.Kind);
+        Assert.Equal(original, dt);
     }
 
     [Fact]
-    public void DateTime_Local_DateTime_Fails()
+    public void DateTime_Local_DateTime_ConvertsToUtc()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
-        object? val = new DateTime(2025,8,20,12,30,0, DateTimeKind.Local);
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsInvalid());
-        Assert.Contains("UTC", result.ValidationErrors.First().ErrorMessage);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
+        var original = new DateTime(2025, 8, 20, 12, 30, 0, DateTimeKind.Local);
+        object? val = original;
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
+        Assert.True(result.IsSuccess);
+        var dt = Assert.IsType<DateTime>(val);
+        Assert.Equal(DateTimeKind.Utc, dt.Kind);
+        Assert.Equal(original.ToUniversalTime(), dt);
     }
 
     [Fact]
     public void DateTime_Utc_String_Parses()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         object? val = "2025-08-20T12:30:00Z";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
-        var str = Assert.IsType<string>(val);
-        Assert.EndsWith("Z", str);
+        var dt = Assert.IsType<DateTime>(val);
+        Assert.Equal(DateTimeKind.Utc, dt.Kind);
+        Assert.Equal(new DateTime(2025, 8, 20, 12, 30, 0, DateTimeKind.Utc), dt);
     }
 
     [Fact]
     public void Decimal_String_Parses()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
+        var prop = MakeProp("Price", PropertyType.Number, required: true);
         object? val = "1.23";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal(1.23m, val);
     }
@@ -143,9 +167,10 @@ public class PropertyValidationExtensionsTests
     [InlineData("  .5  ", 0.5)]
     public void Decimal_Fraction_Forms_Parse(string input, decimal expected)
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
+        var prop = MakeProp("Price", PropertyType.Number, required: true);
         object? val = input;
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal(expected, val);
     }
@@ -153,9 +178,10 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Decimal_Invalid_String_Fails()
     {
-        var prop = MakeProp("Price", SchemaPropertyType.Number, required:true);
+        var prop = MakeProp("Price", PropertyType.Number, required: true);
         object? val = "1.2.3";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid decimal", result.ValidationErrors.First().ErrorMessage);
     }
@@ -163,9 +189,10 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Enum_Valid_Case_Insensitive()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new []{"Red","Green","Blue"});
+        var prop = MakeProp("Color", PropertyType.Enum, true, new[] { "Red", "Green", "Blue" });
         object? val = "green";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal("Green", val); // normalized to actual option casing
     }
@@ -173,9 +200,10 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Enum_Whitespace_Case_Insensitive_Match()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new []{"Red","Green","Blue"});
+        var prop = MakeProp("Color", PropertyType.Enum, true, new[] { "Red", "Green", "Blue" });
         object? val = "  RED  ";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsSuccess);
         Assert.Equal("Red", val);
     }
@@ -183,49 +211,56 @@ public class PropertyValidationExtensionsTests
     [Fact]
     public void Enum_Invalid_Value_Fails()
     {
-        var prop = MakeProp("Color", SchemaPropertyType.Enum, true, new []{"Red","Green"});
+        var prop = MakeProp("Color", PropertyType.Enum, true, new[] { "Red", "Green" });
         object? val = "Blue";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsInvalid());
         Assert.Contains("Invalid enum value", result.ValidationErrors.First().ErrorMessage);
     }
 
     [Fact]
-    public void DateTime_String_NonUtc_Fails()
+    public void DateTime_Optional_String_WithOffset_ConvertsToUtc()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
-        // Provide a local style with offset that will adjust to UTC but we want to ensure Kind is UTC after parse; offset makes Kind Utc so create a case without Z or offset but we expect Accept due to AssumeUniversal.
-        object? val = "2025-08-20T12:30:00+02:00"; // This should parse and become UTC string
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess); // current logic accepts offset converting to UTC
-        Assert.IsType<string>(val);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime);
+        object? val = "2025-08-20T12:30:00+02:00";
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
+        Assert.True(result.IsSuccess);
+        // Optional field still gets converted to UTC DateTime
+        var dt = Assert.IsType<DateTime>(val);
+        Assert.Equal(DateTimeKind.Utc, dt.Kind);
     }
 
     [Fact]
     public void DateTime_String_Unspecified_With_AssumeUniversal_Accepts()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         object? val = "2025-08-20T12:30:00"; // unspecified kind, assumed universal
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess); // Due to AssumeUniversal flag
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
+        Assert.True(result.IsSuccess);
+        var dt = Assert.IsType<DateTime>(val);
+        Assert.Equal(DateTimeKind.Utc, dt.Kind);
     }
 
     [Fact]
     public void DateTime_Required_Blank_Fails()
     {
-        var prop = MakeProp("PublishedAt", SchemaPropertyType.DateTime, required:true);
+        var prop = MakeProp("PublishedAt", PropertyType.DateTime, required: true);
         object? val = "   ";
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
+        var result = _validator.ValidateAndCast(prop, val);
+        val = result.Value;
         Assert.True(result.IsInvalid());
     }
 
     [Fact]
-    public void Text_Required_Whitespace_Passes_CurrentLogic()
+    public void Text_Required_Whitespace_Passes()
     {
-        var prop = MakeProp("Title", SchemaPropertyType.Text, required:true);
-        object? val = "   "; // Current implementation does not trim or nullify
-        var result = PropertyValidator.ValidateProperty(prop, ref val);
-        Assert.True(result.IsSuccess); // Document current behavior
+        var prop = MakeProp("Title", PropertyType.Text, required: true);
+        object? val = "   ";
+        var result = _validator.ValidateAndCast(prop, val);
+        Assert.True(result.IsSuccess);
         Assert.Equal("   ", val);
     }
 }

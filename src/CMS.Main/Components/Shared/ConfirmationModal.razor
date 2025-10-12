@@ -15,19 +15,13 @@
             </div>
             <div class="text-sm text-slate-700 mb-4">@ConfirmationService.CurrentRequest?.Message</div>
             <div class="flex gap-2 justify-end">
-                <button
-                    class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-2 bg-slate-200 text-slate-900 hover:bg-slate-300 focus:ring-2 focus:ring-blue-500"
-                    @onclick="OnCancelClicked" aria-label="@ConfirmationService.CurrentRequest?.CancelText">
-                    <span class="material-symbols-outlined icons-default text-base mr-1" aria-hidden="true">close</span>
+                <SecondaryButton Variant="ButtonVariant.Neutral" Icon="close" @onclick="OnCancelClicked" aria-label="@ConfirmationService.CurrentRequest?.CancelText">
                     @ConfirmationService.CurrentRequest?.CancelText
-                </button>
-                <button
-                    class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
-                    @onclick="OnConfirmClicked" aria-label="@ConfirmationService.CurrentRequest?.ConfirmText">
-                    <span class="material-symbols-outlined icons-default text-base mr-1"
-                          aria-hidden="true">check_circle</span>
+                </SecondaryButton>
+
+                <PrimaryButton Variant="ButtonVariant.Info" @onclick="OnConfirmClicked" aria-label="@ConfirmationService.CurrentRequest?.ConfirmText">
                     @ConfirmationService.CurrentRequest?.ConfirmText
-                </button>
+                </PrimaryButton>
             </div>
         </div>
     </div>

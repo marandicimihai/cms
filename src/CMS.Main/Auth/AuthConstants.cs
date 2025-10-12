@@ -2,8 +2,8 @@ namespace CMS.Main.Auth;
 
 public static class AuthConstants
 {
-    public static string ApiKeyScheme = "ApiKeyScheme";
-    public static readonly string CanEditProject = "ProjectPolicies.CanEditProject";
-    public static readonly string CanEditSchema = "SchemaPolicies.CanEditSchema";
-    public static readonly string CanEditEntry = "EntryPolicies.CanEditEntry";
+    public static readonly string ApiKeyScheme = "ApiKeyScheme";
+    public static readonly string OwnsProject = "OwnsProject";
+    public static readonly string OwnsSchema = "OwnsSchema";
+    public static readonly string OwnsEntry = "OwnsEntry";
 }

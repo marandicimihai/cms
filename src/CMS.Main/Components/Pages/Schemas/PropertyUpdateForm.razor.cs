@@ -1,7 +1,8 @@
-using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Notifications;
+using CMS.Main.Abstractions.Properties.PropertyTypes;
+using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -19,42 +20,45 @@ public partial class PropertyUpdateForm : ComponentBase
     public EventCallback OnCancel { get; set; }
     
     [Parameter]
-    public StatusIndicator? StatusIndicator { get; set; }
-    
-    [Parameter]
     public bool Visible { get; set; } = true;
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
     
     [Inject]
-    private ISchemaPropertyService PropertyService { get; set; } = default!;
+    private IPropertyService PropertyService { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private SchemaPropertyDto PropertyDto { get; set; } = new();
+    private PropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
 
-    public void SetModel(SchemaPropertyDto propertyDto)
+    public void SetModel(PropertyDto propertyDto)
     {
         PropertyDto = propertyDto;
         EnumOptions = PropertyDto.Options is { Length: > 0 } ? string.Join(", ", PropertyDto.Options) : string.Empty;
     }
 
     private bool IsEnumOptionsValid =>
-        PropertyDto.Type != SchemaPropertyType.Enum ||
+        PropertyDto.Type != PropertyType.Enum ||
         (!string.IsNullOrWhiteSpace(EnumOptions) &&
          EnumOptions.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Length > 0);
 
     private async Task HandleUpdatePropertySubmit()
     {
-        if (!await AuthHelper.CanEditSchema(Schema.Id))
+        if (!await AuthHelper.OwnsSchema(Schema.Id))
         {
-            StatusIndicator?.Show("You do not have access to this schema or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
-        
-        if (PropertyDto.Type == SchemaPropertyType.Enum)
+
+        if (PropertyDto.Type == PropertyType.Enum)
         {
             var options = string.IsNullOrWhiteSpace(EnumOptions)
                 ? []
@@ -68,18 +72,20 @@ public partial class PropertyUpdateForm : ComponentBase
         
         PropertyDto.SchemaId = Schema.Id;
 
-        var result = await PropertyService.UpdateSchemaPropertyAsync(PropertyDto);
+        var result = await PropertyService.UpdatePropertyAsync(PropertyDto);
 
         if (result.IsSuccess)
         {
-            StatusIndicator?.Show("Successfully updated schema property.",
-                StatusIndicator.StatusSeverity.Success);
             await OnSuccess.InvokeAsync();
         }
         else
         {
-            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when updating property named {PropertyDto.Name}.",
+                Type = NotificationType.Error
+            });
         }
         
         StateHasChanged();

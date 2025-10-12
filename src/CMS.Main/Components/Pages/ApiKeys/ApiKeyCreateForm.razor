@@ -11,14 +11,8 @@
             </div>
         </div>
         <div class="flex gap-2 mt-4">
-            <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 min-w-[140px]" aria-label="Create API Key">
-                <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
-                Create API Key
-            </button>
-            <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" aria-label="Cancel" @onclick="async () => await OnCancel.InvokeAsync()">
-                <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
-                Cancel
-            </button>
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Create API Key">Create API Key</PrimaryButton>
+            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="async () => await OnCancel.InvokeAsync()" aria-label="Cancel">Cancel</SecondaryButton>
         </div>
     </EditForm>
 </div>

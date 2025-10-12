@@ -1,58 +1,58 @@
 @using System.Globalization
 @using Ardalis.Result
-@using CMS.Main.DTOs.SchemaProperty
+@using CMS.Main.Abstractions.Properties.PropertyTypes
+@using CMS.Main.Components.Shared.PropertyInputs
+@using CMS.Main.DTOs
 @using CMS.Main.Models
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using CMS.Main.Services.SchemaProperties
+@using Humanizer
+@using Mapster
+@using Mono.TextTemplating
+
+@inject IPropertyValidator SchemaPropertyValidator
 
 <div class="flex flex-col gap-1">
-    <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@SchemaProperty.Id">
-        @SchemaProperty.Name
-        @if (SchemaProperty.IsRequired)
+    <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@Property.Id">
+        @Property.Name
+        @if (Property.IsRequired)
         {
             <span class="text-rose-600">*</span>
         }
     </label>
     <div class="flex items-center gap-2">
         <div class="flex-1">
-            @switch (SchemaProperty.Type)
+            @switch (Property.Type)
             {
-                case SchemaPropertyType.Text:
-                    <input id="field-@SchemaProperty.Id" type="text" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(IsNull ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")" value="@BindConverter.FormatValue(Value)" @oninput="OnInputChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" disabled="@IsNull" />
+                case PropertyType.Text:
+                    <TextPropertyInput 
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.Number:
-                    <input id="field-@SchemaProperty.Id" type="number" step="any" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(IsNull ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")" value="@BindConverter.FormatValue(Value)" @onchange="OnInputChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" disabled="@IsNull" />
+                case PropertyType.Number:
+                    <NumberPropertyInput 
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.Boolean:
-                    <div class="flex items-center gap-2 py-2">
-                        <input id="field-@SchemaProperty.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 @(IsNull ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")" checked="@(Value?.ToString()?.ToLowerInvariant() == "true")" @onchange="OnInputChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" disabled="@IsNull" />
-                        <span class="text-sm text-slate-700">@(Value?.ToString()?.ToLowerInvariant() == "true" ? "true" : "false")</span>
-                    </div>
+                case PropertyType.Boolean:
+                    <BooleanPropertyInput 
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.DateTime:
-                    <input id="field-@SchemaProperty.Id" type="datetime-local" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(IsNull ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")" value="@FormatDateTimeLocal(Value)" @onchange="OnInputChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" disabled="@IsNull" />
+                case PropertyType.DateTime:
+                    <DateTimePropertyInput 
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
-                case SchemaPropertyType.Enum:
-                    <select id="field-@SchemaProperty.Id" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(IsNull ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")" value="@BindConverter.FormatValue(Value)" @onchange="OnInputChanged" aria-label="@SchemaProperty.Name" aria-invalid="@HasError" disabled="@IsNull">
-                        <option value="">-- select --</option>
-                        @if (SchemaProperty.Options != null)
-                        {
-                            foreach (var opt in SchemaProperty.Options)
-                            {
-                                <option value="@opt">@opt</option>
-                            }
-                        }
-                    </select>
+                case PropertyType.Enum:
+                    <EnumPropertyInput 
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 default:
-                    <div class="text-rose-600 text-sm">Unsupported type: @SchemaProperty.Type</div>
+                    <div class="text-rose-600 text-sm">Unsupported type: @Property.Type</div>
                     break;
             }
         </div>
-        @if (!SchemaProperty.IsRequired)
+        @if (!Property.IsRequired)
         {
             <div class="flex items-center gap-1">
-                <input id="toggle-@SchemaProperty.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
-                <label class="text-xs text-slate-600" for="toggle-@SchemaProperty.Id">null</label>
+                <input id="toggle-@Property.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
+                <label class="text-xs text-slate-600" for="toggle-@Property.Id">null</label>
             </div>
         }
     </div>
@@ -67,96 +67,57 @@
 @code {
 
     [Parameter, EditorRequired]
-    public SchemaPropertyDto SchemaProperty { get; set; } = default!;
+    public PropertyDto Property { get; set; } = default!;
+
+    private PropertyDto PropertyCopy = default!;
 
     [Parameter]
     public object? InitialValue { get; set; }
-    
-    [Parameter]
-    public bool UseInitialValue { get; set; }
 
-    private object? Value { get; set; }
-    private object? TempValue { get; set; }
+    private IPropertyInput Input { get; set; } = default!;
 
     private string? ValidationMessage { get; set; }
     private bool HasError => !string.IsNullOrEmpty(ValidationMessage);
 
-    private bool IsNull { get; set; }
+    private bool IsNull { get; set; } = false;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
-        if (!UseInitialValue)
+        PropertyCopy = Property.Adapt<PropertyDto>();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
         {
-            // Handle the case where InitialValue was not passed
-            Value = GetDefaultValue();
-            IsNull = false;
-        }
-        else
-        {
-            Value = InitialValue;
-            IsNull = !SchemaProperty.IsRequired && Value is null;
+            IsNull = InitialValue is null && !Property.IsRequired;
+            Input.SetDisabled(IsNull);
+            StateHasChanged();
         }
     }
 
     private void OnIsNullChanged(ChangeEventArgs e)
     {
         IsNull = e.Value?.ToString() == "true" || e.Value is true;
+        Input.SetDisabled(IsNull);
         if (IsNull)
         {
-            TempValue = Value;
-            Value = GetDefaultValue();
             ValidationMessage = null;
-        }
-        else
-        {
-            Value = TempValue;
-            Validate();
         }
         StateHasChanged();
     }
 
-    private void OnInputChanged(ChangeEventArgs e)
-    {
-        var input = e.Value?.ToString();
-        if (SchemaProperty.Type == SchemaPropertyType.DateTime &&
-            DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out var localDt))
-        {
-            var local = DateTime.SpecifyKind(localDt, DateTimeKind.Local);
-            Value = local.ToUniversalTime().ToString("o");
-        }
-        else
-        {
-            Value = input;
-        }
-
-        Validate();
-    }
-
-    private string? FormatDateTimeLocal(object? value)
-    {
-        if (value is string s && DateTime.TryParse(s, null, DateTimeStyles.RoundtripKind, out var utcDt))
-        {
-            return utcDt.ToLocalTime().ToString("yyyy-MM-ddTHH:mm");
-        }
-        return null;
-    }
-
-    private void Validate()
+    private void OnInputChanged(object? value)
     {
         ValidationMessage = null;
         if (!IsNull) 
         {
-            // Treat field as if required if not required already
-            var value = Value is "" ? null : Value;
+            var temp = Property.IsRequired;
+            Property.IsRequired = true; // Temporarily disable required validation to allow empty values
 
-            // Store previous IsRequired value and set to true
-            var temp = SchemaProperty.IsRequired;
-            SchemaProperty.IsRequired = true;
+            var validationResult = SchemaPropertyValidator.ValidateAndCast(Property, value);
 
-            var validationResult = PropertyValidator.ValidateProperty(SchemaProperty, ref value);
-            
-            // Restore original IsRequired value
-            SchemaProperty.IsRequired = temp;
+            Property.IsRequired = temp; // Restore original required setting
 
             if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
             {
@@ -167,34 +128,38 @@
 
     public void Reset()
     {
-        Value = GetDefaultValue();
-        ValidationMessage = null;
+        Input.Reset();
+        IsNull = InitialValue is null && !Property.IsRequired;
+        Input.SetDisabled(IsNull);
+        StateHasChanged();
     }
 
-    public (SchemaPropertyDto, object?) GetPropertyAndValue()
+    public (PropertyDto, object?) GetPropertyAndValue()
     {
-        if (SchemaProperty.Type == SchemaPropertyType.DateTime && Value is DateTime dt)
-        {
-            // Always return ISO 8601 UTC string for DateTime
-            return (SchemaProperty, dt.ToUniversalTime().ToString("o"));
-        }
-        return (SchemaProperty, Value);
+        if (IsNull)
+            return (Property, null);
+
+        return (Property, Input.GetValue());
     }
 
     public bool IsValid()
     {
-        Validate();
-        return !HasError;
-    }
-
-    private object? GetDefaultValue()
-    {
-        return SchemaProperty.Type switch
+        ValidationMessage = null;
+        if (!IsNull) 
         {
-            SchemaPropertyType.Text => string.Empty,
-            SchemaPropertyType.Boolean => false,
-            _ => string.Empty
-        };
+            var temp = Property.IsRequired;
+            Property.IsRequired = true; // Temporarily disable required validation to allow empty values
+
+            var validationResult = SchemaPropertyValidator.ValidateAndCast(Property, Input.GetValue());
+
+            Property.IsRequired = temp; // Restore original required setting
+
+            if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
+            {
+                ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
+            }
+        }
+        return !HasError;
     }
 
 }

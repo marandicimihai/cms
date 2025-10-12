@@ -24,10 +24,7 @@
                         </label>
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">
-                        <button class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5" aria-label="Delete API Key" @onclick="() => OnDeleteKey(key)">
-                            <span class="material-symbols-outlined icons-default text-base mr-1">delete</span>
-                            Delete
-                        </button>
+                        <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeleteKey(key)" aria-label="Delete API Key">Delete</PrimaryButton>
                     </TableData>
                 </TableRow>
             }

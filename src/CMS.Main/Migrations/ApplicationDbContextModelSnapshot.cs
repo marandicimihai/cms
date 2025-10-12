@@ -170,29 +170,7 @@ namespace CMS.Main.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("CMS.Main.Models.Schema", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProjectId")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Schemas");
-                });
-
-            modelBuilder.Entity("CMS.Main.Models.SchemaProperty", b =>
+            modelBuilder.Entity("CMS.Main.Models.Property", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -223,7 +201,29 @@ namespace CMS.Main.Migrations
 
                     b.HasIndex("SchemaId");
 
-                    b.ToTable("SchemaProperties");
+                    b.ToTable("Properties");
+                });
+
+            modelBuilder.Entity("CMS.Main.Models.Schema", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Schemas");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -380,6 +380,17 @@ namespace CMS.Main.Migrations
                     b.Navigation("Schema");
                 });
 
+            modelBuilder.Entity("CMS.Main.Models.Property", b =>
+                {
+                    b.HasOne("CMS.Main.Models.Schema", "Schema")
+                        .WithMany("Properties")
+                        .HasForeignKey("SchemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schema");
+                });
+
             modelBuilder.Entity("CMS.Main.Models.Schema", b =>
                 {
                     b.HasOne("CMS.Main.Models.Project", "Project")
@@ -389,17 +400,6 @@ namespace CMS.Main.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("CMS.Main.Models.SchemaProperty", b =>
-                {
-                    b.HasOne("CMS.Main.Models.Schema", "Schema")
-                        .WithMany("Properties")
-                        .HasForeignKey("SchemaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Schema");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

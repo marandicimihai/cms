@@ -1,4 +1,4 @@
-using CMS.Main.DTOs.ApiKey;
+using CMS.Main.DTOs;
 using System;
 
 namespace CMS.Main.Services.State;

@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using CMS.Main.DTOs.ApiKey;
+using CMS.Main.DTOs;
 
 namespace CMS.Main.Abstractions;
 

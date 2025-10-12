@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs;
 using CMS.Main.DTOs.Pagination;
 
 namespace CMS.Main.Abstractions.Entries;

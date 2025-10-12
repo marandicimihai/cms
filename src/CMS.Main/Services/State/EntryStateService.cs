@@ -1,4 +1,4 @@
-using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs;
 
 namespace CMS.Main.Services.State;
 

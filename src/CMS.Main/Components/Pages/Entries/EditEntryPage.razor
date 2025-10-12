@@ -1,10 +1,9 @@
 @page "/entry/{entryId:guid}/edit"
 @rendermode InteractiveServer
 
-@if (hasAccess)
+@if (Entry is not null)
 {
     <BackButton Href="@($"/schema/{Entry?.SchemaId}/entries")" Text="Back to Entries" />
-    <StatusIndicator @ref="statusIndicator" />
     
     <Paper>
         <h2 class="text-sm font-medium text-slate-900 mb-3">Update entry</h2>
@@ -17,9 +16,4 @@
 else
 {
     <BackButton />
-    <Paper>
-        <StatusIndicator
-            InitialMessage="You do not have access to this resource or it does not exist."
-            InitialSeverity="StatusIndicator.StatusSeverity.Error" />
-    </Paper>
 }

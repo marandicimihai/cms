@@ -5,15 +5,9 @@
         <h2 class="text-lg font-medium">Schemas</h2>
         @if (!IsAddFormVisible)
         {
-            <button
-                class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                aria-label="Add Schema" @onclick="ShowAddForm">
-                <span class="material-symbols-outlined icons-default text-base mr-2">add</span>
-                Add Schema
-            </button>
+            <PrimaryButton Type="button" Variant="ButtonVariant.Info" Icon="add" @onclick="ShowAddForm">Add Schema</PrimaryButton>
         }
     </div>
-    <StatusIndicator @ref="statusIndicator" />
     @if (IsAddFormVisible)
     {
         <EditForm Model="NewSchema" OnValidSubmit="HandleAddSchema" class="mb-4">
@@ -24,21 +18,10 @@
                 <ValidationMessage For="() => NewSchema.Name" class="text-rose-600 text-xs" />
             </div>
             <div class="flex gap-2 mt-4">
-                <button type="submit" class="inline-flex items-center justify-center rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 min-w-[120px]" aria-label="Create Schema" disabled="@IsCreatingSchema">
-                    @if (IsCreatingSchema)
-                    {
-                        <span class="material-symbols-outlined icons-default text-base animate-spin text-white" aria-label="Loading">progress_activity</span>
-                    }
-                    else
-                    {
-                        <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
-                        <span>Create Schema</span>
-                    }
-                </button>
-                <button type="button" class="inline-flex items-center justify-center rounded-md font-medium bg-slate-200 text-slate-900 hover:bg-slate-300 text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500" aria-label="Cancel" @onclick="HideAddForm">
-                    <span class="material-symbols-outlined icons-default text-base mr-2">close</span>
-                    Cancel
-                </button>
+                <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Create Schema">
+                    Create Schema
+                </PrimaryButton>
+                <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" OnClick="HideAddForm">Cancel</SecondaryButton>
             </div>
         </EditForm>
     }
@@ -65,12 +48,7 @@
                             <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
                             Edit
                         </NavLink>
-                        <button type="button"
-                                class="inline-flex items-center justify-center rounded-md font-medium bg-rose-600 text-white hover:bg-rose-700 text-xs px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500"
-                                aria-label="Delete schema" @onclick="() => OnDeleteSchemaAsync(schema)">
-                            <span class="material-symbols-outlined icons-default text-base mr-1">delete</span>
-                            Delete
-                        </button>
+                        <PrimaryButton Type="button" Variant="ButtonVariant.Danger" Icon="delete" OnClick="() => OnDeleteSchemaAsync(schema)" aria-label="Delete schema">Delete</PrimaryButton>
                     </TableData>
                 </TableRow>
             }

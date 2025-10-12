@@ -17,15 +17,9 @@
         </div>
         <form action="Account/Manage/DownloadPersonalData" method="post">
             <AntiforgeryToken/>
-            <button class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2" type="submit">
-                <span class="material-symbols-outlined icons-default text-base mr-2">download</span>
-                Download
-            </button>
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="download" aria-label="Download">Download</PrimaryButton>
         </form>
-        <a href="Account/Manage/DeletePersonalData" class="w-full inline-flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500">
-            <span class="material-symbols-outlined icons-default text-base mr-2">delete</span>
-            Delete
-        </a>
+        <PrimaryButton Variant="ButtonVariant.Danger" aria-label="Delete" href="Account/Manage/DeletePersonalData">Delete</PrimaryButton>
     </div>
 </div>
 

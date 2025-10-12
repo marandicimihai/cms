@@ -1,3 +1,4 @@
+using CMS.Main.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -7,32 +8,32 @@ public class AuthorizationHelperService(
     IAuthorizationService authorizationService,
     AuthenticationStateProvider authenticationStateProvider)
 {
-    public async Task<bool> CanEditProject(string projectId)
+    public async Task<bool> OwnsProject(string projectId)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var authorizationResult =
-            await authorizationService.AuthorizeAsync(user, projectId, "ProjectPolicies.CanEditProject");
+            await authorizationService.AuthorizeAsync(user, projectId, AuthConstants.OwnsProject);
 
         return authorizationResult.Succeeded;
     }
     
-    public async Task<bool> CanEditSchema(string schemaId)
+    public async Task<bool> OwnsSchema(string schemaId)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var authorizationResult =
-            await authorizationService.AuthorizeAsync(user, schemaId, "SchemaPolicies.CanEditSchema");
+            await authorizationService.AuthorizeAsync(user, schemaId, AuthConstants.OwnsSchema);
 
         return authorizationResult.Succeeded;
     }
     
-    public async Task<bool> CanEditEntry(string entryId)
+    public async Task<bool> OwnsEntry(string entryId)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var authorizationResult =
-            await authorizationService.AuthorizeAsync(user, entryId, "EntryPolicies.CanEditEntry");
+            await authorizationService.AuthorizeAsync(user, entryId, AuthConstants.OwnsEntry);
 
         return authorizationResult.Succeeded;
     }

@@ -1,9 +1,8 @@
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Ardalis.Result;
 using CMS.Main.Abstractions.Entries;
 using CMS.Main.Auth;
-using CMS.Main.DTOs.Entry;
+using CMS.Main.DTOs;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -48,7 +47,7 @@ public class UpdateEntry(
 
     public override async Task HandleAsync(UpdateEntryRequest req, CancellationToken ct)
     {
-        var authResult = await authService.AuthorizeAsync(User, req.EntryId, AuthConstants.CanEditEntry);
+        var authResult = await authService.AuthorizeAsync(User, req.EntryId, AuthConstants.OwnsEntry);
         if (!authResult.Succeeded)
         {
             await Send.NotFoundAsync(ct);

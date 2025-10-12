@@ -1,7 +1,8 @@
 using CMS.Main.Abstractions;
+using CMS.Main.Abstractions.Notifications;
+using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.Schema;
-using CMS.Main.DTOs.SchemaProperty;
+using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -21,25 +22,24 @@ public partial class SchemaPage : ComponentBase
     private ISchemaService SchemaService { get; set; } = default!;
     
     [Inject]
-    private ISchemaPropertyService PropertyService { get; set; } = default!;
+    private INotificationService Notifications { get; set; } = default!;
 
     private PropertyCreateForm? createForm;
     private PropertyUpdateForm? updateForm;
-    private StatusIndicator? statusIndicator;
     
     private bool createFormVisible;
     private bool updateFormVisible;
     private bool hasAccess;
 
-    private string? queuedStatusMessage;
-    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
-
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditSchema(SchemaId.ToString()))
+        if (!await AuthHelper.OwnsSchema(SchemaId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
@@ -53,18 +53,12 @@ public partial class SchemaPage : ComponentBase
         }
         else
         {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (queuedStatusMessage != null && queuedStatusSeverity != null)
-        {
-            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
-            queuedStatusMessage = null;
-            queuedStatusSeverity = null;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
         }
     }
 
@@ -80,7 +74,7 @@ public partial class SchemaPage : ComponentBase
         createFormVisible = false;
     }
     
-    private void ShowUpdateForm(SchemaPropertyDto property)
+    private void ShowUpdateForm(PropertyDto property)
     {
         updateForm?.SetModel(property);
         updateFormVisible = true;

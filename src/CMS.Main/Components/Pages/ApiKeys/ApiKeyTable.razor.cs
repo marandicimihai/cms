@@ -1,6 +1,6 @@
 using CMS.Main.Abstractions;
-using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.ApiKey;
+using CMS.Main.Abstractions.Notifications;
+using CMS.Main.DTOs;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
 using Mapster;
@@ -16,9 +16,9 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
     [Parameter]
     public EventCallback<ApiKeyDto> OnEdit { get; set; }
     
-    [Parameter]
-    public StatusIndicator? StatusIndicator { get; set; }
-    
+    [Inject]
+    private AuthorizationHelperService AuthHelper { get; set; } = default!;
+
     [Inject]
     private ApiKeyStateService ApiKeyStateService { get; set; } = default!;
     
@@ -27,6 +27,9 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
     
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
+
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -47,6 +50,16 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
 
     private async Task OnDeleteKey(ApiKeyDto key)
     {
+        if (!await AuthHelper.OwnsProject(key.ProjectId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
+
         var confirmed = await ConfirmationService.ShowAsync(
             "Delete API Key",
             "Are you sure you want to delete this API key? This action cannot be undone.",
@@ -61,23 +74,35 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
         {
             ApiKeys.Remove(key);
             StateHasChanged();
-            StatusIndicator?.Show("Successfully deleted API key.", 
-                StatusIndicator.StatusSeverity.Success);
         }
         else
         {
-            StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error", 
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when deleting API key named {key.Name}.",
+                Type = NotificationType.Error
+            });
         }
     }
 
     private async Task OnToggleKeyState(ApiKeyDto key, object? newValue)
     {
+        if (!await AuthHelper.OwnsProject(key.ProjectId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
+
         if (newValue is bool isActive)
         {
             var toUpdate = key.Adapt<ApiKeyDto>();
             toUpdate.IsActive = isActive;
-            
+
             var result = await ApiKeyService.UpdateApiKeyAsync(toUpdate);
             if (result.IsSuccess)
             {
@@ -85,8 +110,12 @@ public partial class ApiKeyTable : ComponentBase, IDisposable
             }
             else
             {
-                StatusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                    StatusIndicator.StatusSeverity.Error);
+                await Notifications.NotifyAsync(new()
+                {
+                    Message = result.Errors.FirstOrDefault() ??
+                        $"There was an error when updating the state of API key named {key.Name}.",
+                    Type = NotificationType.Error
+                });
             }
         }
 

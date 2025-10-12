@@ -1,0 +1,74 @@
+@using CMS.Main.Abstractions.Properties.PropertyTypes
+@using CMS.Main.DTOs
+@using System.Globalization
+@implements IPropertyInput
+
+<input @oninput="HandleChange"
+    id="field-@Property.Id"
+    value="@Value"
+    type="number"
+    step="any"
+    class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 @(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")"
+    disabled="@Disabled" />
+
+@code {
+    [Parameter, EditorRequired]
+    public PropertyDto Property { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    [Parameter]
+    public object? InitialValue { get; set; }
+
+    private decimal? Value { get; set; }
+
+    private bool Disabled { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        if (Property.Type != PropertyType.Number)
+        {
+            throw new InvalidOperationException($"NumberPropertyInput can only be used with PropertyType.Number, but got {Property.Type}");
+        }
+
+        if (InitialValue is not null and decimal d)
+        {
+            Value = d;
+        }
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        var stringValue = e.Value?.ToString();
+        
+        if (string.IsNullOrWhiteSpace(stringValue))
+        {
+            Value = null;
+        }
+        else if (decimal.TryParse(stringValue, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedValue))
+        {
+            Value = parsedValue;
+        }
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    public object? GetValue() => Value;
+
+    public void SetDisabled(bool disabled)
+    {
+        Disabled = disabled;
+    }
+
+    public void Reset()
+    {
+        if (InitialValue is not null and decimal d)
+        {
+            Value = d;
+        }
+    }
+}

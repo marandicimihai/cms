@@ -10,7 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Project> Projects { get; set; }
     public DbSet<Schema> Schemas { get; set; }
-    public DbSet<SchemaProperty> SchemaProperties { get; set; }
+    public DbSet<Property> Properties { get; set; }
     public DbSet<Entry> Entries { get; set; }
     public DbSet<ApiKey> ApiKeys { get; set; }
 

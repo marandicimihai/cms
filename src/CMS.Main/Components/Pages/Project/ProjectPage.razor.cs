@@ -1,6 +1,6 @@
 using CMS.Main.Abstractions;
-using CMS.Main.Components.Shared;
-using CMS.Main.DTOs.Project;
+using CMS.Main.Abstractions.Notifications;
+using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -23,25 +23,23 @@ public partial class ProjectPage : ComponentBase
     [Inject]
     private ConfirmationService ConfirmationService { get; set; } = default!;
 
+    [Inject]
+    private INotificationService Notifications { get; set; } = default!;
+
     [SupplyParameterFromForm]
-    private ProjectDto ProjectDto { get; set; } = new();
-
-    private StatusIndicator? statusIndicator;
-
-    private string? queuedStatusMessage;
-    private StatusIndicator.StatusSeverity? queuedStatusSeverity;
-    private bool hasAccess;
+    private ProjectDto ProjectDto { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
-            queuedStatusMessage = "You do not have access to this resource or it does not exist.";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
-
-        hasAccess = true;
 
         var result =
             await ProjectService.GetProjectByIdAsync(ProjectId.ToString(), opt => { opt.IncludeSchemas = true; });
@@ -52,50 +50,49 @@ public partial class ProjectPage : ComponentBase
         }
         else
         {
-            queuedStatusMessage = result.Errors.FirstOrDefault() ?? "There was an error";
-            queuedStatusSeverity = StatusIndicator.StatusSeverity.Error;
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (queuedStatusMessage != null && queuedStatusSeverity != null)
-        {
-            statusIndicator?.Show(queuedStatusMessage, queuedStatusSeverity.Value);
-            queuedStatusMessage = null;
-            queuedStatusSeverity = null;
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
         }
     }
 
     private async Task OnSaveName()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
         var result = await ProjectService.UpdateProjectAsync(ProjectDto);
 
-        if (result.IsSuccess)
+        if (!result.IsSuccess)
         {
-            statusIndicator?.Show("Project updated successfully.",
-                StatusIndicator.StatusSeverity.Success);
-        }
-        else
-        {
-            statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    $"There was an error when updating project named {ProjectDto.Name}.",
+                Type = NotificationType.Error
+            });
         }
     }
 
     private async Task OnDeleteProject()
     {
-        if (!await AuthHelper.CanEditProject(ProjectId.ToString()))
+        if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
-            statusIndicator?.Show("You do not have access to this project or it does not exist.",
-                StatusIndicator.StatusSeverity.Error);
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
             return;
         }
 
@@ -115,8 +112,12 @@ public partial class ProjectPage : ComponentBase
             }
             else
             {
-                statusIndicator?.Show(result.Errors.FirstOrDefault() ?? "There was an error",
-                    StatusIndicator.StatusSeverity.Error);
+                await Notifications.NotifyAsync(new()
+                {
+                    Message = result.Errors.FirstOrDefault() ??
+                        $"There was an error when deleting project named {ProjectDto.Name}.",
+                    Type = NotificationType.Error
+                });
             }
         }
     }
