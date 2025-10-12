@@ -3,9 +3,12 @@
 @implements IPropertyInput
 
 <div class="flex items-center gap-2">
-    <InputCheckbox @bind-Value="Value"
-        AdditionalAttributes="@(new Dictionary<string, object>() { { "disabled", Disabled },
-        { "class", $"h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 {(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")}"} })" />
+    <input @onchange="HandleChange"
+        id="field-@Property.Id"
+        checked="@Value"
+        type="checkbox"
+        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 @(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")"
+        disabled="@Disabled" />
     <span class="text-sm text-slate-600">@(Value ? "true" : "false")</span>
 </div>
 
@@ -16,25 +19,33 @@
     [Parameter]
     public EventCallback<object?> ValueChanged { get; set; }
 
-    private bool _value = false;
-    private bool Value
-    {
-        get => _value;
-        set
-        {
-            if (_value == value) return;
-            _value = value;
-            _ = ValueChanged.InvokeAsync(_value);
-        }
-    }
+    [Parameter]
+    public object? InitialValue { get; set; }
+
+    private bool Value { get; set; } = false;
 
     private bool Disabled { get; set; } = false;
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         if (Property.Type != PropertyType.Boolean)
         {
             throw new InvalidOperationException($"BooleanPropertyInput can only be used with PropertyType.Boolean, but got {Property.Type}");
+        }
+        
+        if (InitialValue is not null and bool b)
+        {
+            Value = b;
+        }
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        Value = e.Value is bool b ? b : false;
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
         }
     }
 
@@ -47,6 +58,9 @@
 
     public void Reset()
     {
-        Value = false;
+        if (InitialValue is not null and bool b)
+        {
+            Value = b;
+        }
     }
 }

@@ -45,7 +45,10 @@ public partial class SortAndFilterOptions : ComponentBase
 
     private void AddFilter()
     {
-        var firstProp = FilterableProperties.FirstOrDefault()?.Name ?? string.Empty;
+        var firstProp = FilterableProperties.FirstOrDefault()?.Name;
+        if (firstProp == null)
+            return;
+            
         FilterRows.Add(new FilterRow
         {
             Filter = new EntryFilter { PropertyName = firstProp, FilterType = PropertyFilter.Equals }

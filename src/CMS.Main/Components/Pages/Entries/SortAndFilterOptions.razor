@@ -45,7 +45,7 @@
                                         value="@row.Filter.PropertyName"
                                         @onchange="e => OnFilterPropertyChanged(row, e)"
                                         aria-label="Filter property">
-                                    @foreach (var prop in FilterablePropertiesCopy)
+                                    @foreach (var prop in FilterableProperties)
                                     {
                                         <option value="@prop.Name" selected="@(row.Filter.PropertyName == prop.Name)">@prop.Name</option>
                                     }

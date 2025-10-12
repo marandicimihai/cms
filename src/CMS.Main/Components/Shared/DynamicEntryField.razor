@@ -5,7 +5,9 @@
 @using CMS.Main.DTOs
 @using CMS.Main.Models
 @using CMS.Main.Services.SchemaProperties
+@using Humanizer
 @using Mapster
+@using Mono.TextTemplating
 
 @inject IPropertyValidator SchemaPropertyValidator
 
@@ -23,23 +25,23 @@
             {
                 case PropertyType.Text:
                     <TextPropertyInput 
-                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 case PropertyType.Number:
                     <NumberPropertyInput 
-                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 case PropertyType.Boolean:
                     <BooleanPropertyInput 
-                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 case PropertyType.DateTime:
                     <DateTimePropertyInput 
-                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 case PropertyType.Enum:
                     <EnumPropertyInput 
-                        Property="Property" @ref="Input" ValueChanged="OnInputChanged" />
+                        Property="Property" InitialValue="@InitialValue" @ref="Input" ValueChanged="OnInputChanged" />
                     break;
                 default:
                     <div class="text-rose-600 text-sm">Unsupported type: @Property.Type</div>
@@ -67,6 +69,8 @@
     [Parameter, EditorRequired]
     public PropertyDto Property { get; set; } = default!;
 
+    private PropertyDto PropertyCopy = default!;
+
     [Parameter]
     public object? InitialValue { get; set; }
 
@@ -77,14 +81,24 @@
 
     private bool IsNull { get; set; } = false;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
-        Property = Property.Adapt<PropertyDto>();
+        PropertyCopy = Property.Adapt<PropertyDto>();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            IsNull = InitialValue is null && !Property.IsRequired;
+            Input.SetDisabled(IsNull);
+            StateHasChanged();
+        }
     }
 
     private void OnIsNullChanged(ChangeEventArgs e)
     {
-        IsNull = e.Value is true;
+        IsNull = e.Value?.ToString() == "true" || e.Value is true;
         Input.SetDisabled(IsNull);
         if (IsNull)
         {
@@ -95,10 +109,40 @@
 
     private void OnInputChanged(object? value)
     {
-        Validate();
+        ValidationMessage = null;
+        if (!IsNull) 
+        {
+            var temp = Property.IsRequired;
+            Property.IsRequired = true; // Temporarily disable required validation to allow empty values
+
+            var validationResult = SchemaPropertyValidator.ValidateAndCast(Property, value);
+
+            Property.IsRequired = temp; // Restore original required setting
+
+            if (validationResult.IsInvalid() && validationResult.ValidationErrors.Any())
+            {
+                ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
+            }
+        }
     }
 
-    private void Validate()
+    public void Reset()
+    {
+        Input.Reset();
+        IsNull = InitialValue is null && !Property.IsRequired;
+        Input.SetDisabled(IsNull);
+        StateHasChanged();
+    }
+
+    public (PropertyDto, object?) GetPropertyAndValue()
+    {
+        if (IsNull)
+            return (Property, null);
+
+        return (Property, Input.GetValue());
+    }
+
+    public bool IsValid()
     {
         ValidationMessage = null;
         if (!IsNull) 
@@ -115,27 +159,6 @@
                 ValidationMessage = validationResult.ValidationErrors.First().ErrorMessage;
             }
         }
-    }
-
-    public void Reset()
-    {
-        Input.Reset();
-        IsNull = false;
-        Input.SetDisabled(IsNull);
-        StateHasChanged();
-    }
-
-    public (PropertyDto, object?) GetPropertyAndValue()
-    {
-        if (IsNull)
-            return (Property, null);
-
-        return (Property, Input.GetValue());
-    }
-
-    public bool IsValid()
-    {
-        Validate();
         return !HasError;
     }
 

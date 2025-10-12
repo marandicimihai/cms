@@ -8,8 +8,6 @@ namespace CMS.Main.Components.Pages.Project;
 
 public partial class CreateProject : ComponentBase
 {
-    private bool isLoading;
-
     private string? projectUrl;
 
     [SupplyParameterFromForm]
@@ -36,7 +34,6 @@ public partial class CreateProject : ComponentBase
 
     private async Task HandleValidSubmit()
     {
-        isLoading = true;
         StateHasChanged();
         await Task.Yield();
 
@@ -60,6 +57,5 @@ public partial class CreateProject : ComponentBase
         });
 
         projectUrl = $"/project/{result.Value.Id}";
-        isLoading = false;
     }
 }

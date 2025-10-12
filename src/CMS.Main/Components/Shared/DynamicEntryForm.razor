@@ -1,8 +1,8 @@
 @using CMS.Main.DTOs
 @rendermode InteractiveServer
 
-<EditForm Model="Model" OnValidSubmit="HandleValidSubmit" class="flex flex-col gap-4">
-    
+<form method="post" @onsubmit="HandleValidSubmit" class="flex flex-col gap-4">
+    <AntiforgeryToken />
     @for (var i = 0; i < Properties.Count; i++)
     {
         var j = i; // Capture the current index for use in the field component
@@ -11,13 +11,14 @@
 
     <div class="flex gap-2 justify-start mt-2">
         <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Save Entry">Save</PrimaryButton>
-        <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="HandleCancel" aria-label="Cancel">Cancel</SecondaryButton>
+        @if (OnCancel.HasDelegate)
+        {
+            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="HandleCancel" aria-label="Cancel">Cancel</SecondaryButton>
+        }
     </div>
-</EditForm>
+</form>
 
 @code {
-
-    private object Model { get; set; } = new();
 
     [Parameter]
     public List<PropertyDto> Properties { get; set; } = [];
@@ -54,10 +55,7 @@
         var isValid = true;
         foreach (var field in Fields)
         {
-            var isFieldValid = field?.IsValid();
-
-            if (isFieldValid is false or null)
-                isValid = false;
+            isValid = field?.IsValid() is not false or null;
         }
         
         if (!isValid)

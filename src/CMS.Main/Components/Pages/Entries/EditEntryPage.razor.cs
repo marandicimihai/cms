@@ -79,5 +79,13 @@ public partial class EditEntryPage : ComponentBase
                 Type = NotificationType.Error
             });
         }
+        else
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Entry updated successfully.",
+                Type = NotificationType.Success
+            });
+        }
     }
 }
