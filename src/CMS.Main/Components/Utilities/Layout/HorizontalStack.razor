@@ -1,0 +1,56 @@
+<div class="flex @FlexDirectionClass @GapClass @AlignmentClass @JustifyClass @AdditionalClasses">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public StackGap Gap { get; set; } = StackGap.Medium;
+
+    [Parameter]
+    public StackAlignment Alignment { get; set; } = StackAlignment.Center;
+
+    [Parameter]
+    public StackJustify Justify { get; set; } = StackJustify.Start;
+
+    [Parameter]
+    public bool Wrap { get; set; } = false;
+
+    [Parameter]
+    public string AdditionalClasses { get; set; } = string.Empty;
+
+    private string FlexDirectionClass => Wrap ? "flex-wrap" : "flex-row";
+
+    private string GapClass => Gap switch
+    {
+        StackGap.None => "gap-0",
+        StackGap.XSmall => "gap-1",
+        StackGap.Small => "gap-2",
+        StackGap.Medium => "gap-4",
+        StackGap.Large => "gap-6",
+        StackGap.XLarge => "gap-8",
+        _ => "gap-4"
+    };
+
+    private string AlignmentClass => Alignment switch
+    {
+        StackAlignment.Start => "items-start",
+        StackAlignment.Center => "items-center",
+        StackAlignment.End => "items-end",
+        StackAlignment.Stretch => "items-stretch",
+        _ => "items-center"
+    };
+
+    private string JustifyClass => Justify switch
+    {
+        StackJustify.Start => "justify-start",
+        StackJustify.Center => "justify-center",
+        StackJustify.End => "justify-end",
+        StackJustify.Between => "justify-between",
+        StackJustify.Around => "justify-around",
+        StackJustify.Evenly => "justify-evenly",
+        _ => "justify-start"
+    };
+}

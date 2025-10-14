@@ -1,8 +1,9 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using CMS.Main.Components.Utilities.Button
 
 <button @attributes="AdditionalAttributes"
-    class="inline-flex items-center justify-center rounded-md font-medium text-sm px-3 py-2 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed @VariantClass"
+    class="inline-flex items-center justify-center rounded-full font-medium bg-purple-500 text-white hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors @SizeClass"
     @onclick="OnClick"
     disabled="@Disabled"
     type="@Type">
@@ -20,19 +21,18 @@
 
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
 
-    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Info;
-
     [Parameter] public bool Disabled { get; set; }
 
     [Parameter] public string Type { get; set; } = "button";
 
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
+
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
-    
-    private string VariantClass => Variant switch
+
+    private string SizeClass => Size switch
     {
-        ButtonVariant.Danger => "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500",
-        ButtonVariant.Neutral => "bg-slate-200 text-slate-900 hover:bg-slate-300 focus:ring-blue-500",
-        ButtonVariant.Info => "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-        _ => string.Empty
+        ButtonSize.Small => "text-xs px-2.5 py-1.5",
+        ButtonSize.Medium => "text-sm px-3 py-2",
+        _ => "text-sm px-3 py-2"
     };
 }
