@@ -1,12 +1,20 @@
+@using CMS.Main.Components.Utilities
 <NavLink href="@Href"
-         class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-slate-900 hover:bg-slate-100"
-         ActiveClass="bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+         class="@($"flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 hover:bg-neutral-800 transition-colors {Class} w-full")"
+         ActiveClass="bg-gradient-to-tl from-purple-500/20 to-transparent ring-1 ring-purple-500/40"
          Match="@Match">
     @if (!string.IsNullOrEmpty(Icon))
     {
-        <span class="material-symbols-outlined icons-default text-base">@Icon</span>
+        <Icon Name="@Icon" />
+        @if (ChildContent != null)
+        {
+            <span class="whitespace-nowrap">@ChildContent</span>
+        }
     }
-    <span>@ChildContent</span>
+    else if (ChildContent != null)
+    {
+        <span class="whitespace-nowrap px-2">@ChildContent</span>
+    }
 </NavLink>
 
 @code {
@@ -22,7 +30,8 @@
     public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
 
     [Parameter]
-    [EditorRequired]
-    public RenderFragment ChildContent { get; set; } = default!;
+    public RenderFragment? ChildContent { get; set; }
 
+    [Parameter]
+    public string Class { get; set; } = "";
 }

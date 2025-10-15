@@ -16,10 +16,10 @@ This project favors a dark-mode-first design. Use Tailwind v4 utilities tuned to
 - **Success**: `emerald-500` — Confirmations, success states
 - **Warning**: `amber-500` — Cautions, pending actions
 - **Error**: `rose-600` — Errors, destructive actions
-- **Background**: `slate-900` / `slate-800` — App background and page surfaces
-- **Surface / Panels**: `slate-800` / `slate-700` — Cards, panels, and elevated surfaces
-- **Text Primary**: `slate-100` — Main readable text on dark background
-- **Text Secondary**: `slate-400` — Secondary text and subdued labels
+ - **Background**: `neutral-900` / `neutral-800` — App background and page surfaces
+ - **Surface / Panels**: `neutral-800` / `neutral-700` — Cards, panels, and elevated surfaces
+ - **Text Primary**: `neutral-100` — Main readable text on dark background
+ - **Text Secondary**: `neutral-400` — Secondary text and subdued labels
 
 Gradients: tasteful gradients using purple tones (for example `from-purple-600 via-purple-500 to-purple-400`) are allowed to add depth to headers, cards, and interactive elements. Do not overuse gradients — reserve them for high-value surfaces and call-to-actions.
 
@@ -92,14 +92,15 @@ private string SizeClass => Size switch
 
 Component-first rule still applies: prefer using components from `src/CMS.Main/Components/Utilities` but when a one-off is needed, use inline Tailwind utilities in the HTML as shown above.
 
+
 ### Inputs
-- Base: `block w-full rounded-full border border-slate-700 bg-slate-800 shadow-sm focus:border-purple-500 focus:ring-purple-500`
+- Base: `block w-full rounded-full border border-neutral-800 bg-neutral-800 shadow-sm focus:border-purple-500 focus:ring-purple-500`
 - Sizes: Default `text-sm px-3 py-2`
-- Disabled: `bg-slate-700 text-slate-500 cursor-not-allowed`
+- Disabled: `bg-neutral-700 text-neutral-500 cursor-not-allowed`
 - **No icons on field labels.** Keep field labels clean and text-only for clarity and compactness.
 
 ### Cards / Panels
-- Base: `rounded-xl border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-800/90 shadow-sm` (or use `bg-slate-800` for very simple panels)
+- Base: `rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm` (or use `bg-neutral-800` for very simple panels)
 - Padding: `p-4`
 - Compact layout: reduce padding to `p-3`
 

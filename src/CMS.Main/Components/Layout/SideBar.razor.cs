@@ -15,6 +15,7 @@ public partial class SideBar : ComponentBase, IDisposable
     private readonly int pageSize = 20;
     private bool isLoadingMore;
     private int totalCount;
+    private bool isHidden = false;
 
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
@@ -137,6 +138,12 @@ public partial class SideBar : ComponentBase, IDisposable
             totalCount--;
         }
 
+        StateHasChanged();
+    }
+
+    private void ToggleSidebar()
+    {
+        isHidden = !isHidden;
         StateHasChanged();
     }
 

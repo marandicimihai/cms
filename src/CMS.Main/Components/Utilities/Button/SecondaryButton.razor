@@ -9,7 +9,7 @@
     type="@Type">
     @if (!string.IsNullOrEmpty(Icon))
     {
-        <span class="material-symbols-outlined icons-default text-base mr-2" aria-hidden="true">@Icon</span>
+        <Icon Name="@Icon" Class="text-base mr-2" aria-hidden="true" />
     }
     @ChildContent
 </button>

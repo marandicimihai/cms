@@ -1,35 +1,52 @@
 @rendermode InteractiveServer
 
+@using CMS.Main.Components.Utilities
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
-<aside class="hidden md:block w-64 border-r border-slate-200 bg-white overflow-y-auto">
-    <div class="p-4">
-        <nav class="space-y-1 mb-3">
+<aside class="@(isHidden ? "w-14 p-4 px-2" : "w-64 p-4") block border-r border-neutral-800 bg-neutral-900 overflow-y-auto transition-all duration-300">
+    <div class="@(isHidden ? "opacity-100" : "opacity-0 pointer-events-none") transition-all duration-300 absolute">
+        <VerticalStack Gap="StackGap.Small" Alignment="StackAlignment.Center">
+            <HorizontalStack Justify="StackJustify.Center" Class="w-full">
+                <IconButton IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
+            </HorizontalStack>
+            <SideBarButton Href="/new" Icon="add" />
+        </VerticalStack>
+    </div>
+    <div class="@(isHidden ? "opacity-0 pointer-events-none" : "opacity-100") transition-all duration-300">
+        <VerticalStack Gap="StackGap.Large">
+            <HorizontalStack Justify="StackJustify.Between" Class="w-full">
+                <IconButton IconName="deployed_code" aria-label="Just random cube" />
+                <IconButton IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
+            </HorizontalStack>
             <SideBarButton Href="/new" Icon="add">Create Project</SideBarButton>
-        </nav>
 
-        <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500 mb-3">Projects</h2>
-        <nav class="space-y-1">
-            @foreach (var project in Projects)
+            <VerticalStack Gap="StackGap.Medium" Class="w-full">
+                <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-400">Projects</h2>
+                <VerticalStack Gap="StackGap.Small" Class="w-full">
+                @foreach (var project in Projects)
+                    {
+                        var uri = $"/project/{project.Id}";
+                        <SideBarButton Href="@uri" Match="NavLinkMatch.Prefix">@project.Name</SideBarButton>
+                    }
+                </VerticalStack>
+            </VerticalStack>
+
+            @if (HasMoreProjects)
             {
-                var uri = $"/project/{project.Id}";
-                <SideBarButton Href="@uri" Match="NavLinkMatch.Prefix">@project.Name</SideBarButton>
+                <div class="mt-4 flex">
+                    <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" @onclick="LoadMoreProjectsAsync" aria-label="Load more projects" disabled="@isLoadingMore">
+                        @if (isLoadingMore)
+                        {
+                            <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
+                        }
+                        else
+                        {
+                            <span class="flex-1 text-center">Load More</span>
+                        }
+                    </SecondaryButton>
+                </div>
             }
-        </nav>
-        @if (HasMoreProjects)
-        {
-            <div class="mt-4 flex">
-                <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" @onclick="LoadMoreProjectsAsync" aria-label="Load more projects" disabled="@isLoadingMore">
-                    @if (isLoadingMore)
-                    {
-                        <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
-                    }
-                    else
-                    {
-                        <span class="flex-1 text-center">Load More</span>
-                    }
-                </SecondaryButton>
-            </div>
-        }
+        </VerticalStack>
     </div>
 </aside>

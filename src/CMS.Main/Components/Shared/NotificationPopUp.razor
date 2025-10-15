@@ -36,7 +36,7 @@
 @code {
     private List<NotificationItem> _notifications = new();
     private DotNetObjectReference<NotificationPopUp>? _dotNetReference;
-    private IJSObjectReference? _jsModule;
+    private IJSObjectReference? _jsModule = null;
 
     protected override void OnAfterRender(bool firstRender)
     {

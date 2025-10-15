@@ -1,4 +1,4 @@
-<div class="flex @FlexDirectionClass @GapClass @AlignmentClass @JustifyClass @AdditionalClasses">
+<div class="flex @FlexDirectionClass @GapClass @AlignmentClass @JustifyClass @Class">
     @ChildContent
 </div>
 
@@ -19,7 +19,7 @@
     public bool Wrap { get; set; } = false;
 
     [Parameter]
-    public string AdditionalClasses { get; set; } = string.Empty;
+    public string Class { get; set; } = string.Empty;
 
     private string FlexDirectionClass => Wrap ? "flex-wrap" : "flex-row";
 
