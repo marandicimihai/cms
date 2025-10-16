@@ -5,8 +5,10 @@
             "label": "Tailwind: watch CSS",
             "type": "shell",
             "command": "tailwindcss -i src/CMS.Main/wwwroot/css/app.css -o src/CMS.Main/wwwroot/css/tailwind.css --watch",
+            "isBackground": true,
             "presentation": {
-                "reveal": "always",
+                "echo": false,
+                "reveal": "never",
                 "panel": "dedicated",
                 "showReuseMessage": false,
                 "clear": false
