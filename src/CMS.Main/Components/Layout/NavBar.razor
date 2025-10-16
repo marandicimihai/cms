@@ -1,38 +1,38 @@
 @rendermode InteractiveServer
 
-<nav class="bg-white border-b border-slate-200 shadow-sm">
+<nav class="bg-neutral-900/80 border-b border-neutral-800">
     <div class="w-full px-4">
         <div class="flex justify-between h-14">
             <!-- Logo/Brand -->
             <div class="flex items-center">
-                <a href="/" class="text-slate-900 text-lg font-semibold">CMS</a>
+                <a href="/" class="text-neutral-100 text-lg font-semibold hover:text-purple-500 transition-colors">CMS</a>
             </div>
 
             <!-- Auth Section -->
-            <div class="hidden md:flex items-center space-x-2">
+            <div class="hidden md:flex items-center gap-2">
                 <AuthorizeView>
                     <NotAuthorized>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2">
                             <a href="/Account/Login"
-                               class="inline-flex items-center text-sm text-slate-600 px-2 py-1.5 rounded-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="inline-flex items-center gap-2 text-sm text-neutral-100 px-3 py-2 rounded-full hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
                                aria-label="Sign in">
-                                <span class="material-symbols-outlined icons-default text-base mr-1">login</span>
+                                <span class="material-symbols-outlined icons-default text-base">login</span>
                                 Sign in
                             </a>
                             <a href="/Account/Register"
-                               class="inline-flex items-center text-sm text-slate-600 px-2 py-1.5 rounded-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="inline-flex items-center gap-2 text-sm font-medium text-white bg-purple-500 hover:bg-purple-600 px-3 py-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
                                aria-label="Register">
-                                <span class="material-symbols-outlined icons-default text-base mr-1">person_add</span>
+                                <span class="material-symbols-outlined icons-default text-base">person_add</span>
                                 Register
                             </a>
                         </div>
                     </NotAuthorized>
                     <Authorized>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2">
                             <a href="/Account/Manage"
-                               class="inline-flex items-center text-sm text-slate-600 px-2 py-1.5 rounded-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[200px]"
+                               class="inline-flex items-center gap-2 text-sm text-neutral-100 px-3 py-2 rounded-full hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[200px]"
                                aria-label="Manage account" title="@context.User.Identity?.Name">
-                                <span class="material-symbols-outlined icons-default text-base mr-1">person</span>
+                                <span class="material-symbols-outlined icons-default text-base">person</span>
                                 <span class="truncate">@context.User.Identity?.Name</span>
                             </a>
                             <form method="post" action="/Account/Logout" class="inline">
@@ -47,32 +47,43 @@
 
             <!-- Mobile menu button -->
             <div class="md:hidden flex items-center">
-                <SecondaryButton @onclick="ToggleMobileMenu" Type="button" Variant="ButtonVariant.Neutral" aria-label="Toggle menu">
+                <button @onclick="ToggleMobileMenu" 
+                        type="button" 
+                        class="inline-flex items-center justify-center p-2 rounded-full text-neutral-100 hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        aria-label="Toggle menu">
                     <span class="material-symbols-outlined icons-default text-2xl">menu</span>
-                </SecondaryButton>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Mobile menu -->
-    <div class="@(isMobileMenuOpen ? "block" : "hidden") md:hidden" id="mobile-menu">
+    <div class="@(isMobileMenuOpen ? "block" : "hidden") md:hidden bg-neutral-800/50" id="mobile-menu">
         <div class="px-2 pt-2 pb-3 space-y-1">
             <AuthorizeView>
                 <NotAuthorized>
                     <a href="/Account/Login"
-                       class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-100">Sign
-                        in</a>
+                       class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-100 rounded-full hover:bg-neutral-800 transition-colors">
+                        <span class="material-symbols-outlined icons-default text-base">login</span>
+                        Sign in
+                    </a>
                     <a href="/Account/Register"
-                       class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-100">Register</a>
+                       class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-100 rounded-full hover:bg-neutral-800 transition-colors">
+                        <span class="material-symbols-outlined icons-default text-base">person_add</span>
+                        Register
+                    </a>
                 </NotAuthorized>
                 <Authorized>
                     <a href="/Account/Manage"
-                       class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-100"
-                       title="Manage account">@context.User.Identity?.Name</a>
+                       class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-100 rounded-full hover:bg-neutral-800 transition-colors"
+                       title="Manage account">
+                        <span class="material-symbols-outlined icons-default text-base">person</span>
+                        <span class="truncate">@context.User.Identity?.Name</span>
+                    </a>
                     <form method="post" action="/Account/Logout" class="px-3 py-2">
                         <AntiforgeryToken/>
                         <input type="hidden" name="returnUrl" value="@Nav.ToBaseRelativePath(Nav.Uri)"/>
-                        <PrimaryButton Type="submit" Variant="ButtonVariant.Danger" aria-label="Sign out">Sign out</PrimaryButton>
+                        <PrimaryButton Type="submit" Variant="ButtonVariant.Danger" Icon="logout" aria-label="Sign out">Sign out</PrimaryButton>
                     </form>
                 </Authorized>
             </AuthorizeView>

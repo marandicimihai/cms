@@ -62,3 +62,14 @@
 .animate-slide-out {
     animation: slide-out 0.3s ease-in forwards;
 }
+
+/* Prevent Safari/iOS elastic overscroll (bounce) and generally disable overscroll behavior */
+html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto; /* disable momentum scrolling which can show bounce in some contexts */
+}
+
+/* Ensure main scroll containers don't allow overscroll */
+main, .overflow-auto, .overflow-y-auto {
+    overscroll-behavior: contain;
+}

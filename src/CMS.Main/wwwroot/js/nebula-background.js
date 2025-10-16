@@ -126,7 +126,6 @@
     updateBlobs(dt);
     drawBlobs();
     drawVignette();
-    drawStar();
     drawNoise(0.04);
 
     requestAnimationFrame(animate);
