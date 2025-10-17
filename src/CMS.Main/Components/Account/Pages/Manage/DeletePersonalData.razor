@@ -15,29 +15,31 @@
 
 <PageTitle>Delete Personal Data</PageTitle>
 
-<StatusMessage Message="@message"/>
-
-<h3 class="text-lg font-medium">Delete Personal Data</h3>
-<div class="alert alert-warning bg-amber-100 text-amber-900 border border-amber-200 rounded-md p-3" role="alert">
-    <p class="text-sm">
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-    </p>
-</div>
-
-<div>
-    <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
-        <DataAnnotationsValidator/>
-        <ValidationSummary class="text-rose-600 text-xs" role="alert"/>
-        @if (requirePassword)
-        {
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control text-sm px-3 py-2 rounded-md border border-slate-300 focus:border-blue-500 focus:ring-blue-500" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
-                <label for="Input.Password" class="form-label text-xs uppercase tracking-wide">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-rose-600 text-xs"/>
-            </div>
-        }
-    <PrimaryButton Type="submit" Variant="ButtonVariant.Danger" aria-label="Delete data and close my account">Delete data and close my account</PrimaryButton>
-    </EditForm>
+<div class="max-w-screen-lg mx-auto p-4">
+    <div class="mb-4">
+        <h1 class="text-2xl font-semibold text-neutral-100">Delete Personal Data</h1>
+        <StatusMessage Message="@message"/>
+    </div>
+    <div class="rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-4 max-w-md">
+        <div class="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs p-3 rounded-md mb-4" role="alert">
+            <p class="text-sm">
+                <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+            </p>
+        </div>
+        <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="validation-summary" role="alert"/>
+            @if (requirePassword)
+            {
+                <div class="mb-4">
+                    <label for="Input.Password" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-2">Password</label>
+                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100 text-sm px-4 py-3" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+                    <ValidationMessage For="() => Input.Password" class="validation-message"/>
+                </div>
+            }
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Danger" aria-label="Delete data and close my account">Delete data and close my account</PrimaryButton>
+        </EditForm>
+    </div>
 </div>
 
 @code {

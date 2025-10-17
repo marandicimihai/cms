@@ -14,11 +14,11 @@
 
 <div class="max-w-screen-lg mx-auto p-4">
     <div class="mb-4">
-        <h1 class="text-2xl font-semibold text-slate-900">Reset authenticator key</h1>
+        <h1 class="text-2xl font-semibold text-neutral-100">Reset authenticator key</h1>
         <StatusMessage/>
     </div>
-    <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 max-w-md">
-        <div class="bg-amber-50 border border-amber-200 text-amber-700 text-sm p-3 rounded-md mb-4 flex items-center">
+    <div class="rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-4 max-w-md">
+        <div class="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm p-3 rounded-md mb-4 flex items-center">
             <span class="material-symbols-outlined icons-default text-base mr-2">warning</span>
             <div>
                 <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
@@ -27,7 +27,7 @@
         </div>
         <form @formname="reset-authenticator" @onsubmit="OnSubmitAsync" method="post">
             <AntiforgeryToken/>
-            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="refresh" aria-label="Reset authenticator key">Reset authenticator key</PrimaryButton>
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="refresh" aria-label="Reset authenticator key">Reset authenticator key</PrimaryButton>
         </form>
     </div>
 </div>

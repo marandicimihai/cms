@@ -26,11 +26,11 @@
 }
 
 .status-error {
-    @apply bg-rose-50 border border-rose-200 text-rose-600 text-sm p-3 rounded-md mb-4 flex items-center;
+    @apply bg-rose-900/50 border border-rose-600 text-rose-200 text-sm p-3 rounded-md mb-4 flex items-center;
 }
 
 .status-success {
-    @apply bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-md mb-4 flex items-center;
+    @apply bg-emerald-900/50 border border-emerald-600 text-emerald-200 text-sm p-3 rounded-md mb-4 flex items-center;
 }
 
 @keyframes slide-in {

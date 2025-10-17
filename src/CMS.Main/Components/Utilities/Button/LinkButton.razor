@@ -4,7 +4,7 @@
 
 <a @attributes="AdditionalAttributes"
     href="@Href"
-    class="inline-flex items-center justify-center rounded-full font-medium text-neutral-100 ring-0 ring-purple-500/0 hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-neutral-900 transition-all duration-300 @SizeClass @Class"
+    class="inline-flex items-center justify-center rounded-full font-medium text-neutral-100 ring-0 @RingClass hover:bg-gradient-to-tl @HoverGradientClass @HoverRingClass focus:outline-none focus:ring-2 @FocusRingClass focus:ring-offset-2 focus:ring-offset-neutral-900 transition-all duration-300 @SizeClass @Class"
     aria-label="@AriaLabel">
     @if (!string.IsNullOrEmpty(Icon))
     {
@@ -26,6 +26,8 @@
 
     [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
 
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
     // allow callers to pass extra CSS classes
@@ -37,5 +39,33 @@
         ButtonSize.Small => "text-xs px-2.5 py-1.5",
         ButtonSize.Medium => "text-sm px-3 py-2",
         _ => "text-sm px-3 py-2"
+    };
+
+    private string RingClass => Variant switch
+    {
+        ButtonVariant.Primary => "ring-purple-500/0",
+        ButtonVariant.Danger => "ring-rose-600/0",
+        _ => "ring-purple-500/0"
+    };
+
+    private string HoverGradientClass => Variant switch
+    {
+        ButtonVariant.Primary => "hover:from-purple-500/20 hover:to-transparent",
+        ButtonVariant.Danger => "hover:from-rose-600/20 hover:to-transparent",
+        _ => "hover:from-purple-500/20 hover:to-transparent"
+    };
+
+    private string HoverRingClass => Variant switch
+    {
+        ButtonVariant.Primary => "hover:ring-1 hover:ring-purple-500/40",
+        ButtonVariant.Danger => "hover:ring-1 hover:ring-rose-600/40",
+        _ => "hover:ring-1 hover:ring-purple-500/40"
+    };
+
+    private string FocusRingClass => Variant switch
+    {
+        ButtonVariant.Primary => "focus:ring-purple-500",
+        ButtonVariant.Danger => "focus:ring-rose-600",
+        _ => "focus:ring-purple-500"
     };
 }

@@ -5,7 +5,7 @@
         <h2 class="text-lg font-medium">Schemas</h2>
         @if (!IsAddFormVisible)
         {
-            <PrimaryButton Type="button" Variant="ButtonVariant.Info" Icon="add" @onclick="ShowAddForm">Add Schema</PrimaryButton>
+            <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="ShowAddForm">Add Schema</PrimaryButton>
         }
     </div>
     @if (IsAddFormVisible)
@@ -18,7 +18,7 @@
                 <ValidationMessage For="() => NewSchema.Name" class="text-rose-600 text-xs" />
             </div>
             <div class="flex gap-2 mt-4">
-                <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Create Schema">
+                <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="save" aria-label="Create Schema">
                     Create Schema
                 </PrimaryButton>
                 <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" OnClick="HideAddForm">Cancel</SecondaryButton>

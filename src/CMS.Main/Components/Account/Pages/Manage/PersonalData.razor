@@ -6,20 +6,20 @@
 
 <div class="max-w-screen-lg mx-auto p-4">
     <div class="mb-4">
-        <h1 class="text-2xl font-semibold text-slate-900">Personal Data</h1>
+        <h1 class="text-2xl font-semibold text-neutral-100">Personal Data</h1>
         <StatusMessage/>
     </div>
-    <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-4 max-w-md">
-        <p class="text-sm text-slate-600 mb-2">Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <div class="bg-rose-50 border border-rose-200 text-rose-600 text-xs p-3 rounded-md mb-4 flex items-center">
+    <div class="rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-4 max-w-md">
+        <p class="text-sm text-neutral-400 mb-2">Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+        <div class="bg-rose-600/10 border border-rose-600/20 text-rose-400 text-xs p-3 rounded-md mb-4 flex items-center">
             <span class="material-symbols-outlined icons-default text-base mr-2">warning</span>
             <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
         </div>
         <form action="Account/Manage/DownloadPersonalData" method="post">
             <AntiforgeryToken/>
-            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="download" aria-label="Download">Download</PrimaryButton>
+            <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="download" aria-label="Download">Download</PrimaryButton>
         </form>
-        <PrimaryButton Variant="ButtonVariant.Danger" aria-label="Delete" href="Account/Manage/DeletePersonalData">Delete</PrimaryButton>
+        <LinkButton Variant="ButtonVariant.Danger" aria-label="Delete" Href="Account/Manage/DeletePersonalData">Delete</LinkButton>
     </div>
 </div>
 

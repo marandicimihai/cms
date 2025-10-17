@@ -16,7 +16,7 @@ This project favors a dark-mode-first design. Use Tailwind v4 utilities tuned to
 - **Success**: `emerald-500` — Confirmations, success states
 - **Warning**: `amber-500` — Cautions, pending actions
 - **Error**: `rose-600` — Errors, destructive actions
- - **Background**: `neutral-900` / `neutral-800` — App background and page surfaces
+ - **Background**: `neutral-900` / `neutral-800` — App background and page surfaces (can use opacity variants like `neutral-900/80` for semi-transparent overlays)
  - **Surface / Panels**: `neutral-800` / `neutral-700` — Cards, panels, and elevated surfaces
  - **Text Primary**: `neutral-100` — Main readable text on dark background
  - **Text Secondary**: `neutral-400` — Secondary text and subdued labels
@@ -61,14 +61,34 @@ Built-in stack components: Prefer using reusable layout components (e.g. `Vertic
 ### Buttons
 - Preferred: apply Tailwind utility classes directly on the HTML element. This keeps classnames explicit and ensures Tailwind's JIT picks up the utilities at build time.
 
-- Base (apply on the `<button>`): `inline-flex items-center justify-center rounded-full font-medium`
+- Base (apply on the `<button>`): `inline-flex items-center justify-center rounded-full font-medium text-neutral-100`
+- Core styling (all buttons):
+    - Initial ring state: `ring-0 ring-purple-500/0` (or `ring-rose-600/0` for danger)
+    - Hover gradient: `hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent` (creates subtle gradient overlay)
+    - Hover ring: `hover:ring-1 hover:ring-purple-500/40` (animated ring appearance)
+    - Focus: `focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-neutral-900`
+    - Disabled: `disabled:opacity-50 disabled:cursor-not-allowed`
+    - Transition: `transition-all duration-300`
 - Sizes:
     - Small: `text-xs px-2.5 py-1.5`
     - Medium: `text-sm px-3 py-2`
-- Colors:
-    - Primary: `bg-purple-500 text-white hover:bg-purple-600` (use gradients on hero CTAs when appropriate)
-    - Danger: `bg-rose-600 text-white hover:bg-rose-700`
-- **Icons:** Allowed and encouraged on buttons for clarity and visual cues.
+- Icon-only buttons (IconButton):
+    - Small: `w-8 h-8 p-1.5` with `text-2xl` icon
+    - Medium: `w-10 h-10 p-2` with `text-2xl` icon
+- Variants:
+    - Primary: Uses purple ring/gradient colors (as shown above)
+    - Danger: Replace purple with rose-600 in ring and gradient classes
+- **Icons:** Allowed and encouraged on buttons for clarity and visual cues. Standard icon sizing is `text-base` with `mr-2` spacing when paired with text.
+
+### Navigation Links (SideBarButton pattern)
+- Base styling for sidebar navigation items:
+    - Container: `flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full`
+    - Ring setup: `ring-0 ring-purple-500/0`
+    - Hover state: `hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40`
+    - Active state: `bg-gradient-to-tl from-purple-500/20 to-transparent ring-1 ring-purple-500/40`
+    - Transition: `transition-all duration-300`
+- Icons in nav links use default sizing with `gap-2` spacing from text
+- Text content should use `whitespace-nowrap` to prevent wrapping in sidebar
 
 Notes on conditional classes and C# code:
 - Prefer literal Tailwind classes in markup whenever possible. Example (good):
@@ -94,8 +114,8 @@ Component-first rule still applies: prefer using components from `src/CMS.Main/C
 
 
 ### Inputs
-- Base: `block w-full rounded-full border border-neutral-800 bg-neutral-800 shadow-sm focus:border-purple-500 focus:ring-purple-500`
-- Sizes: Default `text-sm px-3 py-2`
+- Base: `block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100`
+- Sizes: Default `text-sm px-4 py-3`
 - Disabled: `bg-neutral-700 text-neutral-500 cursor-not-allowed`
 - **No icons on field labels.** Keep field labels clean and text-only for clarity and compactness.
 
@@ -117,7 +137,12 @@ When a custom surface style is needed prefer adding or reusing a component in `s
 
 ## 💡 Layout Principles
 - Use **max-w-screen-lg** for main content width.
-- Sidebars: min width `w-64` (256px).
+- Sidebars: 
+    - Collapsed width: `w-14` (56px)
+    - Expanded width: `w-64` (256px)
+    - Background: `bg-neutral-900/80` with `border-r border-neutral-800`
+    - Use smooth transitions: `transition-all duration-300` for collapse/expand animations
+    - Fixed positioning: `fixed left-0 top-0 h-full` with appropriate z-index
 - Content sections separated by `mb-4` (16px).
 - Avoid full-width text blocks; keep line length readable.
 
@@ -185,11 +210,18 @@ Document and review any safelist additions in a PR so the team knows which dynam
 ## ✅ Example Usage
 
 ```html
-<button class="bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium px-3 py-2 rounded-full">
+<!-- Primary Button with Icon -->
+<button class="inline-flex items-center justify-center rounded-full font-medium text-neutral-100 ring-0 ring-purple-500/0 hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm px-3 py-2">
     <span class="material-symbols-outlined icons-default text-base mr-2">save</span>
     Save Changes
 </button>
-<!-- Good: icon on button -->
+<!-- Good: icon on button with proper spacing and gradient hover effect -->
+
+<!-- Icon-only Button (Medium) -->
+<button class="inline-flex items-center justify-center rounded-full text-neutral-100 ring-0 ring-purple-500/0 hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 w-10 h-10 p-2">
+    <span class="material-symbols-outlined text-2xl">add</span>
+</button>
+<!-- Good: icon-only button with fixed dimensions -->
 
 <label class="text-xs uppercase tracking-wide">Project Name</label>
 <!-- Good: no icon on field label -->

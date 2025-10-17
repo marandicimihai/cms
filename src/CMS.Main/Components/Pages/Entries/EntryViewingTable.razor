@@ -47,7 +47,7 @@
                         @FormatCell(entry.UpdatedAt)
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">
-                        <PrimaryButton Variant="ButtonVariant.Info" Icon="edit" @onclick="@(() => NavigationManager.NavigateTo($"/entry/{entry.Id}/edit"))" aria-label="Edit Entry">Edit</PrimaryButton>
+                        <PrimaryButton Variant="ButtonVariant.Primary" Icon="edit" @onclick="@(() => NavigationManager.NavigateTo($"/entry/{entry.Id}/edit"))" aria-label="Edit Entry">Edit</PrimaryButton>
                         <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeleteEntry(entry)" aria-label="Delete Entry">Delete</PrimaryButton>
                     </TableData>
                 </TableRow>

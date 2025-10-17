@@ -12,12 +12,12 @@
 
 <PageTitle>Two-factor authentication</PageTitle>
 
-<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-neutral-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6 text-center">
+        <div class="rounded-lg border border-neutral-700 bg-gradient-to-br from-neutral-800 to-neutral-900 shadow-lg p-6 text-center">
             <StatusMessage Message="@message"/>
-            <h1 class="text-2xl font-semibold text-slate-900 mb-2">Two-factor authentication</h1>
-            <p class="text-sm text-slate-600 mb-4">
+            <h1 class="text-2xl font-semibold text-neutral-100 mb-2">Two-factor authentication</h1>
+            <p class="text-sm text-neutral-400 mb-4">
                 Your login is protected with an authenticator app. Enter your authenticator code below.
             </p>
             <EditForm Model="Input" FormName="login-with-2fa" OnValidSubmit="OnValidSubmitAsync" method="post">
@@ -27,27 +27,27 @@
                 <ValidationSummary class="validation-summary" role="alert"/>
                 <div class="space-y-4">
                     <div>
-                        <label for="Input.TwoFactorCode" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.TwoFactorCode" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-2">
                             Authenticator code
                         </label>
-                        <InputText @bind-Value="Input.TwoFactorCode" id="Input.TwoFactorCode" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" autocomplete="off"/>
+                        <InputText @bind-Value="Input.TwoFactorCode" id="Input.TwoFactorCode" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100 text-sm px-4 py-3" autocomplete="off"/>
                         <ValidationMessage For="() => Input.TwoFactorCode" class="validation-message"/>
                     </div>
                     <div class="flex items-center">
-                        <InputCheckbox @bind-Value="Input.RememberMachine" id="remember-machine" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"/>
-                        <label for="remember-machine" class="ml-2 text-sm text-slate-900">
+                        <InputCheckbox @bind-Value="Input.RememberMachine" id="remember-machine" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-neutral-600 rounded"/>
+                        <label for="remember-machine" class="ml-2 text-sm text-neutral-100">
                             Remember this machine
                         </label>
                     </div>
                     <div>
-                        <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="login" aria-label="Log in">Log in</PrimaryButton>
+                        <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="login" aria-label="Log in">Log in</PrimaryButton>
                     </div>
                 </div>
             </EditForm>
             <div class="mt-6 text-center">
-                <p class="text-sm text-slate-600">
+                <p class="text-sm text-neutral-400">
                     Don't have access to your authenticator device?
-                    <a href="Account/LoginWithRecoveryCode?ReturnUrl=@ReturnUrl" class="text-blue-600 hover:text-blue-500">Log in with a recovery code</a>.
+                    <a href="Account/LoginWithRecoveryCode?ReturnUrl=@ReturnUrl" class="text-purple-500 hover:text-purple-400">Log in with a recovery code</a>.
                 </p>
             </div>
         </div>

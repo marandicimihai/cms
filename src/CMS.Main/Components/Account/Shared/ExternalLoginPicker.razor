@@ -26,7 +26,7 @@ else
             <p class="flex flex-wrap gap-2">
                 @foreach (var provider in externalLogins)
                 {
-                    <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="login" name="provider" value="@provider.Name" title="@($"Log in using your {provider.DisplayName} account")">@provider.DisplayName</PrimaryButton>
+                    <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="login" name="provider" value="@provider.Name" title="@($"Log in using your {provider.DisplayName} account")">@provider.DisplayName</PrimaryButton>
                 }
             </p>
         </div>
