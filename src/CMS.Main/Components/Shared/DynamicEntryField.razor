@@ -11,15 +11,15 @@
 
 @inject IPropertyValidator SchemaPropertyValidator
 
-<div class="flex flex-col gap-1">
-    <label class="text-xs uppercase tracking-wide text-slate-600" for="field-@Property.Id">
+<div class="flex flex-col gap-2">
+    <label class="text-xs uppercase tracking-wide text-neutral-400" for="field-@Property.Id">
         @Property.Name
         @if (Property.IsRequired)
         {
             <span class="text-rose-600">*</span>
         }
     </label>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-4">
         <div class="flex-1">
             @switch (Property.Type)
             {
@@ -50,9 +50,9 @@
         </div>
         @if (!Property.IsRequired)
         {
-            <div class="flex items-center gap-1">
-                <input id="toggle-@Property.Id" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
-                <label class="text-xs text-slate-600" for="toggle-@Property.Id">null</label>
+            <div class="flex items-center gap-2">
+                <input id="toggle-@Property.Id" type="checkbox" class="h-4 w-4 rounded border-neutral-600 text-purple-500 focus:ring-purple-500" checked="@IsNull" @onchange="OnIsNullChanged" aria-label="Enable field" />
+                <label class="text-xs text-neutral-400" for="toggle-@Property.Id">null</label>
             </div>
         }
     </div>

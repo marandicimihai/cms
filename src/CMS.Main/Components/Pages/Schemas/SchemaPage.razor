@@ -7,24 +7,22 @@
 {
     <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" />
 
-    <Paper>
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-medium">
-                @Schema.Name
-            </h2>
+    <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-medium text-neutral-100">
+            @Schema.Name
+        </h2>
 
-            @if (!createFormVisible && !updateFormVisible)
-            {
-                <div class="flex items-center gap-2">
-                    <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" aria-label="Create Property" @onclick="ShowCreateForm">Create Property</PrimaryButton>
-                </div>
-            }
-        </div>
+        @if (!createFormVisible && !updateFormVisible)
+        {
+            <div class="flex items-center gap-4">
+                <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" aria-label="Create Property" @onclick="ShowCreateForm">Create Property</PrimaryButton>
+            </div>
+        }
+    </div>
 
-        <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" @ref="createForm" Visible="createFormVisible" />
-        <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" @ref="updateForm" Visible="updateFormVisible" />
-        <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/>
-    </Paper>
+    <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" @ref="createForm" Visible="createFormVisible" />
+    <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" @ref="updateForm" Visible="updateFormVisible" />
+    <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/>
 }
 else
 {

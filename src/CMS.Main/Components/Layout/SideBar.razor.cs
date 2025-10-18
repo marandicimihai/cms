@@ -174,6 +174,13 @@ public partial class SideBar : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    private void OpenCreateProjectModal()
+    {
+        var uri = NavigationManager.Uri;
+        var separator = uri.Contains('?') ? "&" : "?";
+        NavigationManager.NavigateTo($"{uri}{separator}new=true", false);
+    }
+
     public void Dispose()
     {
         ProjectStateService.ProjectsCreated -= ProjectsCreated;

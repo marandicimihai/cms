@@ -9,7 +9,7 @@
         <VerticalStack Alignment="StackAlignment.Center" Class="h-full">
             <VerticalStack Gap="StackGap.Small" Class="h-full">
                 <IconButton IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
-                <SideBarButton Href="/new" Icon="add" />
+                <IconButton IconName="add" OnClick="OpenCreateProjectModal" aria-label="Create project" />
             </VerticalStack>
             <AuthorizeView>
                 <NotAuthorized>
@@ -37,7 +37,7 @@
                 <IconButton IconName="deployed_code" aria-label="Just random cube" />
                 <IconButton IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
             </HorizontalStack>
-            <SideBarButton Href="/new" Icon="add">Create Project</SideBarButton>
+            <PrimaryButton Variant="ButtonVariant.Primary" Icon="add" OnClick="OpenCreateProjectModal" Class="w-full !justify-start">Create Project</PrimaryButton>
 
             <VerticalStack Gap="StackGap.Medium" Class="w-full h-full">
                 <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-400">Projects</h2>

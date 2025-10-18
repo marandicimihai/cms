@@ -1,0 +1,9 @@
+﻿<h1 class="text-2xl font-semibold text-neutral-100 @Class">@ChildContent</h1>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+}

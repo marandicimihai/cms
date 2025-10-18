@@ -56,7 +56,7 @@
         else
         {
             <TableRow>
-                <TableData Class="px-3 py-4 text-slate-600 text-sm" colspan="@((Properties.Count + 5).ToString())">No entries yet.</TableData>
+                <TableData Class="px-3 py-4 text-neutral-400 text-sm" colspan="@((Properties.Count + 5).ToString())">No entries yet.</TableData>
             </TableRow>
         }
         </TableBody>
@@ -64,9 +64,9 @@
 
     @if (SelectedEntries.Count > 0)
     {
-        <div class="flex items-center justify-between mt-4 p-3 rounded-md border border-slate-200 bg-slate-50">
-            <span class="text-sm text-slate-900">@SelectedEntries.Count entr@(SelectedEntries.Count == 1 ? "y" : "ies") selected</span>
-            <div class="flex gap-2">
+        <div class="flex items-center justify-between mt-4 p-4 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm">
+            <span class="text-sm text-neutral-100">@SelectedEntries.Count entr@(SelectedEntries.Count == 1 ? "y" : "ies") selected</span>
+            <div class="flex gap-4">
                 <SecondaryButton Variant="ButtonVariant.Neutral" @onclick="ClearSelection" aria-label="Cancel selection">Cancel</SecondaryButton>
                 <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="DeleteSelectedEntriesAsync" aria-label="Delete selected entries">Delete</PrimaryButton>
             </div>

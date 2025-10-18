@@ -7,25 +7,23 @@
 {
     <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>
 
-    <Paper>
-        <div class="flex items-center justify-between mb-4">
-            <h1 class="text-lg font-medium text-slate-900">Entries</h1>
-            @if (!showCreateForm)
-            {
-                <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="ShowAddForm">Add Entry</PrimaryButton>
-            }
-        </div>
-
-        @if (showCreateForm)
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-lg font-medium text-neutral-100">Entries</h1>
+        @if (!showCreateForm)
         {
-            <div class="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <h2 class="text-sm font-medium text-slate-900 mb-3">New Entry</h2>
-                <DynamicEntryForm @ref="entryCreateForm" Properties="Schema.Properties" OnValidSubmit="OnEntryCreateSubmit" OnCancel="HideAddForm"/>
-            </div>
+            <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="ShowAddForm">Add Entry</PrimaryButton>
         }
+    </div>
 
-        <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
-    </Paper>
+    @if (showCreateForm)
+    {
+        <div class="mb-4 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-4">
+            <h2 class="text-sm font-medium text-neutral-100 mb-3">New Entry</h2>
+            <DynamicEntryForm @ref="entryCreateForm" Properties="Schema.Properties" OnValidSubmit="OnEntryCreateSubmit" OnCancel="HideAddForm"/>
+        </div>
+    }
+
+    <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
 }
 else
 {

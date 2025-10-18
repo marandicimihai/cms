@@ -79,6 +79,7 @@ Built-in stack components: Prefer using reusable layout components (e.g. `Vertic
     - Primary: Uses purple ring/gradient colors (as shown above)
     - Danger: Replace purple with rose-600 in ring and gradient classes
 - **Icons:** Allowed and encouraged on buttons for clarity and visual cues. Standard icon sizing is `text-base` with `mr-2` spacing when paired with text.
+- **Link Buttons:** When buttons require navigation (href), use the LinkButton component instead of a standard button.
 
 ### Navigation Links (SideBarButton pattern)
 - Base styling for sidebar navigation items:
@@ -136,7 +137,7 @@ When a custom surface style is needed prefer adding or reusing a component in `s
 ---
 
 ## 💡 Layout Principles
-- Use **max-w-screen-lg** for main content width.
+- Main content should take all available width and it will be on a solid background so it doesn't need any sort of separation from the background when styling.
 - Sidebars: 
     - Collapsed width: `w-14` (56px)
     - Expanded width: `w-64` (256px)
@@ -155,6 +156,8 @@ When a custom surface style is needed prefer adding or reusing a component in `s
 - Icons are allowed and encouraged on buttons for clarity and visual cues.
 
 Component-first rule: Prefer using the components located in `src/CMS.Main/Components/Utilities` (for buttons, layout, tables, icons etc.). If the component you need does not exist in that folder, the developer should first ask the project owner whether to create the new component or to fall back to Tailwind utility classes directly. This keeps UI consistent and maintainable.
+
+- **Icon Component:** Where icons are required, use the Icon component for consistency.
 
 ---
 
