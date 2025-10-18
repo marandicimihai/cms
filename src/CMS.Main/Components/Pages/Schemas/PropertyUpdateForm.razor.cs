@@ -1,26 +1,23 @@
 using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
+using Mapster;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace CMS.Main.Components.Pages.Schemas;
 
 public partial class PropertyUpdateForm : ComponentBase
 {
+    private bool _isOpen;
+
     [Parameter, EditorRequired]
     public SchemaDto Schema { get; set; } = default!;
 
     [Parameter]
-    public EventCallback OnSuccess { get; set; }
-    
-    [Parameter]
-    public EventCallback OnCancel { get; set; }
-    
-    [Parameter]
-    public bool Visible { get; set; } = true;
+    public EventCallback OnPropertyUpdated { get; set; }
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -35,10 +32,38 @@ public partial class PropertyUpdateForm : ComponentBase
     private PropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
 
-    public void SetModel(PropertyDto propertyDto)
+    public bool IsOpen
     {
-        PropertyDto = propertyDto;
+        get => _isOpen;
+        set
+        {
+            if (_isOpen != value)
+            {
+                _isOpen = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public void Open(PropertyDto propertyDto)
+    {
+        PropertyDto = propertyDto.Adapt<PropertyDto>();
         EnumOptions = PropertyDto.Options is { Length: > 0 } ? string.Join(", ", PropertyDto.Options) : string.Empty;
+        IsOpen = true;
+    }
+
+    public void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!IsOpen) return;
+        if (e.Key == "Escape")
+        {
+            CloseModal();
+        }
     }
 
     private bool IsEnumOptionsValid =>
@@ -74,11 +99,7 @@ public partial class PropertyUpdateForm : ComponentBase
 
         var result = await PropertyService.UpdatePropertyAsync(PropertyDto);
 
-        if (result.IsSuccess)
-        {
-            await OnSuccess.InvokeAsync();
-        }
-        else
+        if (!result.IsSuccess)
         {
             await Notifications.NotifyAsync(new()
             {
@@ -86,8 +107,16 @@ public partial class PropertyUpdateForm : ComponentBase
                     $"There was an error when updating property named {PropertyDto.Name}.",
                 Type = NotificationType.Error
             });
+            return;
         }
-        
-        StateHasChanged();
+
+        await Notifications.NotifyAsync(new()
+        {
+            Message = $"Updated property named {result.Value.Name}.",
+            Type = NotificationType.Success
+        });
+
+        CloseModal();
+        await OnPropertyUpdated.InvokeAsync();
     }
 }

@@ -6,7 +6,7 @@
 @if (ProjectDto is not null)
 {
     <Paper>
-        <PageHeader>Project Details <Tag Class="mb-3" Value="@ProjectDto.Id">@ProjectDto.Id</Tag></PageHeader>
+        <PageHeader Class="mb-3">Project Details <Tag Value="@ProjectDto.Id">@ProjectDto.Id</Tag></PageHeader>
         <EditForm Model="ProjectDto" OnValidSubmit="OnSaveName" class="flex flex-col gap-1 mb-6">
         <DataAnnotationsValidator />
             <div class="flex flex-col gap-1 flex-1">

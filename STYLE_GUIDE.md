@@ -115,10 +115,31 @@ Component-first rule still applies: prefer using components from `src/CMS.Main/C
 
 
 ### Inputs
+
+**Text Inputs:**
 - Base: `block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100`
 - Sizes: Default `text-sm px-4 py-3`
 - Disabled: `bg-neutral-700 text-neutral-500 cursor-not-allowed`
 - **No icons on field labels.** Keep field labels clean and text-only for clarity and compactness.
+
+**Checkboxes:**
+- **Global styling applied automatically** - No need to add classes to basic checkboxes
+- Default size: `h-5 w-5`
+- Checked state: Purple (`bg-purple-500 border-purple-500`)
+- Focus: Purple ring with offset for dark backgrounds
+- Hover: Lighter purple border (`border-purple-400`)
+- Usage: `<input type="checkbox" />` or `<InputCheckbox />`
+- For custom layouts, wrap in label: `<label class="flex items-center gap-2"><input type="checkbox" /><span>Label text</span></label>`
+
+**Select Inputs:**
+- **Global styling applied automatically** - No need to add classes to basic selects
+- Base: Full-width, rounded-full, dark-mode styled with custom dropdown arrow
+- Background: `neutral-700` with `neutral-600` border
+- Focus: Purple ring (`focus:ring-purple-500`) with offset
+- Hover: Lighter purple border (`border-purple-400`)
+- Custom SVG arrow icon (neutral-400 color)
+- Usage: `<select>...</select>` or `<InputSelect>`
+- Disabled state automatically styled with reduced opacity
 
 ### Cards / Panels
 - Base: `rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm` (or use `bg-neutral-800` for very simple panels)
@@ -226,8 +247,30 @@ Document and review any safelist additions in a PR so the team knows which dynam
 </button>
 <!-- Good: icon-only button with fixed dimensions -->
 
-<label class="text-xs uppercase tracking-wide">Project Name</label>
-<!-- Good: no icon on field label -->
+<!-- Text Input with Label -->
+<div class="mb-4">
+    <label for="project-name" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-1">Project Name</label>
+    <input type="text" id="project-name" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm text-sm px-3 py-2 focus:border-purple-500 focus:ring-purple-500 text-neutral-100" placeholder="Enter name" />
+</div>
+<!-- Good: no icon on field label, proper spacing -->
+
+<!-- Checkbox (Global Styles Applied) -->
+<label class="flex items-center gap-2">
+    <input type="checkbox" />
+    <span class="text-sm text-neutral-100">Enable feature</span>
+</label>
+<!-- Good: No custom classes needed for checkbox, automatically styled -->
+
+<!-- Select Input (Global Styles Applied) -->
+<div class="mb-4">
+    <label for="status" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-1">Status</label>
+    <select id="status">
+        <option>Active</option>
+        <option>Inactive</option>
+        <option>Pending</option>
+    </select>
+</div>
+<!-- Good: No custom classes needed for select, automatically styled with custom arrow -->
 ```
 
 If a developer can't find the matching component in `src/CMS.Main/Components/Utilities`, they must ask whether to:
