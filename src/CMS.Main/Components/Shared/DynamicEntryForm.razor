@@ -1,7 +1,7 @@
 @using CMS.Main.DTOs
 @rendermode InteractiveServer
 
-<form method="post" @onsubmit="HandleValidSubmit" class="flex flex-col gap-4">
+<form method="post" @onsubmit="HandleValidSubmit" class="flex flex-col gap-1">
     <AntiforgeryToken />
     @for (var i = 0; i < Properties.Count; i++)
     {

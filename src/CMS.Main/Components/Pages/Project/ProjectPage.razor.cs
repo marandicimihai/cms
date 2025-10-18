@@ -31,6 +31,11 @@ public partial class ProjectPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadProject();
+    }
+
+    private async Task LoadProject()
+    {
         if (!await AuthHelper.OwnsProject(ProjectId.ToString()))
         {
             await Notifications.NotifyAsync(new()
@@ -57,6 +62,12 @@ public partial class ProjectPage : ComponentBase
                 Type = NotificationType.Error
             });
         }
+    }
+
+    private async Task RefreshProject()
+    {
+        await LoadProject();
+        StateHasChanged();
     }
 
     private async Task OnSaveName()

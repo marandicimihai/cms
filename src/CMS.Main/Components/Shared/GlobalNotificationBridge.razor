@@ -1,0 +1,53 @@
+@using CMS.Main.Abstractions.Notifications
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@rendermode InteractiveServer
+@inject INotificationService NotificationService
+@inject IJSRuntime JSRuntime
+
+@code {
+    private DotNetObjectReference<GlobalNotificationBridge>? _dotNetReference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetReference = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("window.setNotificationBridge", _dotNetReference);
+        }
+    }
+
+    [JSInvokable]
+    public async Task ShowNotification(string message, string type)
+    {
+        var notificationType = type.ToLower() switch
+        {
+            "success" => NotificationType.Success,
+            "error" => NotificationType.Error,
+            "warning" => NotificationType.Warning,
+            _ => NotificationType.Info
+        };
+
+        await NotificationService.NotifyAsync(new Notification
+        {
+            Message = message,
+            Type = notificationType
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetReference != null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("window.clearNotificationBridge");
+            }
+            catch
+            {
+                // Ignore errors during disposal
+            }
+            _dotNetReference?.Dispose();
+        }
+    }
+}

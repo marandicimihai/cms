@@ -6,7 +6,7 @@
 @inject INotificationService NotificationService
 @inject IJSRuntime JSRuntime
 
-<div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2" style="max-width: 400px;">
+<div class="fixed bottom-4 right-4 z-50 flex flex-col gap-1" style="max-width: 400px;">
     @foreach (var notification in _notifications)
     {
         var bgColor = notification.Type switch

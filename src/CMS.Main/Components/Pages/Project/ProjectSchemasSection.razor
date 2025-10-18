@@ -2,28 +2,9 @@
 
 <div class="flex items-center justify-between mb-3">
     <h2 class="text-lg font-medium text-neutral-100">Schemas</h2>
-    @if (!IsAddFormVisible)
-    {
-        <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="ShowAddForm">Add Schema</PrimaryButton>
-    }
+    <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="OpenAddSchemaModal">Add Schema</PrimaryButton>
 </div>
-@if (IsAddFormVisible)
-{
-    <EditForm Model="NewSchema" OnValidSubmit="HandleAddSchema" class="mb-4">
-        <DataAnnotationsValidator />
-        <div class="flex flex-col gap-4">
-            <label for="schema-name" class="text-xs uppercase tracking-wide text-neutral-400">Schema Name</label>
-            <InputText @bind-Value="NewSchema.Name" id="schema-name" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm text-neutral-100 text-sm px-4 py-3 focus:border-purple-500 focus:ring-purple-500" placeholder="Enter schema name" aria-label="Schema Name" />
-            <ValidationMessage For="() => NewSchema.Name" class="text-rose-600 text-xs" />
-        </div>
-        <div class="flex gap-4 mt-4">
-            <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="save" aria-label="Create Schema">
-                Create Schema
-            </PrimaryButton>
-            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" OnClick="HideAddForm">Cancel</SecondaryButton>
-        </div>
-    </EditForm>
-}
+
 @if (Schemas.Count > 0)
 {
     <Table>
@@ -39,15 +20,11 @@
             <TableRow>
                 <TableData>@schema.Name</TableData>
                 <TableData Class="text-right flex gap-4 justify-end">
-                    <NavLink class="inline-flex items-center justify-center rounded-full font-medium bg-neutral-700 text-neutral-100 hover:bg-neutral-600 text-xs px-2.5 py-1.5 focus:ring-2 focus:ring-purple-500" aria-label="View entries" href="@($"/schema/{schema.Id}/entries")">
-                        <span class="material-symbols-outlined icons-default text-base mr-1">arrow_forward</span>
-                        View Entries
-                    </NavLink>
-                    <NavLink class="inline-flex items-center justify-center rounded-full font-medium bg-purple-600 text-white hover:bg-purple-700 text-xs px-2.5 py-1.5 focus:ring-2 focus:ring-purple-500" aria-label="Edit schema" href="@($"/schema/{schema.Id}")">
-                        <span class="material-symbols-outlined icons-default text-base mr-1">edit</span>
-                        Edit
-                    </NavLink>
-                    <PrimaryButton Type="button" Variant="ButtonVariant.Danger" Icon="delete" OnClick="() => OnDeleteSchemaAsync(schema)" aria-label="Delete schema">Delete</PrimaryButton>
+                    <ButtonGroup>
+                        <LinkButton Href="@($"/schema/{schema.Id}/entries")" Variant="ButtonVariant.Neutral" Icon="arrow_forward" aria-label="View entries">View Entries</LinkButton>
+                        <LinkButton Href="@($"/schema/{schema.Id}")" Variant="ButtonVariant.Primary" Icon="edit" aria-label="Edit schema">Edit</LinkButton>
+                        <PrimaryButton Type="button" Variant="ButtonVariant.Danger" Icon="delete" OnClick="() => OnDeleteSchemaAsync(schema)" aria-label="Delete schema">Delete</PrimaryButton>
+                    </ButtonGroup>
                 </TableData>
             </TableRow>
         }
@@ -58,3 +35,5 @@ else
 {
     <div class="text-neutral-400 text-sm">No schemas found for this project.</div>
 }
+
+<CreateSchemaModal @ref="createSchemaModal" ProjectId="@ProjectId" OnSchemaCreated="HandleSchemaCreated" />

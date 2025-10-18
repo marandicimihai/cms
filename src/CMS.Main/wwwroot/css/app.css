@@ -73,3 +73,37 @@ html, body {
 main, .overflow-auto, .overflow-y-auto {
     overscroll-behavior: contain;
 }
+
+.button-group {
+    /* Remove gap between buttons */
+    @apply gap-0;
+}
+
+/* All buttons in the group lose their border radius and overlap borders */
+.button-group > * {
+    @apply rounded-none -ml-px;
+}
+
+/* First button gets left border radius */
+.button-group > *:first-child {
+    @apply rounded-l-full;
+    margin-left: 0; /* override the -ml-px for the first child */
+}
+
+/* Last button gets right border radius */
+.button-group > *:last-child {
+    @apply rounded-r-full;
+}
+
+/* Single button (both first and last) gets full radius */
+.button-group > *:only-child {
+    @apply rounded-full;
+}
+
+/* Z-index handling for focus/hover states to ensure borders/rings show properly */
+.button-group > *:hover,
+.button-group > *:focus,
+.button-group > *:focus-within {
+    position: relative;
+    z-index: 1;
+}

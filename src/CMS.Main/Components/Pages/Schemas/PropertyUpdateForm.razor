@@ -5,18 +5,18 @@
     <EditForm Model="PropertyDto" OnValidSubmit="HandleUpdatePropertySubmit" class="mb-4">
         <DataAnnotationsValidator/>
         <div class="grid grid-cols-1 gap-4">
-            <div class="flex flex-col gap-2 md:col-span-1">
+            <div class="flex flex-col gap-1 md:col-span-1">
                 <label class="text-xs uppercase tracking-wide text-slate-600">Name</label>
                 <InputText @bind-Value="PropertyDto.Name" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="Property name"/>
                 <ValidationMessage For="() => PropertyDto.Name" class="text-rose-600 text-xs"/>
             </div>
-            <div class="flex flex-col gap-2 md:col-span-1">
+            <div class="flex flex-col gap-1 md:col-span-1">
                 <label class="text-xs uppercase tracking-wide text-slate-600">Required</label>
                 <InputCheckbox @bind-Value="PropertyDto.IsRequired" class="h-5 w-5 text-blue-600 focus:ring-blue-500"/>
             </div>
             @if (PropertyDto.Type == PropertyType.Enum)
             {
-                <div class="flex flex-col gap-2 md:col-span-1">
+                <div class="flex flex-col gap-1 md:col-span-1">
                     <label class="text-xs uppercase tracking-wide text-slate-600">Options (comma separated)</label>
                     <InputText @bind-Value="EnumOptions" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="Red, Green, Blue"/>
                     @if (!IsEnumOptionsValid)

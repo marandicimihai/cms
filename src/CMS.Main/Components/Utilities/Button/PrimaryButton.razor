@@ -3,13 +3,13 @@
 @using CMS.Main.Components.Utilities.Button
 
 <button @attributes="AdditionalAttributes"
-    class="inline-flex items-center justify-center rounded-full font-medium text-neutral-100 ring-0 @RingClass hover:bg-gradient-to-tl @HoverGradientClass @HoverRingClass focus:outline-none focus:ring-2 @FocusRingClass focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm px-3 py-2 @Class"
+    class="inline-flex items-center justify-center rounded-full font-medium text-neutral-100 @BorderClass ring-0 @RingClass hover:bg-gradient-to-tl @HoverGradientClass @HoverRingClass focus:outline-none focus:ring-2 @FocusRingClass focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm px-3 py-2 @Class"
     @onclick="OnClick"
     disabled="@Disabled"
     type="@Type">
     @if (!string.IsNullOrEmpty(Icon))
     {
-        <Icon Name="@Icon" Class="text-base mr-2" aria-hidden="true" />
+        <Icon Name="@Icon" Class="!text-md mr-2" aria-hidden="true" />
     }
     @ChildContent
 </button>
@@ -27,16 +27,22 @@
 
     [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
 
+    [Parameter]
+    public bool Outlined { get; set; } = true;
+
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
     // allow callers to pass extra CSS classes
     [Parameter]
     public string Class { get; set; } = "";
 
+    private string BorderClass => Outlined ? "border border-neutral-700" : "";
+
     private string RingClass => Variant switch
     {
         ButtonVariant.Primary => "ring-purple-500/0",
         ButtonVariant.Danger => "ring-rose-600/0",
+        ButtonVariant.Neutral => "ring-neutral-500/0",
         _ => "ring-purple-500/0"
     };
 
@@ -44,6 +50,7 @@
     {
         ButtonVariant.Primary => "hover:from-purple-500/20 hover:to-transparent",
         ButtonVariant.Danger => "hover:from-rose-600/20 hover:to-transparent",
+        ButtonVariant.Neutral => "hover:from-neutral-500/20 hover:to-transparent",
         _ => "hover:from-purple-500/20 hover:to-transparent"
     };
 
@@ -51,6 +58,7 @@
     {
         ButtonVariant.Primary => "hover:ring-1 hover:ring-purple-500/40",
         ButtonVariant.Danger => "hover:ring-1 hover:ring-rose-600/40",
+        ButtonVariant.Neutral => "hover:ring-1 hover:ring-neutral-500/40",
         _ => "hover:ring-1 hover:ring-purple-500/40"
     };
 
@@ -58,6 +66,7 @@
     {
         ButtonVariant.Primary => "focus:ring-purple-500",
         ButtonVariant.Danger => "focus:ring-rose-600",
+        ButtonVariant.Neutral => "focus:ring-neutral-500",
         _ => "focus:ring-purple-500"
     };
 }

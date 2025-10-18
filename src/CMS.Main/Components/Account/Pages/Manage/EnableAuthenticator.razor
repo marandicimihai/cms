@@ -48,7 +48,7 @@ else
             <DataAnnotationsValidator />
             <div>
                 <label for="Input.Code" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-2">Verification Code</label>
-                <InputText @bind-Value="Input.Code" id="Input.Code" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm text-neutral-100 text-sm px-4 py-3 focus:border-purple-500 focus:ring-purple-500" autocomplete="one-time-code" inputmode="numeric" placeholder="123456" />
+                <InputText @bind-Value="Input.Code" id="Input.Code" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm text-neutral-100 text-sm px-3 py-2 focus:border-purple-500 focus:ring-purple-500" autocomplete="one-time-code" inputmode="numeric" placeholder="123456" />
                 <ValidationMessage For="() => Input.Code" class="validation-message" />
             </div>
             <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="check" aria-label="Verify">Verify</PrimaryButton>

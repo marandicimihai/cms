@@ -8,8 +8,8 @@
     <div class="@(isHidden ? "opacity-100" : "opacity-0 pointer-events-none") transition-all duration-300 absolute inset-y-4 inset-x-2">
         <VerticalStack Alignment="StackAlignment.Center" Class="h-full">
             <VerticalStack Gap="StackGap.Small" Class="h-full">
-                <IconButton IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
-                <IconButton IconName="add" OnClick="OpenCreateProjectModal" aria-label="Create project" />
+                <IconButton Outlined="false" IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
+                <IconButton Outlined="false" IconName="add" OnClick="OpenCreateProjectModal" aria-label="Create project" />
             </VerticalStack>
             <AuthorizeView>
                 <NotAuthorized>
@@ -24,7 +24,7 @@
                         <form method="post" action="/Account/Logout">
                             <AntiforgeryToken/>
                             <input type="hidden" name="returnUrl" value="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"/>
-                            <IconButton Type="submit" IconName="logout" Variant="ButtonVariant.Danger" aria-label="Sign out" Class="w-full" />
+                            <IconButton Outlined="false" Type="submit" IconName="logout" Variant="ButtonVariant.Danger" aria-label="Sign out" Class="w-full" />
                         </form>
                     </VerticalStack>
                 </Authorized>
@@ -34,10 +34,10 @@
     <div class="@(isHidden ? "opacity-0 pointer-events-none" : "opacity-100") transition-all duration-300 h-full">
         <VerticalStack Gap="StackGap.Large" Class="h-full">
             <HorizontalStack Justify="StackJustify.Between" Class="w-full">
-                <IconButton IconName="deployed_code" aria-label="Just random cube" />
-                <IconButton IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
+                <IconButton IconName="deployed_code" Outlined="false" aria-label="Just random cube" />
+                <IconButton IconName="dock_to_right" Outlined="false" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
             </HorizontalStack>
-            <PrimaryButton Variant="ButtonVariant.Primary" Icon="add" OnClick="OpenCreateProjectModal" Class="w-full !justify-start">Create Project</PrimaryButton>
+            <PrimaryButton Variant="ButtonVariant.Primary" Outlined="false" Icon="add" OnClick="OpenCreateProjectModal" Class="w-full !justify-start">Create Project</PrimaryButton>
 
             <VerticalStack Gap="StackGap.Medium" Class="w-full h-full">
                 <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-400">Projects</h2>
@@ -65,7 +65,7 @@
                         <form method="post" action="/Account/Logout" class="w-full">
                             <AntiforgeryToken/>
                             <input type="hidden" name="returnUrl" value="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"/>
-                            <PrimaryButton Class="w-full !justify-start !px-2" Variant="ButtonVariant.Danger" Type="submit" Size="ButtonSize.Small" Icon="logout" aria-label="Sign out">Sign out</PrimaryButton>
+                            <PrimaryButton Class="w-full !justify-start !px-2" Variant="ButtonVariant.Danger" Outlined="false" Type="submit" Size="ButtonSize.Small" Icon="logout" aria-label="Sign out">Sign out</PrimaryButton>
                         </form>
                     </VerticalStack>
                 </Authorized>

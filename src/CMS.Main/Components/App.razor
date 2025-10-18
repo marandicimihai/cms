@@ -22,6 +22,7 @@
 <body class="noto-sans">
 <script src="_framework/blazor.web.js"></script>
 <script src="js/notifications.js"></script>
+<script src="js/clipboard.js"></script>
 </body>
 <Routes/>
 </html>
@@ -59,7 +60,8 @@
         "check",
         "info",
         "dock_to_right",
-        "deployed_code"
+        "deployed_code",
+        "content_copy"
     ];
 
     private string IconNamesSorted => string.Join(',', iconNames.OrderBy(x => x));
