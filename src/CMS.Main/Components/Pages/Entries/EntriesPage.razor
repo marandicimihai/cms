@@ -3,27 +3,22 @@
 
 @attribute [Authorize]
 
+<PageTitle>CMS - Entries</PageTitle>
+
 @if (Schema is not null)
 {
     <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project"/>
 
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-lg font-medium text-neutral-100">Entries</h1>
-        @if (!showCreateForm)
-        {
-            <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="ShowAddForm">Add Entry</PrimaryButton>
-        }
-    </div>
+    <Paper Class="mt-4">
+        <HorizontalStack Justify="StackJustify.Between" Class="mb-4">
+            <PageHeader>Entries</PageHeader>
+            <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="OpenCreateEntryModal">Add Entry</PrimaryButton>
+        </HorizontalStack>
 
-    @if (showCreateForm)
-    {
-        <div class="mb-4 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-4">
-            <h2 class="text-sm font-medium text-neutral-100 mb-3">New Entry</h2>
-            <DynamicEntryForm @ref="entryCreateForm" Properties="Schema.Properties" OnValidSubmit="OnEntryCreateSubmit" OnCancel="HideAddForm"/>
-        </div>
-    }
+        <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
+    </Paper>
 
-    <EntryViewingTable SchemaId="@SchemaId.ToString()" Properties="@Schema.Properties" />
+    <EntryCreateModal @ref="createEntryModal" SchemaId="@SchemaId" Properties="@Schema.Properties" OnEntryCreated="HandleEntryCreated" />
 }
 else
 {

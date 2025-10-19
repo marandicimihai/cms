@@ -33,9 +33,19 @@
             throw new InvalidOperationException($"DateTimePropertyInput can only be used with PropertyType.DateTime, but got {Property.Type}");
         }
 
-        if (InitialValue is not null and DateTime dt)
+        if (InitialValue is not null)
         {
-            Value = dt;
+            if (InitialValue is DateTime dt)
+            {
+                Value = dt;
+            }
+            else if (InitialValue is string str && !string.IsNullOrWhiteSpace(str))
+            {
+                if (DateTime.TryParse(str, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsedValue))
+                {
+                    Value = parsedValue;
+                }
+            }
         }
     }
 
@@ -75,9 +85,19 @@
 
     public void Reset()
     {
-        if (InitialValue is not null and DateTime dt)
+        if (InitialValue is not null)
         {
-            Value = dt;
+            if (InitialValue is DateTime dt)
+            {
+                Value = dt;
+            }
+            else if (InitialValue is string str && !string.IsNullOrWhiteSpace(str))
+            {
+                if (DateTime.TryParse(str, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsedValue))
+                {
+                    Value = parsedValue;
+                }
+            }
         }
     }
 }

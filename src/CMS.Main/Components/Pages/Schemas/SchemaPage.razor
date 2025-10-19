@@ -3,6 +3,8 @@
 
 @attribute [Authorize]
 
+<PageTitle>CMS - Schema</PageTitle>
+
 @if (Schema is not null)
 {
     <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" />

@@ -30,7 +30,7 @@
             {
                 <TableRow>
                     <TableData Class="px-3 py-2">
-                        <input type="checkbox" aria-label="Select entry @entry.Id" checked="@(() => SelectedEntries.Any(e => e.Id == entry.Id))" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
+                        <input type="checkbox" aria-label="Select entry @entry.Id" checked="@IsEntrySelected(entry.Id)" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
                     </TableData>
                     <TableData Class="font-mono text-xs whitespace-nowrap">@entry.Id</TableData>
                     @foreach (var prop in Properties)
@@ -47,8 +47,10 @@
                         @FormatCell(entry.UpdatedAt)
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">
-                        <PrimaryButton Variant="ButtonVariant.Primary" Icon="edit" @onclick="@(() => NavigationManager.NavigateTo($"/entry/{entry.Id}/edit"))" aria-label="Edit Entry">Edit</PrimaryButton>
-                        <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeleteEntry(entry)" aria-label="Delete Entry">Delete</PrimaryButton>
+                        <ButtonGroup>
+                            <PrimaryButton Variant="ButtonVariant.Primary" Icon="edit" @onclick="@(() => OpenEditEntryModal(entry.Id))" aria-label="Edit Entry">Edit</PrimaryButton>
+                            <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeleteEntry(entry)" aria-label="Delete Entry">Delete</PrimaryButton>
+                        </ButtonGroup>
                     </TableData>
                 </TableRow>
             }
@@ -66,10 +68,10 @@
     {
         <div class="flex items-center justify-between mt-4 p-4 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm">
             <span class="text-sm text-neutral-100">@SelectedEntries.Count entr@(SelectedEntries.Count == 1 ? "y" : "ies") selected</span>
-            <div class="flex gap-4">
+            <ButtonGroup>
                 <SecondaryButton Variant="ButtonVariant.Neutral" @onclick="ClearSelection" aria-label="Cancel selection">Cancel</SecondaryButton>
                 <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="DeleteSelectedEntriesAsync" aria-label="Delete selected entries">Delete</PrimaryButton>
-            </div>
+            </ButtonGroup>
         </div>
     }
 
@@ -89,3 +91,5 @@
         </div>
     }
 }
+
+<EntryEditModal @ref="editEntryModal" OnEntryUpdated="HandleEntryUpdated" />

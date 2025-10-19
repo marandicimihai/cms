@@ -33,11 +33,10 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
     
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
-    
     private List<EntryDto> Entries { get; set; } = [];
     private List<EntryDto> SelectedEntries { get; set; } = [];
+
+    private EntryEditModal? editEntryModal;
 
     private SortAndFilterOptionsChangedEventArgs? cachedArgs;
 
@@ -66,6 +65,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
 
         EntryStateService.EntriesCreated += EntriesCreated;
+        EntryStateService.EntriesUpdated += EntriesUpdated;
         
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
@@ -197,6 +197,20 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         StateHasChanged();
     }
     
+    private void EntriesUpdated(List<EntryDto> updated)
+    {
+        // Update entries in the list with the new data
+        foreach (var updatedEntry in updated)
+        {
+            var index = Entries.FindIndex(e => e.Id == updatedEntry.Id);
+            if (index >= 0)
+            {
+                Entries[index] = updatedEntry;
+            }
+        }
+        StateHasChanged();
+    }
+    
     private object? GetEntryPropertyValue(EntryDto entry, string propertyName)
     {
         foreach (var kv in entry.Fields)
@@ -299,6 +313,11 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         set => ToggleSelectAll(value);
     }
 
+    private bool IsEntrySelected(string entryId)
+    {
+        return SelectedEntries.Any(e => e.Id == entryId);
+    }
+
     private void ToggleEntrySelection(EntryDto entry, bool selected)
     {
         if (selected)
@@ -383,9 +402,23 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    private async Task OpenEditEntryModal(string entryId)
+    {
+        if (editEntryModal is not null)
+        {
+            await editEntryModal.OpenAsync(entryId);
+        }
+    }
+
+    private void HandleEntryUpdated()
+    {
+        StateHasChanged();
+    }
+
     public void Dispose()
     {
         EntryStateService.EntriesCreated -= EntriesCreated;
+        EntryStateService.EntriesUpdated -= EntriesUpdated;
         GC.SuppressFinalize(this);
     }
 }

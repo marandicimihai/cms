@@ -1,10 +1,7 @@
 using CMS.Main.Abstractions;
-using CMS.Main.Abstractions.Entries;
 using CMS.Main.Abstractions.Notifications;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
-using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
 
 namespace CMS.Main.Components.Pages.Entries;
@@ -21,19 +18,11 @@ public partial class EntriesPage : ComponentBase
     
     [Inject]
     private ISchemaService SchemaService { get; set; } = default!;
-    
-    [Inject]
-    private IEntryService EntryService { get; set; } = default!;
-
-    [Inject]
-    private EntryStateService EntryStateService { get; set; } = default!;
 
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
 
-    private DynamicEntryForm? entryCreateForm;
-    
-    private bool showCreateForm;
+    private EntryCreateModal? createEntryModal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,54 +53,13 @@ public partial class EntriesPage : ComponentBase
         }
     }
     
-    private async Task OnEntryCreateSubmit(Dictionary<string, object?> entry)
+    private void OpenCreateEntryModal()
     {
-        if (!await AuthHelper.OwnsSchema(SchemaId.ToString()))
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = "Could not retrieve resource.",
-                Type = NotificationType.Error
-            });
-            return;
-        }
-
-        var dto = new EntryDto
-        {
-            SchemaId = SchemaId.ToString(),
-            Fields = entry
-        };
-
-        var result = await EntryService.AddEntryAsync(dto);
-
-        if (result.IsSuccess)
-        {
-            EntryStateService.NotifyCreated([result.Value]);
-
-            showCreateForm = false;
-
-            entryCreateForm?.Reset();
-            StateHasChanged();
-        }
-        else
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = result.Errors.FirstOrDefault() ??
-                    "There was an error when creating the entry.",
-                Type = NotificationType.Error
-            });
-        }
+        createEntryModal?.Open();
     }
 
-    private void ShowAddForm()
+    private void HandleEntryCreated()
     {
-        entryCreateForm?.Reset();
-        showCreateForm = true;
-    }
-    
-    private void HideAddForm()
-    {
-        showCreateForm = false;
+        StateHasChanged();
     }
 }
