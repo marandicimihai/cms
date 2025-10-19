@@ -10,22 +10,11 @@ namespace CMS.Main.Components.Pages.Entries;
 
 public partial class SortAndFilterOptions : ComponentBase
 {
-    // Event args for sort/filter changes
-    public record SortAndFilterOptionsChangedEventArgs(string SortByProperty, bool Descending, List<EntryFilter> Filters);
+    // Event args for filter changes
+    public record SortAndFilterOptionsChangedEventArgs(List<EntryFilter> Filters);
 
     [Parameter]
     public EventCallback<SortAndFilterOptionsChangedEventArgs> OnOptionsChanged { get; set; }
-
-    // Sorting
-    [Parameter]
-    public List<string> SortableProperties { get; set; } = [];
-    [Parameter]
-    public string InitialSortByProperty { get; set; } = "CreatedAt";
-    [Parameter]
-    public bool InitialDescending { get; set; } = false;
-
-    private string SortByProperty { get; set; } = "CreatedAt";
-    private bool Descending { get; set; }
 
     // Filtering
     [Parameter]
@@ -39,8 +28,6 @@ public partial class SortAndFilterOptions : ComponentBase
         // Defensive copy for UI state
         FilterablePropertiesCopy = FilterableProperties.Adapt<List<PropertyDto>>();
         FilterablePropertiesCopy.ForEach(p => p.IsRequired = false);
-        SortByProperty = InitialSortByProperty;
-        Descending = InitialDescending;
     }
 
     private void AddFilter()
@@ -111,7 +98,6 @@ public partial class SortAndFilterOptions : ComponentBase
 
     private void ApplySortAndFilterOptions()
     {
-        var args = new SortAndFilterOptionsChangedEventArgs(SortByProperty, Descending, Filters);
         var allValid = FilterRows.All(row => row.Field is not null && row.Field.IsValid());
         if (allValid)
         {
@@ -120,6 +106,7 @@ public partial class SortAndFilterOptions : ComponentBase
                 var (_, val) = row.Field!.GetPropertyAndValue();
                 row.Filter.ReferenceValue = val;
             }
+            var args = new SortAndFilterOptionsChangedEventArgs(Filters);
             if (OnOptionsChanged.HasDelegate)
                 OnOptionsChanged.InvokeAsync(args);
         }

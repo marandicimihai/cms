@@ -1,9 +1,6 @@
 <SortAndFilterOptions 
     OnOptionsChanged="OnOptionsChangedAsync"
-    SortableProperties="SortableProperties"
-    FilterableProperties="Properties"
-    InitialSortByProperty="CreatedAt"
-    InitialDescending="true" />
+    FilterableProperties="Properties" />
 
 @if (Properties != null)
 {
@@ -16,10 +13,41 @@
                 <TableHeader Class="font-mono text-xs">ID</TableHeader>
                 @foreach (var prop in Properties)
                 {
-                    <TableHeader>@prop.Name</TableHeader>
+                    @if (IsSortableProperty(prop.Name))
+                    {
+                        <TableHeader>
+                            <button type="button" class="flex items-center gap-1 cursor-pointer hover:text-neutral-100 transition-colors w-full text-left" @onclick="@(() => ToggleSortByProperty(prop.Name))">
+                                <span class="uppercase">@prop.Name</span>
+                                @if (CurrentSortProperty == prop.Name)
+                                {
+                                    <Icon Name="@(IsDescending ? "keyboard_arrow_up" : "keyboard_arrow_down")" Class="text-sm" />
+                                }
+                            </button>
+                        </TableHeader>
+                    }
+                    else
+                    {
+                        <TableHeader>@prop.Name</TableHeader>
+                    }
                 }
-                <TableHeader>Created At</TableHeader>
-                <TableHeader>Updated At</TableHeader>
+                <TableHeader>
+                    <button type="button" class="flex items-center gap-1 cursor-pointer hover:text-neutral-100 transition-colors w-full text-left" @onclick="@(() => ToggleSortByProperty("CreatedAt"))">
+                        <span>Created At</span>
+                        @if (CurrentSortProperty == "CreatedAt")
+                        {
+                            <Icon Name="@(IsDescending ? "keyboard_arrow_up" : "keyboard_arrow_down")" Class="text-sm" />
+                        }
+                    </button>
+                </TableHeader>
+                <TableHeader>
+                    <button type="button" class="flex items-center gap-1 cursor-pointer hover:text-neutral-100 transition-colors w-full text-left" @onclick="@(() => ToggleSortByProperty("UpdatedAt"))">
+                        <span>Updated At</span>
+                        @if (CurrentSortProperty == "UpdatedAt")
+                        {
+                            <Icon Name="@(IsDescending ? "keyboard_arrow_up" : "keyboard_arrow_down")" Class="text-sm" />
+                        }
+                    </button>
+                </TableHeader>
                 <TableHeader Class="text-right">Actions</TableHeader>
             </TableRow>
         </TableHead>
@@ -81,7 +109,7 @@
             <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" @onclick="LoadMoreEntriesAsync" aria-label="Load more entries" disabled="@isLoadingMore">
                 @if (isLoadingMore)
                 {
-                    <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
+                    <Icon Name="progress_activity" Class="text-2xl animate-spin mx-auto" />
                 }
                 else
                 {

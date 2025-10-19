@@ -40,6 +40,10 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private SortAndFilterOptionsChangedEventArgs? cachedArgs;
 
+    // Sorting state
+    private string? CurrentSortProperty { get; set; } = "CreatedAt";
+    private bool IsDescending { get; set; } = true;
+
     private List<string> SortableProperties => Properties
         .Where(p => p.Type == PropertyType.Text || p.Type == PropertyType.Number || p.Type == PropertyType.DateTime)
         .Select(p => p.Name)
@@ -69,7 +73,12 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
-            new PaginationParams(1, pageSize));
+            new PaginationParams(1, pageSize),
+            opt =>
+            {
+                opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
+                opt.Descending = IsDescending;
+            });
 
         if (result.IsSuccess)
         {
@@ -87,7 +96,7 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
     }
 
-    // Called whenever the sort property or direction changes
+    // Called whenever the filter options change
     private async Task OnOptionsChangedAsync(SortAndFilterOptionsChangedEventArgs args)
     {
         if (!await AuthHelper.OwnsSchema(SchemaId))
@@ -100,23 +109,23 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             return;
         }
 
+        cachedArgs = args;
+
         var result = await EntryService.GetEntriesForSchema(
             SchemaId,
             new PaginationParams(1, pageSize),
             opt =>
             {
-                opt.SortByPropertyName = args.SortByProperty;
-                opt.Descending = args.Descending;
+                opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
+                opt.Descending = IsDescending;
                 opt.Filters = args.Filters;
             });
-
-        cachedArgs = args;
 
         if (result.IsSuccess)
         {
             (Entries, var pagination) = result.Value;
-            StateHasChanged();
             totalCount = pagination.TotalCount;
+            StateHasChanged();
         }
         else
         {
@@ -155,10 +164,10 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
                 new PaginationParams(nextPage, pageSize),
                 opt =>
                 {
+                    opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
+                    opt.Descending = IsDescending;
                     if (cachedArgs is not null)
                     {
-                        opt.SortByPropertyName = cachedArgs.SortByProperty;
-                        opt.Descending = cachedArgs.Descending;
                         opt.Filters = cachedArgs.Filters;
                     }
                 });
@@ -316,6 +325,80 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private bool IsEntrySelected(string entryId)
     {
         return SelectedEntries.Any(e => e.Id == entryId);
+    }
+
+    private bool IsSortableProperty(string propertyName)
+    {
+        return SortableProperties.Contains(propertyName);
+    }
+
+    private async Task ToggleSortByProperty(string propertyName)
+    {
+        if (CurrentSortProperty == propertyName)
+        {
+            // Toggle between descending -> ascending -> none
+            if (IsDescending)
+            {
+                // Currently descending, switch to ascending
+                IsDescending = false;
+            }
+            else
+            {
+                // Currently ascending, remove sorting (default to CreatedAt descending)
+                CurrentSortProperty = "CreatedAt";
+                IsDescending = true;
+            }
+        }
+        else
+        {
+            // New property, start with descending
+            CurrentSortProperty = propertyName;
+            IsDescending = true;
+        }
+
+        await RefreshEntriesWithCurrentFilters();
+    }
+
+    private async Task RefreshEntriesWithCurrentFilters()
+    {
+        if (!await AuthHelper.OwnsSchema(SchemaId))
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+            return;
+        }
+
+        var result = await EntryService.GetEntriesForSchema(
+            SchemaId,
+            new PaginationParams(1, pageSize),
+            opt =>
+            {
+                opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
+                opt.Descending = IsDescending;
+                if (cachedArgs is not null)
+                {
+                    opt.Filters = cachedArgs.Filters;
+                }
+            });
+
+        if (result.IsSuccess)
+        {
+            (Entries, var pagination) = result.Value;
+            totalCount = pagination.TotalCount;
+            StateHasChanged();
+        }
+        else
+        {
+            await Notifications.NotifyAsync(new()
+            {
+                Message = result.Errors.FirstOrDefault() ??
+                    "Could not retrieve resource.",
+                Type = NotificationType.Error
+            });
+        }
     }
 
     private void ToggleEntrySelection(EntryDto entry, bool selected)
