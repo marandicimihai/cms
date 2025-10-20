@@ -41,10 +41,14 @@ public class ApiKeySchemeHandler(
         if (user is null)
             return AuthenticateResult.Fail("Invalid api key.");
         
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id, ClaimValueTypes.String, Options.ClaimsIssuer),
+            new Claim(AuthConstants.ProjectIdClaimType, hashedKey.Project.Id, ClaimValueTypes.String, Options.ClaimsIssuer)
+        };
+        
         var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(
-                [new Claim(ClaimTypes.NameIdentifier, user.Id, ClaimValueTypes.String, Options.ClaimsIssuer)],
-                Scheme.Name));
+            new ClaimsIdentity(claims, Scheme.Name));
         var ticket = new AuthenticationTicket(principal, AuthConstants.ApiKeyScheme);
 
         return AuthenticateResult.Success(ticket);
