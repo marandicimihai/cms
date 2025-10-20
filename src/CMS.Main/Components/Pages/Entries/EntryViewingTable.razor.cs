@@ -6,7 +6,8 @@ using CMS.Main.DTOs.Pagination;
 using CMS.Main.Services;
 using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Components;
-using static CMS.Main.Components.Pages.Entries.SortAndFilterOptions;
+using CMS.Main.Components.Shared;
+using Mapster;
 
 namespace CMS.Main.Components.Pages.Entries;
 
@@ -38,7 +39,15 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
 
     private EntryEditModal? editEntryModal;
 
-    private SortAndFilterOptionsChangedEventArgs? cachedArgs;
+    // Filtering state
+    private List<PropertyDto> FilterablePropertiesCopy { get; set; } = [];
+    private List<FilterRow> FilterRows { get; set; } = [];
+    private List<EntryFilter> Filters => FilterRows.Select(r => r.Filter).ToList();
+    private bool showFilterPopup = false;
+    private string newFilterPropertyName = "";
+    private PropertyFilter newFilterType = PropertyFilter.Equals;
+    private DynamicEntryField? newFilterField;
+    private Guid fieldKey = Guid.NewGuid();
 
     // Sorting state
     private string? CurrentSortProperty { get; set; } = "CreatedAt";
@@ -55,6 +64,16 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private bool isLoadingMore;
     private int totalCount;
     private bool HasMoreEntries => Entries.Count < totalCount;
+
+    protected override void OnParametersSet()
+    {
+        // Update FilterablePropertiesCopy whenever Properties changes
+        if (Properties != null && Properties.Any())
+        {
+            FilterablePropertiesCopy = Properties.Adapt<List<PropertyDto>>();
+            FilterablePropertiesCopy.ForEach(p => p.IsRequired = false);
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,48 +115,6 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
         }
     }
 
-    // Called whenever the filter options change
-    private async Task OnOptionsChangedAsync(SortAndFilterOptionsChangedEventArgs args)
-    {
-        if (!await AuthHelper.OwnsSchema(SchemaId))
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = "Could not retrieve resource.",
-                Type = NotificationType.Error
-            });
-            return;
-        }
-
-        cachedArgs = args;
-
-        var result = await EntryService.GetEntriesForSchema(
-            SchemaId,
-            new PaginationParams(1, pageSize),
-            opt =>
-            {
-                opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
-                opt.Descending = IsDescending;
-                opt.Filters = args.Filters;
-            });
-
-        if (result.IsSuccess)
-        {
-            (Entries, var pagination) = result.Value;
-            totalCount = pagination.TotalCount;
-            StateHasChanged();
-        }
-        else
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = result.Errors.FirstOrDefault() ??
-                    "Could not retrieve resource.",
-                Type = NotificationType.Error
-            });
-        }
-    }
-
     private async Task LoadMoreEntriesAsync()
     {
         if (!await AuthHelper.OwnsSchema(SchemaId))
@@ -166,9 +143,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
                 {
                     opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
                     opt.Descending = IsDescending;
-                    if (cachedArgs is not null)
+                    if (Filters.Any())
                     {
-                        opt.Filters = cachedArgs.Filters;
+                        opt.Filters = Filters;
                     }
                 });
 
@@ -378,9 +355,9 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
             {
                 opt.SortByPropertyName = CurrentSortProperty ?? "CreatedAt";
                 opt.Descending = IsDescending;
-                if (cachedArgs is not null)
+                if (Filters.Any())
                 {
-                    opt.Filters = cachedArgs.Filters;
+                    opt.Filters = Filters;
                 }
             });
 
@@ -496,6 +473,138 @@ public partial class EntryViewingTable : ComponentBase, IDisposable
     private void HandleEntryUpdated()
     {
         StateHasChanged();
+    }
+
+    // Filter management methods
+    private void ToggleFilterPopup()
+    {
+        showFilterPopup = !showFilterPopup;
+        if (showFilterPopup)
+        {
+            // Reset filter form
+            newFilterPropertyName = "";
+            newFilterType = PropertyFilter.Equals;
+            newFilterField = null;
+        }
+    }
+
+    private void CloseFilterPopup()
+    {
+        showFilterPopup = false;
+        newFilterPropertyName = "";
+        newFilterType = PropertyFilter.Equals;
+        newFilterField = null;
+    }
+
+    private void OnPropertySelected(ChangeEventArgs e)
+    {
+        if (e.Value is string propertyName)
+        {
+            newFilterPropertyName = propertyName;
+            newFilterType = PropertyFilter.Equals;
+            newFilterField = null;
+            
+            // Set IsRequired to false for Equals (default filter type)
+            var property = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == propertyName);
+            if (property != null)
+            {
+                property.IsRequired = false; // Equals and NotEquals allow null
+            }
+            
+            StateHasChanged();
+        }
+    }
+
+    private void OnFilterTypeSelected(ChangeEventArgs e)
+    {
+        if (e.Value is string val && Enum.TryParse<PropertyFilter>(val, out var filterType))
+        {
+            newFilterType = filterType;
+            
+            // Update the property's IsRequired based on the filter type
+            if (!string.IsNullOrEmpty(newFilterPropertyName))
+            {
+                var property = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == newFilterPropertyName);
+                if (property != null)
+                {
+                    property.IsRequired = !(filterType is PropertyFilter.Equals or PropertyFilter.NotEquals);
+                    // Force the DynamicEntryField to re-render by changing the key
+                    fieldKey = Guid.NewGuid();
+                    newFilterField = null;
+                }
+            }
+            
+            StateHasChanged();
+        }
+    }
+
+    private async void AddFilterWithValue()
+    {
+        if (string.IsNullOrEmpty(newFilterPropertyName))
+            return;
+
+        if (newFilterField is null || !newFilterField.IsValid())
+            return;
+
+        var (_, val) = newFilterField.GetPropertyAndValue();
+        
+        var newFilter = new EntryFilter 
+        { 
+            PropertyName = newFilterPropertyName, 
+            FilterType = newFilterType,
+            ReferenceValue = val
+        };
+        
+        FilterRows.Add(new FilterRow
+        {
+            Filter = newFilter
+        });
+
+        // Close popup and reset form
+        CloseFilterPopup();
+        
+        // Apply filters immediately
+        await RefreshEntriesWithCurrentFilters();
+    }
+
+    private string FormatFilterValue(object? value)
+    {
+        return value switch
+        {
+            null => "null",
+            string s when DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out var dt) 
+                => dt.ToLocalTime().ToString("g"),
+            bool b => b.ToString().ToLowerInvariant(),
+            DateTime d => d.ToLocalTime().ToString("g"),
+            _ => value.ToString() ?? ""
+        };
+    }
+
+    private async void RemoveFilter(FilterRow row)
+    {
+        FilterRows.Remove(row);
+        
+        // Automatically refresh to apply the change
+        await RefreshEntriesWithCurrentFilters();
+    }
+
+    private static List<PropertyFilter> GetFilterOptionsForProperty(PropertyDto property)
+    {
+        return property.Type switch
+        {
+            PropertyType.Text => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.StartsWith, PropertyFilter.EndsWith, PropertyFilter.Contains],
+            PropertyType.Number => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
+            PropertyType.Boolean => [PropertyFilter.Equals, PropertyFilter.NotEquals],
+            PropertyType.DateTime => [PropertyFilter.Equals, PropertyFilter.NotEquals, PropertyFilter.GreaterThan, PropertyFilter.LessThan],
+            PropertyType.Enum => [PropertyFilter.Equals, PropertyFilter.NotEquals],
+            _ => []
+        };
+    }
+
+    private record FilterRow
+    {
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public EntryFilter Filter { get; set; } = new();
     }
 
     public void Dispose()
