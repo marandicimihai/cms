@@ -12,7 +12,7 @@
 
 <PageTitle>Two-factor authentication (2FA)</PageTitle>
 
-<div class="max-w-screen-lg mx-auto p-4">
+<div class="max-w-5xl">
     <div class="mb-4">
         <h1 class="text-2xl font-semibold text-neutral-100">Two-factor authentication (2FA)</h1>
         <StatusMessage/>
@@ -28,7 +28,7 @@
                         <span class="material-symbols-outlined icons-default text-base mr-2">error</span>
                         <div>
                             <strong>You have no recovery codes left.</strong>
-                            <p>You must <a href="Account/Manage/GenerateRecoveryCodes" class="text-purple-500 hover:text-purple-600 underline">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
+                            <p>You must <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/GenerateRecoveryCodes">generate a new set of recovery codes</LinkButton> before you can log in with a recovery code.</p>
                         </div>
                     </div>
                 }
@@ -38,7 +38,7 @@
                         <span class="material-symbols-outlined icons-default text-base mr-2">error</span>
                         <div>
                             <strong>You have 1 recovery code left.</strong>
-                            <p>You can <a href="Account/Manage/GenerateRecoveryCodes" class="text-purple-500 hover:text-purple-600 underline">generate a new set of recovery codes</a>.</p>
+                            <p>You can <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/GenerateRecoveryCodes">generate a new set of recovery codes</LinkButton>.</p>
                         </div>
                     </div>
                 }
@@ -48,7 +48,7 @@
                         <span class="material-symbols-outlined icons-default text-base mr-2">warning</span>
                         <div>
                             <strong>You have @recoveryCodesLeft recovery codes left.</strong>
-                            <p>You should <a href="Account/Manage/GenerateRecoveryCodes" class="text-purple-500 hover:text-purple-600 underline">generate a new set of recovery codes</a>.</p>
+                            <p>You should <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/GenerateRecoveryCodes">generate a new set of recovery codes</LinkButton>.</p>
                         </div>
                     </div>
                 }
@@ -59,7 +59,7 @@
                         <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="logout" aria-label="Forget this browser">Forget this browser</PrimaryButton>
                     </form>
                 }
-                <LinkButton Variant="ButtonVariant.Danger" Href="Account/Manage/Disable2fa" aria-label="Disable 2FA">Disable 2FA</LinkButton>
+                    <LinkButton Variant="ButtonVariant.Danger" Href="Account/Manage/Disable2fa" aria-label="Disable 2FA">Disable 2FA</LinkButton>
                 <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/GenerateRecoveryCodes" aria-label="Reset recovery codes">Reset recovery codes</LinkButton>
             }
             <div class="mt-6">

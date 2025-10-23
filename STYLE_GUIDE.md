@@ -1,27 +1,33 @@
 # 📐 App Style Guide
 
 **Purpose:**  
-This app prioritizes **functionality** and **fast navigation** with **compact layouts** that still maintain readability and breathing room.  
-Design choices aim for a professional, modern look with a focus on a dark-mode-first experience and reusable UI components.
+This app prioritizes **functionality** and **fast navigation** with **compact layouts** that maintain readability and breathing room.  
+Design choices aim for a professional, modern look with a dark-mode-first experience and reusable UI components.
 
 ---
 
 ## 🎨 Colors (Dark Mode-first)
 
-This project favors a dark-mode-first design. Use Tailwind v4 utilities tuned to a dark theme and prefer the reusable components in `src/CMS.Main/Components/Utilities` for consistent surfaces.
+This project favors a dark-mode-first design. All components use Tailwind utilities tuned to a dark theme. Prefer the reusable components in `src/CMS.Main/Components/Utilities` for consistent surfaces.
 
 ### Brand Palette
-- **Primary (Interactive)**: `purple-500` / `purple-600` — Buttons, links, highlights (use `purple-600` for hover/active)
-- **No Secondary Color**: The system intentionally avoids a separate secondary color to keep emphasis and interactions consistent; use shades of gray, white/near-white, or accent variants of purple when necessary.
-- **Success**: `emerald-500` — Confirmations, success states
-- **Warning**: `amber-500` — Cautions, pending actions
-- **Error**: `rose-600` — Errors, destructive actions
- - **Background**: `neutral-900` / `neutral-800` — App background and page surfaces (can use opacity variants like `neutral-900/80` for semi-transparent overlays)
- - **Surface / Panels**: `neutral-800` / `neutral-700` — Cards, panels, and elevated surfaces
- - **Text Primary**: `neutral-100` — Main readable text on dark background
- - **Text Secondary**: `neutral-400` — Secondary text and subdued labels
+- **Primary (Interactive)**: `purple-500` — Buttons, links, highlights, focus rings
+- **Purple Variants**: `purple-400` (lighter hover), `purple-500/40` (semi-transparent rings), `purple-500/20` (gradient overlays)
+- **Danger**: `rose-600` — Errors, destructive actions, delete buttons
+- **Neutral**: `neutral-500` — Neutral variant for secondary actions
+- **Success**: `emerald-500` / `emerald-600` — Confirmations, success states (in status messages)
+- **Background**: `neutral-900` — Main app background (can use opacity variants like `neutral-900/80` for semi-transparent overlays)
+- **Surface / Panels**: `neutral-800` / `neutral-700` — Cards, panels, elevated surfaces, borders
+- **Text Primary**: `neutral-100` — Main readable text on dark background
+- **Text Secondary**: `neutral-400` / `neutral-300` — Secondary text, subdued labels, muted content
+- **Text Disabled**: `neutral-500` — Disabled input text
+- **Borders**: `neutral-700` / `neutral-800` / `neutral-600` — Component borders and dividers
 
-Gradients: tasteful gradients using purple tones (for example `from-purple-600 via-purple-500 to-purple-400`) are allowed to add depth to headers, cards, and interactive elements. Do not overuse gradients — reserve them for high-value surfaces and call-to-actions.
+### Gradient Usage
+Gradients are used sparingly for depth and interactive feedback:
+- **Hover gradients**: `hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent` — Subtle overlay on interactive elements
+- **Panel backgrounds**: `bg-gradient-to-b from-neutral-800 to-neutral-800/80` — Adds depth to cards/papers
+- **Backdrop overlays**: `bg-black/40 backdrop-blur` — Modal/dialog backgrounds
 
 ---
 

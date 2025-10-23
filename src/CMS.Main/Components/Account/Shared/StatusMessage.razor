@@ -1,12 +1,14 @@
 ﻿@if (!string.IsNullOrEmpty(DisplayMessage))
 {
     var isError = DisplayMessage.StartsWith("Error");
-    var statusClass = isError ? "status-error" : "status-success";
+    var bgClass = isError ? "bg-rose-600/10" : "bg-emerald-600/10";
+    var borderClass = isError ? "border-rose-600/30" : "border-emerald-600/30";
+    var textClass = isError ? "text-rose-400" : "text-emerald-400";
     var iconName = isError ? "error" : "check_circle";
     
-    <div class="@statusClass" role="alert">
-        <span class="material-symbols-outlined icons-default text-base mr-2">@iconName</span>
-        @DisplayMessage
+    <div class="@bgClass @borderClass @textClass border rounded-xl p-3 mb-4 flex items-center gap-2 text-sm" role="alert">
+        <span class="material-symbols-outlined icons-default text-base">@iconName</span>
+        <span>@DisplayMessage</span>
     </div>
 }
 
