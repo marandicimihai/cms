@@ -184,7 +184,7 @@
                     <TableData Class="px-3 py-2">
                         <input type="checkbox" aria-label="Select entry @entry.Id" checked="@IsEntrySelected(entry.Id)" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
                     </TableData>
-                    <TableData Class="font-mono text-xs whitespace-nowrap">@entry.Id</TableData>
+                    <TableData Class="font-mono text-xs whitespace-nowrap"><Tag Value="@entry.Id">@entry.Id</Tag></TableData>
                     @foreach (var prop in Properties)
                     {
                         var cellValue = GetEntryPropertyValue(entry, prop.Name);

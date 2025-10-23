@@ -20,7 +20,7 @@
                     <TableData>
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" class="sr-only peer" checked="@key.IsActive" @onchange="e => OnToggleKeyState(key, e.Value)" />
-                            <div class="size-6 bg-neutral-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-neutral-500 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer:bg-rose-600 peer:border-rose-600 peer-not-checked:bg-rose-600 peer-not-checked:border-rose-600"></div>
+                            <div class="relative w-11 h-6 bg-neutral-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 peer-focus:ring-offset-2 peer-focus:ring-offset-neutral-900 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
                         </label>
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">

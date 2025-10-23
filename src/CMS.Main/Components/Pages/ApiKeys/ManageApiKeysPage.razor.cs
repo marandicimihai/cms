@@ -23,10 +23,7 @@ public partial class ManageApiKeysPage : ComponentBase
     
     private ProjectDto? ProjectDto { get; set; } = new();
     
-    private ApiKeyCreateForm? createForm;
-    
-    // queued status for showing after render when initialized
-    private bool createFormVisible;
+    private ApiKeyCreateForm? createModal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,11 +55,13 @@ public partial class ManageApiKeysPage : ComponentBase
         }
     }
 
-    private void ShowCreateForm()
+    private void OpenCreateModal()
     {
-        createForm?.ResetForm();
-        createFormVisible = true;
+        createModal?.Open();
     }
     
-    private void HideCreateForm() => createFormVisible = false;
+    private void HandleApiKeyCreated()
+    {
+        // Modal stays open to show the API key, user will close it manually
+    }
 }

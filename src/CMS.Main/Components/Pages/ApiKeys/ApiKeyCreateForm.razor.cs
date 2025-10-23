@@ -5,22 +5,19 @@ using Mapster;
 using CMS.Main.DTOs;
 using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Services;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace CMS.Main.Components.Pages.ApiKeys;
 
 public partial class ApiKeyCreateForm : ComponentBase
 {
+    private bool _isOpen;
+
     [Parameter, EditorRequired]
     public string ProjectId { get; set; } = default!;
 
     [Parameter]
     public EventCallback OnSuccess { get; set; }
-    
-    [Parameter]
-    public EventCallback OnCancel { get; set; }
-    
-    [Parameter]
-    public bool Visible { get; set; } = true;
 
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -38,9 +35,41 @@ public partial class ApiKeyCreateForm : ComponentBase
     private ApiKeyDto ApiKeyDto { get; set; } = new();
     private string? rawKey;
 
-    protected override void OnInitialized()
+    public bool IsOpen
     {
-        ResetForm();
+        get => _isOpen;
+        set
+        {
+            if (_isOpen != value)
+            {
+                _isOpen = value;
+                if (_isOpen)
+                {
+                    ResetForm();
+                }
+                StateHasChanged();
+            }
+        }
+    }
+
+    public void Open()
+    {
+        IsOpen = true;
+    }
+
+    public void CloseModal()
+    {
+        IsOpen = false;
+        rawKey = null;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!IsOpen) return;
+        if (e.Key == "Escape")
+        {
+            CloseModal();
+        }
     }
 
     public void ResetForm()
