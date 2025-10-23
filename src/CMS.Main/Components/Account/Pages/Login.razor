@@ -13,20 +13,17 @@
 
 <PageTitle>Log in</PageTitle>
 
-<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-neutral-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 text-center">Sign in to your account</h1>
-            <p class="mt-2 text-center text-sm text-slate-600">
+            <h1 class="text-2xl font-semibold text-neutral-100 text-center">Sign in to your account</h1>
+            <p class="mt-2 text-center text-sm text-neutral-400">
                 Or
-                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" 
-                   class="font-medium text-blue-600 hover:text-blue-500">
-                    create a new account
-                </a>
+                <LinkButton Variant="ButtonVariant.Primary" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">create a new account</LinkButton>
             </p>
         </div>
         
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6">
+        <div class="rounded-xl border border-neutral-800 bg-linear-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6">
             <StatusMessage Message="@errorMessage"/>
             
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
@@ -35,12 +32,12 @@
                 
                 <div class="space-y-4">
                     <div>
-                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-2">
                             Email
                         </label>
                         <InputText @bind-Value="Input.Email" 
                                   id="Input.Email" 
-                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100 text-sm px-3 py-2" 
                                   autocomplete="username" 
                                   aria-required="true" 
                                   placeholder="name@example.com"/>
@@ -48,13 +45,13 @@
                     </div>
                     
                     <div>
-                        <label for="Input.Password" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.Password" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-2">
                             Password
                         </label>
                         <InputText type="password" 
                                   @bind-Value="Input.Password" 
                                   id="Input.Password" 
-                                  class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" 
+                                  class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100 text-sm px-3 py-2" 
                                   autocomplete="current-password" 
                                   aria-required="true" 
                                   placeholder="password"/>
@@ -62,7 +59,7 @@
                     </div>
                     
                     <div>
-                        <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="login" aria-label="Sign in">Sign in</PrimaryButton>
+                        <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="login" aria-label="Sign in">Sign in</PrimaryButton>
                     </div>
                 </div>
             </EditForm>
@@ -70,13 +67,13 @@
             <div class="mt-6 text-center space-y-2">
                 <div>
                     <a href="Account/ForgotPassword" 
-                       class="text-sm text-blue-600 hover:text-blue-500">
+                       class="text-sm text-purple-500 hover:text-purple-600">
                         Forgot your password?
                     </a>
                 </div>
                 <div>
                     <a href="Account/ResendEmailConfirmation" 
-                       class="text-sm text-blue-600 hover:text-blue-500">
+                       class="text-sm text-purple-500 hover:text-purple-600">
                         Resend email confirmation
                     </a>
                 </div>
@@ -85,10 +82,10 @@
             <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-slate-200" />
+                        <div class="w-full border-t border-neutral-800" />
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-slate-500">Or continue with</span>
+                        <span class="px-2 bg-neutral-800 text-neutral-400">Or continue with</span>
                     </div>
                 </div>
                 

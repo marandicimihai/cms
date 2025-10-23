@@ -1,12 +1,133 @@
-<SortAndFilterOptions 
-    OnOptionsChanged="OnOptionsChangedAsync"
-    SortableProperties="SortableProperties"
-    FilterableProperties="Properties"
-    InitialSortByProperty="CreatedAt"
-    InitialDescending="true" />
+@using System.Linq
+@using CMS.Main.Abstractions.Entries
 
 @if (Properties != null)
 {
+    <!-- Filters Section -->
+    @if (FilterRows.Any())
+    {
+        <div class="mb-4 flex flex-col gap-2 w-96">
+            @foreach (var row in FilterRows)
+            {
+                var property = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == row.Filter.PropertyName);
+                <div class="w-full flex items-center gap-3 px-3 py-2 rounded-full border border-neutral-700" @key="row.Id">
+                    <!-- Property Display -->
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="text-sm text-neutral-300">@row.Filter.PropertyName</span>
+                        <span class="text-sm font-bold text-purple-400">@row.Filter.FilterType</span>
+                    </div>
+                    
+                    <!-- Value Display -->
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm text-neutral-300">@FormatFilterValue(row.Filter.ReferenceValue)</span>
+                    </div>
+                    
+                    <!-- Remove Button -->
+                    <div class="flex-shrink-0">
+                        <IconButton IconName="close" 
+                                    Variant="ButtonVariant.Danger" 
+                                    Size="ButtonSize.Small"
+                                    OnClick="() => RemoveFilter(row)"
+                                    Outlined="false" />
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Add Filter Button -->
+    <div class="mb-4 relative">
+        <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="filter_list" @onclick="ToggleFilterPopup">
+            Add Filter
+        </PrimaryButton>
+
+        @if (showFilterPopup)
+        {
+            <!-- Backdrop to close popup when clicking outside -->
+            <div class="fixed inset-0 z-[9]" @onclick="CloseFilterPopup"></div>
+            
+            <div class="absolute top-full left-0 mt-2 z-10 w-96 rounded-lg border border-neutral-700 bg-neutral-800 shadow-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-sm font-medium text-neutral-100">Add Filter</div>
+                    <IconButton IconName="close" 
+                                Variant="ButtonVariant.Neutral" 
+                                Size="ButtonSize.Small"
+                                OnClick="CloseFilterPopup"
+                                Outlined="false" />
+                </div>
+                
+                <!-- Property Selector -->
+                <div class="mb-3">
+                    <label class="text-xs uppercase tracking-wide block mb-1 text-neutral-400">Property</label>
+                    <select class="block w-full rounded-lg border border-neutral-600 bg-neutral-700 shadow-sm text-neutral-100 text-sm px-3 py-2 focus:border-purple-500 focus:ring-purple-500"
+                            value="@newFilterPropertyName"
+                            @onchange="OnPropertySelected">
+                        <option value="">Select property...</option>
+                        @foreach (var prop in Properties)
+                        {
+                            <option value="@prop.Name">@prop.Name</option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Filter Type Selector -->
+                <div class="mb-3">
+                    <label class="text-xs uppercase tracking-wide block mb-1 text-neutral-400">Filter Type</label>
+                    <select class="block w-full rounded-lg border border-neutral-600 bg-neutral-700 shadow-sm text-neutral-100 text-sm px-3 py-2 focus:border-purple-500 focus:ring-purple-500"
+                            value="@newFilterType"
+                            @onchange="OnFilterTypeSelected"
+                            disabled="@(string.IsNullOrEmpty(newFilterPropertyName))">
+                        @if (!string.IsNullOrEmpty(newFilterPropertyName))
+                        {
+                            var selectedProperty = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == newFilterPropertyName);
+                            if (selectedProperty != null)
+                            {
+                                var filterChoices = GetFilterOptionsForProperty(selectedProperty);
+                                @foreach (var option in filterChoices)
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <option value="">Select property first...</option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Value Input -->
+                <div class="mb-3">
+                    <label class="text-xs uppercase tracking-wide block mb-1 text-neutral-400">Value</label>
+                    @if (!string.IsNullOrEmpty(newFilterPropertyName))
+                    {
+                        var selectedProperty = FilterablePropertiesCopy.FirstOrDefault(p => p.Name == newFilterPropertyName);
+                        if (selectedProperty != null)
+                        {
+                            <DynamicEntryField 
+                                @key="fieldKey"
+                                @ref="newFilterField"
+                                Property="selectedProperty" />
+                        }
+                    }
+                    else
+                    {
+                        <div class="block w-full rounded-lg border border-neutral-600 bg-neutral-700/50 shadow-sm text-neutral-500 text-sm px-3 py-2">
+                            Select property first...
+                        </div>
+                    }
+                </div>
+                
+                <!-- Add Button -->
+                <div class="flex justify-end">
+                    <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="check" @onclick="AddFilterWithValue" Disabled="@(string.IsNullOrEmpty(newFilterPropertyName))">
+                        Add
+                    </PrimaryButton>
+                </div>
+            </div>
+        }
+    </div>
+
     <Table>
         <TableHead>
             <TableRow>
@@ -16,10 +137,41 @@
                 <TableHeader Class="font-mono text-xs">ID</TableHeader>
                 @foreach (var prop in Properties)
                 {
-                    <TableHeader>@prop.Name</TableHeader>
+                    @if (IsSortableProperty(prop.Name))
+                    {
+                        <TableHeader>
+                            <button type="button" class="flex items-center gap-1 cursor-pointer hover:text-neutral-100 transition-colors w-full text-left" @onclick="@(() => ToggleSortByProperty(prop.Name))">
+                                <span class="uppercase">@prop.Name</span>
+                                @if (CurrentSortProperty == prop.Name)
+                                {
+                                    <Icon Name="@(IsDescending ? "keyboard_arrow_up" : "keyboard_arrow_down")" Class="text-sm" />
+                                }
+                            </button>
+                        </TableHeader>
+                    }
+                    else
+                    {
+                        <TableHeader>@prop.Name</TableHeader>
+                    }
                 }
-                <TableHeader>Created At</TableHeader>
-                <TableHeader>Updated At</TableHeader>
+                <TableHeader>
+                    <button type="button" class="flex items-center gap-1 cursor-pointer hover:text-neutral-100 transition-colors w-full text-left" @onclick="@(() => ToggleSortByProperty("CreatedAt"))">
+                        <span class="uppercase">Created At</span>
+                        @if (CurrentSortProperty == "CreatedAt")
+                        {
+                            <Icon Name="@(IsDescending ? "keyboard_arrow_up" : "keyboard_arrow_down")" Class="text-sm" />
+                        }
+                    </button>
+                </TableHeader>
+                <TableHeader>
+                    <button type="button" class="flex items-center gap-1 cursor-pointer hover:text-neutral-100 transition-colors w-full text-left" @onclick="@(() => ToggleSortByProperty("UpdatedAt"))">
+                        <span class="uppercase">Updated At</span>
+                        @if (CurrentSortProperty == "UpdatedAt")
+                        {
+                            <Icon Name="@(IsDescending ? "keyboard_arrow_up" : "keyboard_arrow_down")" Class="text-sm" />
+                        }
+                    </button>
+                </TableHeader>
                 <TableHeader Class="text-right">Actions</TableHeader>
             </TableRow>
         </TableHead>
@@ -30,9 +182,9 @@
             {
                 <TableRow>
                     <TableData Class="px-3 py-2">
-                        <input type="checkbox" aria-label="Select entry @entry.Id" checked="@(() => SelectedEntries.Any(e => e.Id == entry.Id))" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
+                        <input type="checkbox" aria-label="Select entry @entry.Id" checked="@IsEntrySelected(entry.Id)" @onchange="@(e => ToggleEntrySelection(entry, e.Value as bool? ?? false))" />
                     </TableData>
-                    <TableData Class="font-mono text-xs whitespace-nowrap">@entry.Id</TableData>
+                    <TableData Class="font-mono text-xs whitespace-nowrap"><Tag Value="@entry.Id">@entry.Id</Tag></TableData>
                     @foreach (var prop in Properties)
                     {
                         var cellValue = GetEntryPropertyValue(entry, prop.Name);
@@ -47,8 +199,10 @@
                         @FormatCell(entry.UpdatedAt)
                     </TableData>
                     <TableData Class="text-right flex gap-2 justify-end">
-                        <PrimaryButton Variant="ButtonVariant.Info" Icon="edit" @onclick="@(() => NavigationManager.NavigateTo($"/entry/{entry.Id}/edit"))" aria-label="Edit Entry">Edit</PrimaryButton>
-                        <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeleteEntry(entry)" aria-label="Delete Entry">Delete</PrimaryButton>
+                        <ButtonGroup>
+                            <PrimaryButton Variant="ButtonVariant.Primary" Icon="edit" @onclick="@(() => OpenEditEntryModal(entry.Id))" aria-label="Edit Entry">Edit</PrimaryButton>
+                            <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeleteEntry(entry)" aria-label="Delete Entry">Delete</PrimaryButton>
+                        </ButtonGroup>
                     </TableData>
                 </TableRow>
             }
@@ -56,7 +210,7 @@
         else
         {
             <TableRow>
-                <TableData Class="px-3 py-4 text-slate-600 text-sm" colspan="@((Properties.Count + 5).ToString())">No entries yet.</TableData>
+                <TableData Class="px-3 py-4 text-neutral-400 text-sm" colspan="@((Properties.Count + 5).ToString())">No entries yet.</TableData>
             </TableRow>
         }
         </TableBody>
@@ -64,12 +218,12 @@
 
     @if (SelectedEntries.Count > 0)
     {
-        <div class="flex items-center justify-between mt-4 p-3 rounded-md border border-slate-200 bg-slate-50">
-            <span class="text-sm text-slate-900">@SelectedEntries.Count entr@(SelectedEntries.Count == 1 ? "y" : "ies") selected</span>
-            <div class="flex gap-2">
+        <div class="flex items-center justify-between mt-4 p-4 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm">
+            <span class="text-sm text-neutral-100">@SelectedEntries.Count entr@(SelectedEntries.Count == 1 ? "y" : "ies") selected</span>
+            <ButtonGroup>
                 <SecondaryButton Variant="ButtonVariant.Neutral" @onclick="ClearSelection" aria-label="Cancel selection">Cancel</SecondaryButton>
                 <PrimaryButton Variant="ButtonVariant.Danger" Icon="delete" @onclick="DeleteSelectedEntriesAsync" aria-label="Delete selected entries">Delete</PrimaryButton>
-            </div>
+            </ButtonGroup>
         </div>
     }
 
@@ -79,7 +233,7 @@
             <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" @onclick="LoadMoreEntriesAsync" aria-label="Load more entries" disabled="@isLoadingMore">
                 @if (isLoadingMore)
                 {
-                    <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
+                    <Icon Name="progress_activity" Class="text-2xl animate-spin mx-auto" />
                 }
                 else
                 {
@@ -89,3 +243,5 @@
         </div>
     }
 }
+
+<EntryEditModal @ref="editEntryModal" OnEntryUpdated="HandleEntryUpdated" />

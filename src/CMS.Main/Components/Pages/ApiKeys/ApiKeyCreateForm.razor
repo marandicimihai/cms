@@ -1,27 +1,47 @@
 @rendermode InteractiveServer
+@attribute [Authorize]
 
-<div class="@(Visible ? "" : "hidden")">
-    <EditForm Model="ApiKeyDto" OnValidSubmit="HandleCreateApiKeySubmit" class="mb-4">
-        <DataAnnotationsValidator/>
-        <div class="grid grid-cols-1 gap-4">
-            <div class="flex flex-col gap-2 md:col-span-1">
-                <label class="text-xs uppercase tracking-wide text-slate-600">Name</label>
-                <InputText @bind-Value="ApiKeyDto.Name" class="block w-full rounded-md border border-slate-300 shadow-sm text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" placeholder="API key name"/>
-                <ValidationMessage For="() => ApiKeyDto.Name" class="text-rose-600 text-xs"/>
-            </div>
-        </div>
-        <div class="flex gap-2 mt-4">
-            <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Create API Key">Create API Key</PrimaryButton>
-            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="async () => await OnCancel.InvokeAsync()" aria-label="Cancel">Cancel</SecondaryButton>
-        </div>
-    </EditForm>
-</div>
-
-@if (!string.IsNullOrEmpty(rawKey))
+@if (IsOpen)
 {
-    <div class="mt-4 rounded-md bg-amber-50 border border-amber-100 p-3 mb-4">
-        <p class="text-sm text-amber-900 mb-2">New API key (shown once):</p>
-        <pre class="bg-white p-2 rounded text-sm">@rawKey</pre>
-        <p class="text-xs text-slate-600 mt-2">Make sure to copy this value now. It will not be shown again.</p>
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur opacity-100"
+         aria-modal="true" role="dialog" tabindex="-1" @onkeydown="HandleKeyDown">
+        <div class="rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6 max-w-sm sm:max-w-md w-full mx-4 overflow-auto max-h-screen">
+            <div class="mb-6 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-medium text-neutral-100">@(string.IsNullOrEmpty(rawKey) ? "Create API Key" : "API Key Created")</h2>
+                </div>
+                <button @onclick="CloseModal" class="text-neutral-400 hover:text-neutral-100 transition-colors" aria-label="Close modal">
+                    <span class="material-symbols-outlined icons-default text-xl">close</span>
+                </button>
+            </div>
+
+            @if (string.IsNullOrEmpty(rawKey))
+            {
+                <EditForm Model="ApiKeyDto" OnValidSubmit="HandleCreateApiKeySubmit" FormName="CreateApiKeyForm">
+                    <DataAnnotationsValidator/>
+                    
+                    <div class="mb-4">
+                        <label for="apikey-name" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-1">Name</label>
+                        <InputText id="apikey-name" @bind-Value="ApiKeyDto.Name" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm text-sm px-3 py-2 focus:border-purple-500 focus:ring-purple-500 text-neutral-100" placeholder="API key name"/>
+                        <ValidationMessage For="() => ApiKeyDto.Name" class="text-rose-600 text-xs mt-1"/>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="save" aria-label="Create API Key">Create API Key</PrimaryButton>
+                    </div>
+                </EditForm>
+            }
+            else
+            {
+                <div class="mb-4">
+                    <p class="text-sm text-amber-500 mb-2">New API key (shown once):</p>
+                    <pre class="bg-neutral-700 p-3 rounded-lg text-sm text-neutral-100 overflow-x-auto">@rawKey</pre>
+                    <p class="text-xs text-neutral-400 mt-2">Make sure to copy this value now. It will not be shown again.</p>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="check" aria-label="Done" @onclick="CloseModal">Done</PrimaryButton>
+                </div>
+            }
+        </div>
     </div>
 }

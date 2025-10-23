@@ -1,7 +1,5 @@
 using CMS.Main.Abstractions;
 using CMS.Main.Abstractions.Notifications;
-using CMS.Main.Abstractions.SchemaProperties;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
@@ -13,7 +11,7 @@ public partial class SchemaPage : ComponentBase
     [Parameter]
     public Guid SchemaId { get; set; }
 
-    private SchemaDto Schema { get; set; } = new();
+    private SchemaDto? Schema { get; set; }
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -24,12 +22,8 @@ public partial class SchemaPage : ComponentBase
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
 
-    private PropertyCreateForm? createForm;
-    private PropertyUpdateForm? updateForm;
-    
-    private bool createFormVisible;
-    private bool updateFormVisible;
-    private bool hasAccess;
+    private PropertyCreateForm? createPropertyModal;
+    private PropertyUpdateForm? updatePropertyModal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -42,8 +36,6 @@ public partial class SchemaPage : ComponentBase
             });
             return;
         }
-
-        hasAccess = true;
 
         var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
 
@@ -62,27 +54,35 @@ public partial class SchemaPage : ComponentBase
         }
     }
 
-    private void ShowCreateForm()
+    private void OpenCreatePropertyModal()
     {
-        createForm?.ResetForm();
-        createFormVisible = true;
-        updateFormVisible = false;
+        createPropertyModal?.Open();
     }
     
-    private void HideCreateForm()
+    private async Task HandlePropertyCreated()
     {
-        createFormVisible = false;
+        // Reload the schema to get the updated properties list
+        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
+        if (result.IsSuccess)
+        {
+            Schema = result.Value;
+            StateHasChanged();
+        }
     }
     
-    private void ShowUpdateForm(PropertyDto property)
+    private void OpenUpdatePropertyModal(PropertyDto property)
     {
-        updateForm?.SetModel(property);
-        updateFormVisible = true;
-        createFormVisible = false;
+        updatePropertyModal?.Open(property);
     }
     
-    private void HideUpdateForm()
+    private async Task HandlePropertyUpdated()
     {
-        updateFormVisible = false;
+        // Reload the schema to get the updated properties list
+        var result = await SchemaService.GetSchemaByIdAsync(SchemaId.ToString());
+        if (result.IsSuccess)
+        {
+            Schema = result.Value;
+            StateHasChanged();
+        }
     }
 }

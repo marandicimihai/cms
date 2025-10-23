@@ -1,0 +1,21 @@
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur opacity-100"
+         aria-modal="true" role="dialog" tabindex="-1" @onkeydown="HandleKeyDown">
+        <div class="rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6 max-w-md sm:max-w-lg lg:max-w-2xl w-full mx-4 overflow-auto max-h-screen">
+            <div class="mb-6 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-medium text-neutral-100">New Entry</h2>
+                </div>
+                <button @onclick="CloseModal" class="text-neutral-400 hover:text-neutral-100 transition-colors" aria-label="Close modal">
+                    <span class="material-symbols-outlined icons-default text-xl">close</span>
+                </button>
+            </div>
+
+            <DynamicEntryForm @ref="entryCreateForm" Properties="Properties" OnValidSubmit="HandleCreateSubmit" />
+        </div>
+    </div>
+}

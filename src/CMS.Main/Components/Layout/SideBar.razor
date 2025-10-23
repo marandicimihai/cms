@@ -1,35 +1,91 @@
 @rendermode InteractiveServer
 
+@using CMS.Main.Components.Utilities
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
-<aside class="hidden md:block w-64 border-r border-slate-200 bg-white overflow-y-auto">
-    <div class="p-4">
-        <nav class="space-y-1 mb-3">
-            <SideBarButton Href="/new" Icon="add">Create Project</SideBarButton>
-        </nav>
+<aside class="fixed left-0 top-0 h-full @(isHidden ? "w-14" : "w-64") p-4 block border-r border-neutral-800 bg-neutral-900/80 overflow-y-auto overflow-x-hidden transition-all duration-300 z-20">
+    <div class="@(isHidden ? "opacity-100" : "opacity-0 pointer-events-none") transition-all duration-300 absolute inset-y-4 inset-x-2">
+        <VerticalStack Alignment="StackAlignment.Center" Class="h-full">
+            <VerticalStack Gap="StackGap.Small" Class="h-full">
+                <IconButton Outlined="false" IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
+                <IconButton Outlined="false" IconName="add" OnClick="OpenCreateProjectModal" aria-label="Create project" />
+            </VerticalStack>
+            <AuthorizeView>
+                <NotAuthorized>
+                    <VerticalStack Gap="StackGap.Small">
+                        <SideBarButton Href="/Account/Login" Icon="login" />
+                        <SideBarButton Href="/Account/Register" Icon="person_add" />
+                    </VerticalStack>
+                </NotAuthorized>
+                <Authorized>
+                    <VerticalStack Gap="StackGap.Small">
+                        <SideBarButton Href="/Account/Manage" Icon="person" />
+                        <form method="post" action="/Account/Logout">
+                            <AntiforgeryToken/>
+                            <input type="hidden" name="returnUrl" value="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"/>
+                            <IconButton Outlined="false" Type="submit" IconName="logout" Variant="ButtonVariant.Danger" aria-label="Sign out" Class="w-full" />
+                        </form>
+                    </VerticalStack>
+                </Authorized>
+            </AuthorizeView>
+        </VerticalStack>
+    </div>
+    <div class="@(isHidden ? "opacity-0 pointer-events-none" : "opacity-100") transition-all duration-300 h-full">
+        <VerticalStack Gap="StackGap.Large" Class="h-full">
+            <HorizontalStack Justify="StackJustify.Between" Class="w-full">
+                <IconButton IconName="deployed_code" Outlined="false" aria-label="Just random cube" />
+                <IconButton IconName="dock_to_right" Outlined="false" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
+            </HorizontalStack>
+            <PrimaryButton Variant="ButtonVariant.Primary" Outlined="false" Icon="add" OnClick="OpenCreateProjectModal" Class="w-full !justify-start">Create Project</PrimaryButton>
 
-        <h2 class="text-xs font-medium uppercase tracking-wide text-slate-500 mb-3">Projects</h2>
-        <nav class="space-y-1">
-            @foreach (var project in Projects)
+            <VerticalStack Gap="StackGap.Medium" Class="w-full h-full">
+                <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-400">Projects</h2>
+                <VerticalStack Gap="StackGap.Small" Class="w-full">
+                @foreach (var project in Projects)
+                {
+                    var uri = $"/project/{project.Id}";
+                    <SideBarButton Href="@uri" Match="NavLinkMatch.Prefix">@project.Name</SideBarButton>
+                }
+                </VerticalStack>
+            </VerticalStack>
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <VerticalStack Gap="StackGap.Small" Class="w-full">
+                        <SideBarButton Class="w-full !justify-start" Href="/Account/Login" Icon="login">Sign in</SideBarButton>
+                        <SideBarButton Class="w-full !justify-start" Href="/Account/Register" Icon="person_add">Register</SideBarButton>
+                    </VerticalStack>
+                </NotAuthorized>
+                <Authorized>
+                    <VerticalStack Gap="StackGap.Small" Class="w-full">
+                        <SideBarButton Href="/Account/Manage" Icon="person" Class="w-full !justify-start">
+                            <span class="truncate">@context.User.Identity?.Name</span>
+                        </SideBarButton>
+                        <form method="post" action="/Account/Logout" class="w-full">
+                            <AntiforgeryToken/>
+                            <input type="hidden" name="returnUrl" value="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"/>
+                            <PrimaryButton Class="w-full !justify-start !px-2" Variant="ButtonVariant.Danger" Outlined="false" Type="submit" Size="ButtonSize.Small" Icon="logout" aria-label="Sign out">Sign out</PrimaryButton>
+                        </form>
+                    </VerticalStack>
+                </Authorized>
+            </AuthorizeView>
+
+            @if (HasMoreProjects)
             {
-                var uri = $"/project/{project.Id}";
-                <SideBarButton Href="@uri" Match="NavLinkMatch.Prefix">@project.Name</SideBarButton>
+                <div class="mt-4 flex">
+                    <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" @onclick="LoadMoreProjectsAsync" aria-label="Load more projects" disabled="@isLoadingMore">
+                        @if (isLoadingMore)
+                        {
+                            <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
+                        }
+                        else
+                        {
+                            <span class="flex-1 text-center">Load More</span>
+                        }
+                    </SecondaryButton>
+                </div>
             }
-        </nav>
-        @if (HasMoreProjects)
-        {
-            <div class="mt-4 flex">
-                <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" @onclick="LoadMoreProjectsAsync" aria-label="Load more projects" disabled="@isLoadingMore">
-                    @if (isLoadingMore)
-                    {
-                        <span class="material-symbols-outlined icons-default text-2xl animate-spin mx-auto">progress_activity</span>
-                    }
-                    else
-                    {
-                        <span class="flex-1 text-center">Load More</span>
-                    }
-                </SecondaryButton>
-            </div>
-        }
+        </VerticalStack>
     </div>
 </aside>

@@ -1,0 +1,17 @@
+﻿<span class="tag inline-flex gap-1 items-center rounded-full border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-medium text-neutral-300 cursor-pointer hover:border-purple-500/40 hover:bg-neutral-700 transition-all duration-200 select-none @Class"
+      data-clipboardvalue="@Value"
+      title="Click to copy">
+    <Icon Name="content_copy" Class="!text-sm" />
+    @ChildContent
+</span>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public string? Value { get; set; }
+}

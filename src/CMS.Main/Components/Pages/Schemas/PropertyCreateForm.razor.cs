@@ -1,26 +1,22 @@
 using CMS.Main.Abstractions.Notifications;
 using CMS.Main.Abstractions.Properties.PropertyTypes;
 using CMS.Main.Abstractions.SchemaProperties;
-using CMS.Main.Components.Shared;
 using CMS.Main.DTOs;
 using CMS.Main.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace CMS.Main.Components.Pages.Schemas;
 
 public partial class PropertyCreateForm : ComponentBase
 {
+    private bool _isOpen;
+
     [Parameter, EditorRequired]
     public SchemaDto Schema { get; set; } = default!;
 
     [Parameter]
-    public EventCallback OnSuccess { get; set; }
-    
-    [Parameter]
-    public EventCallback OnCancel { get; set; }
-    
-    [Parameter]
-    public bool Visible { get; set; } = true;
+    public EventCallback OnPropertyCreated { get; set; }
     
     [Inject]
     private AuthorizationHelperService AuthHelper { get; set; } = default!;
@@ -31,11 +27,48 @@ public partial class PropertyCreateForm : ComponentBase
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
 
+    [SupplyParameterFromForm]
     private PropertyDto PropertyDto { get; set; } = new();
     private string EnumOptions { get; set; } = string.Empty;
     private PropertyType[] PropertyTypes { get; } = Enum.GetValues<PropertyType>();
 
-    public void ResetForm()
+    public bool IsOpen
+    {
+        get => _isOpen;
+        set
+        {
+            if (_isOpen != value)
+            {
+                _isOpen = value;
+                if (_isOpen)
+                {
+                    ResetForm();
+                }
+                StateHasChanged();
+            }
+        }
+    }
+
+    public void Open()
+    {
+        IsOpen = true;
+    }
+
+    public void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!IsOpen) return;
+        if (e.Key == "Escape")
+        {
+            CloseModal();
+        }
+    }
+
+    private void ResetForm()
     {
         PropertyDto = new PropertyDto
         {
@@ -89,12 +122,7 @@ public partial class PropertyCreateForm : ComponentBase
 
         var result = await PropertyService.CreatePropertyAsync(PropertyDto);
 
-        if (result.IsSuccess)
-        {
-            Schema.Properties.Add(result.Value);
-            await OnSuccess.InvokeAsync();
-        }
-        else
+        if (!result.IsSuccess)
         {
             await Notifications.NotifyAsync(new()
             {
@@ -102,8 +130,18 @@ public partial class PropertyCreateForm : ComponentBase
                     $"There was an error when creating property named {PropertyDto.Name}.",
                 Type = NotificationType.Error
             });
+            return;
         }
+
+        Schema.Properties.Add(result.Value);
         
-        StateHasChanged();
+        await Notifications.NotifyAsync(new()
+        {
+            Message = $"Created property named {result.Value.Name}.",
+            Type = NotificationType.Success
+        });
+
+        CloseModal();
+        await OnPropertyCreated.InvokeAsync();
     }
 }

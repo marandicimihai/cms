@@ -1,0 +1,13 @@
+<span class="material-symbols-outlined icons-default text-neutral-100 @Class" @attributes="AdditionalAttributes">@Name</span>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public string Name { get; set; } = default!;
+
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}

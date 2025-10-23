@@ -13,6 +13,8 @@
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300..500,0..1,-50..200&icon_names=@IconNamesSorted"/>
     <link rel="stylesheet" href="@Assets["css/tailwind.css"]"/>
     <link rel="stylesheet" href="@Assets["CMS.Main.styles.css"]"/>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     <ImportMap/>
     <HeadOutlet/>
 </head>
@@ -20,6 +22,7 @@
 <body class="noto-sans">
 <script src="_framework/blazor.web.js"></script>
 <script src="js/notifications.js"></script>
+<script src="js/clipboard.js"></script>
 </body>
 <Routes/>
 </html>
@@ -29,7 +32,8 @@
     private readonly string[] iconNames =
     [
         "menu",
-        "add",
+    "add",
+    "filter_list",
         "email",
         "lock",
         "login",
@@ -37,6 +41,11 @@
         "person_add",
         "send",
         "arrow_back",
+        "arrow_downward",
+        "arrow_forward",
+        "arrow_upward",
+        "keyboard_arrow_up",
+        "keyboard_arrow_down",
         "refresh",
         "check_circle",
         "error",
@@ -51,11 +60,16 @@
         "person",
         "logout",
         "help",
-        "arrow_forward",
         "edit",
         "vpn_key",
         "check",
-        "info"
+        "info",
+        "description",
+        "notifications_active",
+        "list",
+        "dock_to_right",
+        "deployed_code",
+        "content_copy"
     ];
 
     private string IconNamesSorted => string.Join(',', iconNames.OrderBy(x => x));

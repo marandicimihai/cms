@@ -23,6 +23,23 @@ public class OwnsSchemaHandler(
 
                 if (result.IsSuccess && result.Value.Project.OwnerId == userId)
                 {
+                    // If authenticated via API key, enforce project scope
+                    var apiKeyProjectId = context.User.FindFirst(AuthConstants.ProjectIdClaimType)?.Value;
+                    if (!string.IsNullOrEmpty(apiKeyProjectId))
+                    {
+                        // API key authentication: must match the schema's project
+                        if (apiKeyProjectId == result.Value.Project.Id)
+                        {
+                            context.Succeed(requirement);
+                        }
+                        else
+                        {
+                            context.Fail();
+                        }
+                        return;
+                    }
+                    
+                    // Regular user authentication: user owns the project
                     context.Succeed(requirement);
                     return;
                 }

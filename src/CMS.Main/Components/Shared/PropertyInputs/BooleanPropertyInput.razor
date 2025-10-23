@@ -2,14 +2,14 @@
 @using CMS.Main.DTOs
 @implements IPropertyInput
 
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-4">
     <input @onchange="HandleChange"
         id="field-@Property.Id"
         checked="@Value"
         type="checkbox"
-        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 @(Disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "")"
+        class="h-4 w-4 rounded border-neutral-600 text-purple-500 focus:ring-purple-500 @(Disabled ? "bg-neutral-700 text-neutral-500 cursor-not-allowed" : "")"
         disabled="@Disabled" />
-    <span class="text-sm text-slate-600">@(Value ? "true" : "false")</span>
+    <span class="text-sm text-neutral-400">@(Value ? "true" : "false")</span>
 </div>
 
 @code {

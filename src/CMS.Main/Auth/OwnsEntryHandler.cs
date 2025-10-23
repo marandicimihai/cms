@@ -30,6 +30,23 @@ public class OwnsEntryHandler(
 
                 if (ownerId == userId)
                 {
+                    // If authenticated via API key, enforce project scope
+                    var apiKeyProjectId = context.User.FindFirst(AuthConstants.ProjectIdClaimType)?.Value;
+                    if (!string.IsNullOrEmpty(apiKeyProjectId))
+                    {
+                        // API key authentication: must match the entry's project
+                        if (apiKeyProjectId == entry?.Schema.Project.Id)
+                        {
+                            context.Succeed(requirement);
+                        }
+                        else
+                        {
+                            context.Fail();
+                        }
+                        return;
+                    }
+                    
+                    // Regular user authentication: user owns the project
                     context.Succeed(requirement);
                     return;
                 }

@@ -1,0 +1,56 @@
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur opacity-100"
+         aria-modal="true" role="dialog" tabindex="-1" @onkeydown="HandleKeyDown">
+        <div class="rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6 max-w-sm sm:max-w-md w-full mx-4 overflow-auto max-h-screen">
+            <div class="mb-6 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-medium text-neutral-100">Create Project</h2>
+                </div>
+                <button @onclick="CloseModal" class="text-neutral-400 hover:text-neutral-100 transition-colors" aria-label="Close modal">
+                    <span class="material-symbols-outlined icons-default text-xl">close</span>
+                </button>
+            </div>
+
+            @if (projectUrl != null)
+            {
+                <div class="text-center">
+                    <div class="mb-4">
+                        <span class="material-symbols-outlined icons-default text-4xl text-emerald-500 mb-2">check_circle</span>
+                    </div>
+                    <h3 class="text-lg font-medium text-neutral-100 mb-2">Project Created Successfully!</h3>
+                    <p class="text-sm text-neutral-400 mb-6">Your project is ready. Click below to start working on it.</p>
+                    <PrimaryButton Variant="ButtonVariant.Primary" OnClick="NavigateToProject" role="link" aria-label="Go to project page">Go To Project Page</PrimaryButton>
+                </div>
+            }
+            else
+            {
+                <EditForm Model="@CreateDto" OnValidSubmit="@HandleValidSubmit" FormName="CreateProjectForm">
+                    <DataAnnotationsValidator/>
+
+                    <div class="mb-6">
+                        <label for="name" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-1">
+                            Project Name
+                        </label>
+                        <InputText id="name"
+                                    @bind-Value="CreateDto.Name"
+                                    class="block text-sm w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100 px-3 py-2"
+                                    placeholder="Enter project name"/>
+                        <ValidationMessage For="@(() => CreateDto.Name)"
+                                            class="text-rose-600 text-xs mt-1" />
+                    </div>
+
+                    <div class="flex justify-end">
+                        <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="add">Create Project</PrimaryButton>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+}

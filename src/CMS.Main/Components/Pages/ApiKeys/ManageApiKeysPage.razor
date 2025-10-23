@@ -7,19 +7,16 @@
 {
     <BackButton Href="@($"/project/{ProjectId}")" Text="Back to Project" />
 
-    <Paper>
+    <Paper Class="mt-4">
         <div class="flex items-center justify-between mb-4">
-            <h1 class="text-lg font-medium text-slate-900">API Keys</h1>
-            @if (!createFormVisible)
-            {
-                <PrimaryButton Type="button" Variant="ButtonVariant.Info" Icon="add" @onclick="ShowCreateForm">New API Key</PrimaryButton>
-            }
+            <h1 class="text-lg font-medium text-neutral-100">API Keys</h1>
+            <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" @onclick="OpenCreateModal">New API Key</PrimaryButton>
         </div>
-
-        <ApiKeyCreateForm @ref="createForm" ProjectId="@ProjectId.ToString()" Visible="@createFormVisible" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" />
 
         <ApiKeyTable ApiKeys="ProjectDto.ApiKeys" />
     </Paper>
+
+    <ApiKeyCreateForm @ref="createModal" ProjectId="@ProjectId.ToString()" OnSuccess="HandleApiKeyCreated" />
 }
 else
 {

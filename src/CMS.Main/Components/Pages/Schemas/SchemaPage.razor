@@ -3,28 +3,26 @@
 
 @attribute [Authorize]
 
-@if (hasAccess)
+<PageTitle>CMS - Schema</PageTitle>
+
+@if (Schema is not null)
 {
     <BackButton Href="@($"/project/{Schema.ProjectId}")" Text="Back to Project" />
 
-    <Paper>
+    <Paper Class="mt-4">
         <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-medium">
-                @Schema.Name
-            </h2>
+            <PageHeader>@Schema.Name <Tag Value="@Schema.Id">@Schema.Id</Tag></PageHeader>
 
-            @if (!createFormVisible && !updateFormVisible)
-            {
-                <div class="flex items-center gap-2">
-                    <PrimaryButton Type="button" Variant="ButtonVariant.Info" Icon="add" aria-label="Create Property" @onclick="ShowCreateForm">Create Property</PrimaryButton>
-                </div>
-            }
+            <div class="flex items-center gap-4">
+                <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="add" aria-label="Create Property" @onclick="OpenCreatePropertyModal">Create Property</PrimaryButton>
+            </div>
         </div>
 
-        <PropertyCreateForm Schema="Schema" OnSuccess="HideCreateForm" OnCancel="HideCreateForm" @ref="createForm" Visible="createFormVisible" />
-        <PropertyUpdateForm Schema="Schema" OnSuccess="HideUpdateForm" OnCancel="HideUpdateForm" @ref="updateForm" Visible="updateFormVisible" />
-        <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="ShowUpdateForm"/>
+        <ViewSchemaPropertiesTable Schema="Schema" OnEditProperty="OpenUpdatePropertyModal"/>
     </Paper>
+    
+    <PropertyCreateForm Schema="Schema" OnPropertyCreated="HandlePropertyCreated" @ref="createPropertyModal" />
+    <PropertyUpdateForm Schema="Schema" OnPropertyUpdated="HandlePropertyUpdated" @ref="updatePropertyModal" />
 }
 else
 {

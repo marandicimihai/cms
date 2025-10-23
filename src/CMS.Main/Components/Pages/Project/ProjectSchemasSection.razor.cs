@@ -8,11 +8,16 @@ namespace CMS.Main.Components.Pages.Project;
 
 public partial class ProjectSchemasSection : ComponentBase
 {
+    private CreateSchemaModal createSchemaModal = default!;
+
     [Parameter]
     public List<SchemaDto> Schemas { get; set; } = [];
 
     [Parameter]
     public string ProjectId { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback OnSchemasChanged { get; set; }
 
     [Inject]
     private ISchemaService SchemaService { get; set; } = default!;
@@ -26,61 +31,20 @@ public partial class ProjectSchemasSection : ComponentBase
     [Inject]
     private INotificationService Notifications { get; set; } = default!;
 
-    [SupplyParameterFromForm]
-    public SchemaDto NewSchema { get; set; } = new();
-    private bool IsAddFormVisible { get; set; }
-
     protected override void OnInitialized()
     {
-        NewSchema = new SchemaDto { ProjectId = ProjectId };
-        StateHasChanged();
+        
     }
 
-    private void ShowAddForm()
+    private void OpenAddSchemaModal()
     {
-        IsAddFormVisible = true;
-        NewSchema = new SchemaDto { ProjectId = ProjectId };
+        createSchemaModal.Open();
     }
 
-    private void HideAddForm()
+    private async Task HandleSchemaCreated()
     {
-        IsAddFormVisible = false;
-        NewSchema = new SchemaDto { ProjectId = ProjectId };
-    }
-
-    public async Task HandleAddSchema()
-    {
-        if (!await AuthHelper.OwnsProject(ProjectId))
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = "Could not retrieve resource.",
-                Type = NotificationType.Error
-            });
-            return;
-        }
-
-        StateHasChanged();
-        await Task.Yield();
-
-        var result = await SchemaService.CreateSchemaAsync(NewSchema);
-
-        if (result.IsSuccess)
-        {
-            IsAddFormVisible = false;
-            NewSchema = new SchemaDto { ProjectId = ProjectId };
-            Schemas.Add(result.Value);
-        }
-        else
-        {
-            await Notifications.NotifyAsync(new()
-            {
-                Message = result.Errors.FirstOrDefault() ?? "There was an error",
-                Type = NotificationType.Error
-            });
-        }
-
-        StateHasChanged();
+        // Notify parent component to refresh
+        await OnSchemasChanged.InvokeAsync();
     }
 
     private async Task OnDeleteSchemaAsync(SchemaDto schema)
@@ -108,6 +72,7 @@ public partial class ProjectSchemasSection : ComponentBase
             if (result.IsSuccess)
             {
                 Schemas.Remove(schema);
+                await OnSchemasChanged.InvokeAsync();
             }
             else
             {

@@ -5,6 +5,7 @@ using CMS.Main.DTOs.Pagination;
 using CMS.Main.Services.State;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace CMS.Main.Components.Layout;
 
@@ -15,6 +16,7 @@ public partial class SideBar : ComponentBase, IDisposable
     private readonly int pageSize = 20;
     private bool isLoadingMore;
     private int totalCount;
+    private bool isHidden = false;
 
     [Inject]
     private IProjectService ProjectService { get; set; } = default!;
@@ -138,6 +140,45 @@ public partial class SideBar : ComponentBase, IDisposable
         }
 
         StateHasChanged();
+    }
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // initialize CSS variable for sidebar width
+            await SetSidebarWidthAsync();
+        }
+    }
+
+    private async Task SetSidebarWidthAsync()
+    {
+        var width = isHidden ? "3.5rem" : "16rem"; // Tailwind w-14 = 3.5rem, w-64 = 16rem
+        try
+        {
+            await JS.InvokeVoidAsync("sidebar.setWidth", width);
+        }
+        catch
+        {
+            // ignore JS interop errors in server prerendering
+        }
+    }
+
+    private async void ToggleSidebar()
+    {
+        isHidden = !isHidden;
+        await SetSidebarWidthAsync();
+        StateHasChanged();
+    }
+
+    private void OpenCreateProjectModal()
+    {
+        var uri = NavigationManager.Uri;
+        var separator = uri.Contains('?') ? "&" : "?";
+        NavigationManager.NavigateTo($"{uri}{separator}new=true", false);
     }
 
     public void Dispose()

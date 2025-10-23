@@ -119,26 +119,26 @@ public class GetEntries(
                     opt.SortByPropertyName = req.Body!.SortByPropertyName;
                     opt.Descending = req.Body!.Descending;
                 }
-                // if (req.Body?.Filters is not null && req.Body.Filters.Count != 0)
-                // {
-                //     opt.Filters = req.Body.Filters
-                //         .Select(f =>
-                //         {
-                //             if (Enum.TryParse<PropertyFilter>(f.FilterType, true, out var filterType))
-                //             {
-                //                 return new EntryFilter()
-                //                 {
-                //                     PropertyName = f.PropertyName,
-                //                     FilterType = filterType,
-                //                     ReferenceValue = f.ReferenceValue?.ToString()
-                //                 };
-                //             }
-                //             return null;
-                //         })
-                //         .Where(e => e is not null)
-                //         .Cast<EntryFilter>()
-                //         .ToList();
-                // }
+                if (req.Body?.Filters is not null && req.Body.Filters.Count != 0)
+                {
+                    opt.Filters = req.Body.Filters
+                        .Select(f =>
+                        {
+                            if (Enum.TryParse<PropertyFilter>(f.FilterType, true, out var filterType))
+                            {
+                                return new EntryFilter()
+                                {
+                                    PropertyName = f.PropertyName,
+                                    FilterType = filterType,
+                                    ReferenceValue = f.ReferenceValue?.ToString()
+                                };
+                            }
+                            return null;
+                        })
+                        .Where(e => e is not null)
+                        .Cast<EntryFilter>()
+                        .ToList();
+                }
             });
         
         if (result.IsSuccess)
@@ -153,6 +153,14 @@ public class GetEntries(
         else if (result.IsNotFound())
         {
             await Send.NotFoundAsync(ct);
+        }
+        else if (result.ValidationErrors.Any())
+        {
+            foreach (var error in result.ValidationErrors)
+            {
+                AddError(error.ErrorMessage);
+            }
+            ThrowIfAnyErrors();
         }
         else if (result.Errors.Any())
         {

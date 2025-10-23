@@ -19,6 +19,23 @@ public class OwnsProjectHandler(IProjectService projectService)
 
                 if (result.IsSuccess && result.Value.OwnerId == userId)
                 {
+                    // If authenticated via API key, enforce project scope
+                    var apiKeyProjectId = context.User.FindFirst(AuthConstants.ProjectIdClaimType)?.Value;
+                    if (!string.IsNullOrEmpty(apiKeyProjectId))
+                    {
+                        // API key authentication: must match the key's project
+                        if (apiKeyProjectId == projectId)
+                        {
+                            context.Succeed(requirement);
+                        }
+                        else
+                        {
+                            context.Fail();
+                        }
+                        return;
+                    }
+                    
+                    // Regular user authentication: user owns the project
                     context.Succeed(requirement);
                     return;
                 }

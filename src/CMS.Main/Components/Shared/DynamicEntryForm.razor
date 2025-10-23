@@ -1,7 +1,7 @@
 @using CMS.Main.DTOs
 @rendermode InteractiveServer
 
-<form method="post" @onsubmit="HandleValidSubmit" class="flex flex-col gap-4">
+<form method="post" @onsubmit="HandleValidSubmit" class="flex flex-col gap-1">
     <AntiforgeryToken />
     @for (var i = 0; i < Properties.Count; i++)
     {
@@ -10,7 +10,7 @@
     }
 
     <div class="flex gap-2 justify-start mt-2">
-        <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="save" aria-label="Save Entry">Save</PrimaryButton>
+        <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="save" aria-label="Save Entry">Save</PrimaryButton>
         @if (OnCancel.HasDelegate)
         {
             <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="HandleCancel" aria-label="Cancel">Cancel</SecondaryButton>

@@ -2,7 +2,7 @@ namespace CMS.Main.Components.Utilities.Button;
 
 public enum ButtonVariant
 {
-    Info,
+    Primary,
     Danger,
     Neutral
 }

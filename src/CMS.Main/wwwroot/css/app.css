@@ -26,11 +26,11 @@
 }
 
 .status-error {
-    @apply bg-rose-50 border border-rose-200 text-rose-600 text-sm p-3 rounded-md mb-4 flex items-center;
+    @apply bg-rose-900/50 border border-rose-600 text-rose-200 text-sm p-3 rounded-md mb-4 flex items-center;
 }
 
 .status-success {
-    @apply bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-md mb-4 flex items-center;
+    @apply bg-emerald-900/50 border border-emerald-600 text-emerald-200 text-sm p-3 rounded-md mb-4 flex items-center;
 }
 
 @keyframes slide-in {
@@ -61,4 +61,128 @@
 
 .animate-slide-out {
     animation: slide-out 0.3s ease-in forwards;
+}
+
+/* Prevent Safari/iOS elastic overscroll (bounce) and generally disable overscroll behavior */
+html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto; /* disable momentum scrolling which can show bounce in some contexts */
+}
+
+/* Ensure main scroll containers don't allow overscroll */
+main, .overflow-auto, .overflow-y-auto {
+    overscroll-behavior: contain;
+}
+
+.button-group {
+    /* Remove gap between buttons */
+    @apply gap-0;
+}
+
+/* All buttons in the group lose their border radius and overlap borders */
+.button-group > * {
+    @apply rounded-none -ml-px;
+}
+
+/* First button gets left border radius */
+.button-group > *:first-child {
+    @apply rounded-l-full;
+    margin-left: 0; /* override the -ml-px for the first child */
+}
+
+/* Last button gets right border radius */
+.button-group > *:last-child {
+    @apply rounded-r-full;
+}
+
+/* Single button (both first and last) gets full radius */
+.button-group > *:only-child {
+    @apply rounded-full;
+}
+
+/* Z-index handling for focus/hover states to ensure borders/rings show properly */
+.button-group > *:hover,
+.button-group > *:focus,
+.button-group > *:focus-within {
+    position: relative;
+    z-index: 1;
+}
+
+/* Custom round checkbox styling
+   Strategy:
+   - Use native `accent-color` where supported to color the native control.
+   - Provide a custom circular fallback using appearance:none + background SVG checkmark so
+     browsers without full accent-color support still show a purple checked state.
+*/
+input[type="checkbox"] {
+    /* Square native controls will be overridden; set size and make round */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: inline-block;
+    vertical-align: middle;
+    width: 1.25rem; /* 20px */
+    height: 1.25rem;
+    border-radius: 9999px; /* fully round */
+    background-color: rgba(55, 65, 81, 1); /* neutral-700 */
+    border: 1px solid rgba(75, 85, 99, 1); /* neutral-600 */
+    cursor: pointer;
+    transition: all 0.12s ease-in-out;
+    box-sizing: border-box;
+}
+
+/* Use accent-color where supported to tint native control (modern browsers) */
+input[type="checkbox"] {
+    accent-color: rgba(139, 92, 246, 1); /* purple-500 */
+}
+
+/* Checked state: prefer accent-color, but include a fallback visual (SVG check) */
+input[type="checkbox"]:checked {
+    background-color: rgba(139, 92, 246, 1); /* purple-500 */
+    border-color: rgba(139, 92, 246, 1);
+    /* Fallback checkmark as background image (SVG) for browsers where accent-color doesn't style the control)
+       - uses an encoded svg path with white checkmark */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M4.5 10.5l3 3 8-8'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.6rem 0.6rem;
+}
+
+input[type="checkbox"]:focus {
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12); /* subtle purple focus */
+}
+
+input[type="checkbox"]:hover:not(:disabled) {
+    border-color: rgba(167, 139, 250, 0.8); /* lighter purple border */
+}
+
+input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Custom Select Styling */
+select {
+    @apply block w-full rounded-full;
+    @apply border border-neutral-600 bg-neutral-700 shadow-sm;
+    @apply text-sm text-neutral-100;
+    @apply px-3 py-2;
+    @apply focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-neutral-800;
+    @apply transition-all duration-200;
+    @apply disabled:bg-neutral-700 disabled:text-neutral-500 disabled:cursor-not-allowed;
+    @apply cursor-pointer;
+    /* Custom arrow styling */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23a3a3a3' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+select:hover:not(:disabled) {
+    @apply border-purple-400;
 }

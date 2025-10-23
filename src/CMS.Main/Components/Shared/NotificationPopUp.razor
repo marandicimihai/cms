@@ -9,12 +9,20 @@
 <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2" style="max-width: 400px;">
     @foreach (var notification in _notifications)
     {
-        var bgColor = notification.Type switch
+        var bgGradient = notification.Type switch
         {
-            NotificationType.Success => "bg-emerald-600",
-            NotificationType.Error => "bg-rose-600",
-            NotificationType.Warning => "bg-amber-500",
-            _ => "bg-blue-600"
+            NotificationType.Success => "bg-gradient-to-b from-neutral-800 to-neutral-800/90 border-emerald-500/40",
+            NotificationType.Error => "bg-gradient-to-b from-neutral-800 to-neutral-800/90 border-rose-600/40",
+            NotificationType.Warning => "bg-gradient-to-b from-neutral-800 to-neutral-800/90 border-amber-500/40",
+            _ => "bg-gradient-to-b from-neutral-800 to-neutral-800/90 border-purple-500/40"
+        };
+
+        var iconColor = notification.Type switch
+        {
+            NotificationType.Success => "text-emerald-500",
+            NotificationType.Error => "text-rose-600",
+            NotificationType.Warning => "text-amber-500",
+            _ => "text-purple-500"
         };
 
         var icon = notification.Type switch
@@ -25,10 +33,15 @@
             _ => "info"
         };
 
-        <div class="@bgColor text-white rounded-lg shadow-lg p-4 flex items-start gap-3 @(notification.IsClosing ? "animate-slide-out" : "animate-slide-in")">
-            <span class="material-symbols-outlined icons-default flex-shrink-0">@icon</span>
-            <p class="text-sm flex-1">@notification.Message</p>
-            <SecondaryButton Type="button" Variant="ButtonVariant.Neutral" Icon="close" @onclick="() => RemoveNotification(notification.Id)" aria-label="Close notification" />
+        <div class="@bgGradient rounded-xl border-l-4 shadow-lg p-4 flex items-start gap-3 @(notification.IsClosing ? "animate-slide-out" : "animate-slide-in")">
+            <span class="material-symbols-outlined icons-default @iconColor flex-shrink-0">@icon</span>
+            <p class="text-sm text-neutral-100 flex-1">@notification.Message</p>
+            <button type="button" 
+                    class="inline-flex items-center justify-center rounded-full text-neutral-100 ring-0 ring-purple-500/0 hover:bg-gradient-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 w-8 h-8 p-1.5" 
+                    @onclick="() => RemoveNotification(notification.Id)" 
+                    aria-label="Close notification">
+                <span class="material-symbols-outlined text-2xl">close</span>
+            </button>
         </div>
     }
 </div>
@@ -36,7 +49,7 @@
 @code {
     private List<NotificationItem> _notifications = new();
     private DotNetObjectReference<NotificationPopUp>? _dotNetReference;
-    private IJSObjectReference? _jsModule;
+    private IJSObjectReference? _jsModule = null;
 
     protected override void OnAfterRender(bool firstRender)
     {

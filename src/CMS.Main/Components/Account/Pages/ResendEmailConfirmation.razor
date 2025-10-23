@@ -14,29 +14,29 @@
 
 <PageTitle>Resend email confirmation</PageTitle>
 
-<div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-neutral-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 text-center">Resend email confirmation</h1>
-            <p class="mt-2 text-center text-sm text-slate-600">
+            <h1 class="text-2xl font-semibold text-neutral-100 text-center">Resend email confirmation</h1>
+            <p class="mt-2 text-center text-sm text-neutral-400">
                 Enter your email address to resend the confirmation link.
             </p>
         </div>
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-6">
+        <div class="rounded-xl border border-neutral-800 bg-linear-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6">
             <StatusMessage Message="@message"/>
             <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="validation-summary" role="alert"/>
                 <div class="space-y-4">
                     <div>
-                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-slate-600 mb-2">
+                        <label for="Input.Email" class="block text-xs font-medium uppercase tracking-wide text-neutral-400 mb-2">
                             Email
                         </label>
-                        <InputText @bind-Value="Input.Email" id="Input.Email" class="block w-full rounded-md border border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" aria-required="true" placeholder="name@example.com"/>
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="block w-full rounded-full border border-neutral-600 bg-neutral-700 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-neutral-100 text-sm px-3 py-2" aria-required="true" placeholder="name@example.com"/>
                         <ValidationMessage For="() => Input.Email" class="validation-message"/>
                     </div>
                     <div>
-                        <PrimaryButton Type="submit" Variant="ButtonVariant.Info" Icon="send" aria-label="Resend">Resend</PrimaryButton>
+                        <PrimaryButton Type="submit" Variant="ButtonVariant.Primary" Icon="send" aria-label="Resend">Resend</PrimaryButton>
                     </div>
                 </div>
             </EditForm>

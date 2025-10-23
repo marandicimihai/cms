@@ -16,19 +16,21 @@
             <TableRow>
                 <TableData>@prop.Name</TableData>
                 <TableData>@prop.Type</TableData>
-                <TableData>@(prop.Options is { Length: > 0 } ? string.Join(" ", prop.Options) : "-")</TableData>
+                <TableData>@(prop.Options is { Length: > 0 } ? string.Join(", ", prop.Options) : "-")</TableData>
                 <TableData>@(prop.IsRequired ? "true" : "false")</TableData>
                 <TableData class="text-right">
-                    <PrimaryButton Type="button" Variant="ButtonVariant.Info" Icon="edit" @onclick="() => OnEditProperty.InvokeAsync(prop)" aria-label="Edit property">Edit</PrimaryButton>
-                    <PrimaryButton Type="button" Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeletePropertyClicked(prop)" aria-label="Delete property">Delete</PrimaryButton>
+                    <ButtonGroup>
+                        <PrimaryButton Type="button" Variant="ButtonVariant.Primary" Icon="edit" @onclick="() => OnEditProperty.InvokeAsync(prop)" aria-label="Edit property">Edit</PrimaryButton>
+                        <PrimaryButton Type="button" Variant="ButtonVariant.Danger" Icon="delete" @onclick="() => OnDeletePropertyClicked(prop)" aria-label="Delete property">Delete</PrimaryButton>
+                    </ButtonGroup>
                 </TableData>
             </TableRow>
         }
         </TableBody>
     </Table>
     <div class="mt-6">
-        <h3 class="text-sm font-medium text-slate-700 mb-2">Example JSON Object</h3>
-        <pre class="text-xs bg-slate-900 text-slate-100 rounded-md p-4 overflow-x-auto" aria-label="Example JSON object"><code>@ExampleJson</code></pre>
+        <h3 class="text-sm font-medium text-neutral-100 mb-2">Example JSON Object</h3>
+        <pre class="text-sm bg-neutral-800 text-neutral-100 rounded-md p-4 overflow-x-auto border border-neutral-800 shadow-sm font-mono" aria-label="Example JSON object"><code>@ExampleJson</code></pre>
     </div>
 }
 else
