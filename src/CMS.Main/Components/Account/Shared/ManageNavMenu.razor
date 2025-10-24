@@ -3,29 +3,72 @@
 
 @inject SignInManager<ApplicationUser> SignInManager
 
-<ul class="flex flex-col gap-2">
-    <li>
-        <NavLink class="flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full ring-0 ring-purple-500/0 hover:bg-linear-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 transition-all duration-300 whitespace-nowrap" href="Account/Manage" Match="NavLinkMatch.All" aria-label="Profile">Profile</NavLink>
-    </li>
-    <li>
-        <NavLink class="flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full ring-0 ring-purple-500/0 hover:bg-linear-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 transition-all duration-300 whitespace-nowrap" href="Account/Manage/Email" aria-label="Email">Email</NavLink>
-    </li>
-    <li>
-        <NavLink class="flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full ring-0 ring-purple-500/0 hover:bg-linear-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 transition-all duration-300 whitespace-nowrap" href="Account/Manage/ChangePassword" aria-label="Password">Password</NavLink>
-    </li>
-    @if (hasExternalLogins)
-    {
-        <li>
-            <NavLink class="flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full ring-0 ring-purple-500/0 hover:bg-linear-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 transition-all duration-300 whitespace-nowrap" href="Account/Manage/ExternalLogins" aria-label="External logins">External logins</NavLink>
-        </li>
+<style>
+    .tab-link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgb(163, 163, 163);
+        background-color: transparent;
+        border: 1px solid transparent;
+        border-bottom: none;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+        margin-bottom: -1px;
+        transform: translateY(0);
     }
-    <li>
-        <NavLink class="flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full ring-0 ring-purple-500/0 hover:bg-linear-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 transition-all duration-300 whitespace-nowrap" href="Account/Manage/TwoFactorAuthentication" aria-label="Two-factor authentication">Two-factor authentication</NavLink>
-    </li>
-    <li>
-        <NavLink class="flex items-center gap-2 p-2 min-h-10 text-sm font-medium rounded-full text-neutral-100 w-full ring-0 ring-purple-500/0 hover:bg-linear-to-tl hover:from-purple-500/20 hover:to-transparent hover:ring-1 hover:ring-purple-500/40 transition-all duration-300 whitespace-nowrap" href="Account/Manage/PersonalData" aria-label="Personal data">Personal data</NavLink>
-    </li>
-</ul>
+    
+    .tab-link::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(168, 85, 247, 0) 0%, rgba(168, 85, 247, 1) 50%, rgba(168, 85, 247, 0) 100%);
+        transform: translateX(-50%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .tab-link:hover {
+        color: rgb(255, 255, 255);
+        border-color: rgba(168, 85, 247, 0.3);
+        border-bottom-color: transparent;
+        transform: translateY(-2px);
+    }
+    
+    .tab-link:hover::before {
+        width: 80%;
+    }
+    
+    .tab-link.active {
+        color: rgb(255, 255, 255);
+        border-color: rgb(38, 38, 38);
+        border-bottom-color: rgb(38, 38, 38);
+        transform: translateY(0);
+        box-shadow: 0 -2px 8px rgba(168, 85, 247, 0.15);
+    }
+    
+    .tab-link.active::before {
+        width: 100%;
+        background: linear-gradient(90deg, rgba(168, 85, 247, 0) 0%, rgba(168, 85, 247, 0.8) 50%, rgba(168, 85, 247, 0) 100%);
+    }
+</style>
+
+<NavLink class="tab-link" href="Account/Manage" Match="NavLinkMatch.All" aria-label="Profile">Profile</NavLink>
+<NavLink class="tab-link" href="Account/Manage/Email" aria-label="Email">Email</NavLink>
+<NavLink class="tab-link" href="Account/Manage/ChangePassword" aria-label="Password">Password</NavLink>
+@if (hasExternalLogins)
+{
+    <NavLink class="tab-link" href="Account/Manage/ExternalLogins" aria-label="External logins">External logins</NavLink>
+}
+<NavLink class="tab-link" href="Account/Manage/TwoFactorAuthentication" aria-label="Two-factor authentication">Two-factor authentication</NavLink>
+<NavLink class="tab-link" href="Account/Manage/PersonalData" aria-label="Personal data">Personal data</NavLink>
 
 @code {
     private bool hasExternalLogins;

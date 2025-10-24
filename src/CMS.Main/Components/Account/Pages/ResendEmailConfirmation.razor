@@ -22,7 +22,6 @@
                 Enter your email address to resend the confirmation link.
             </p>
         </div>
-        <div class="rounded-xl border border-neutral-800 bg-linear-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6">
             <StatusMessage Message="@message"/>
             <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
                 <DataAnnotationsValidator/>
@@ -40,7 +39,6 @@
                     </div>
                 </div>
             </EditForm>
-        </div>
     </Paper>
 </div>
 

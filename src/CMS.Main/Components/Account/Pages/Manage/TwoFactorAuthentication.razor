@@ -13,10 +13,7 @@
 <PageTitle>Two-factor authentication (2FA)</PageTitle>
 
 <div class="max-w-5xl">
-    <div class="mb-4">
-        <h1 class="text-2xl font-semibold text-neutral-100">Two-factor authentication (2FA)</h1>
-        <StatusMessage/>
-    </div>
+    <StatusMessage/>
     @if (canTrack)
     {
         <div class="space-y-4">
@@ -62,18 +59,16 @@
                     <LinkButton Variant="ButtonVariant.Danger" Href="Account/Manage/Disable2fa" aria-label="Disable 2FA">Disable 2FA</LinkButton>
                 <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/GenerateRecoveryCodes" aria-label="Reset recovery codes">Reset recovery codes</LinkButton>
             }
-            <div class="mt-6">
-                <h2 class="text-lg font-medium text-neutral-100 mb-2">Authenticator app</h2>
-                @if (!hasAuthenticator)
-                {
-                    <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/EnableAuthenticator" Icon="add" aria-label="Add authenticator app">Add authenticator app</LinkButton>
-                }
-                else
-                {
-                    <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/EnableAuthenticator" Icon="settings" aria-label="Set up authenticator app">Set up authenticator app</LinkButton>
-                    <LinkButton Variant="ButtonVariant.Danger" Href="Account/Manage/ResetAuthenticator" Icon="refresh" aria-label="Reset authenticator app">Reset authenticator app</LinkButton>
-                }
-            </div>
+            <h2 class="text-lg font-medium text-neutral-100 mb-2">Authenticator app</h2>
+            @if (!hasAuthenticator)
+            {
+                <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/EnableAuthenticator" Icon="add" aria-label="Add authenticator app">Add authenticator app</LinkButton>
+            }
+            else
+            {
+                <LinkButton Variant="ButtonVariant.Primary" Href="Account/Manage/EnableAuthenticator" Icon="settings" aria-label="Set up authenticator app">Set up authenticator app</LinkButton>
+                <LinkButton Variant="ButtonVariant.Danger" Href="Account/Manage/ResetAuthenticator" Icon="refresh" aria-label="Reset authenticator app">Reset authenticator app</LinkButton>
+            }
         </div>
     }
     else
