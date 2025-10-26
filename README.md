@@ -4,9 +4,7 @@ A modern, headless content management system built with ASP.NET Core 9.0, Blazor
 
 ## 🎥 Demo
 
-[![CMS Showcase](https://img.youtube.com/vi/13ACYDFdx0s/0.jpg)](https://youtu.be/13ACYDFdx0s)
-
-Watch the full demo: [https://youtu.be/13ACYDFdx0s](https://youtu.be/13ACYDFdx0s)
+Watch the demo: [https://youtu.be/13ACYDFdx0s](https://youtu.be/13ACYDFdx0s)
 
 ## ✨ Features
 
