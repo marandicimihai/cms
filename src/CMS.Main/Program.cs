@@ -19,6 +19,7 @@ using CMS.Main.Services.Entries;
 using CMS.Main.Abstractions.SchemaProperties;
 using CMS.Main.Services.SchemaProperties;
 using CMS.Main.Abstractions.Notifications;
+using Microsoft.EntityFrameworkCore;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -107,6 +108,13 @@ else
     app.UseExceptionHandler("/Error", true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+if (!app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
 }
 
 app.UseHttpsRedirection();

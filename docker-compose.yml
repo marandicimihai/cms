@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:latest
+    container_name: cms-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: CMS
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cms-network
+
+  # smtp4dev - Email testing server
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: cms-smtp4dev
+    ports:
+      - "5001:80"      # Web UI
+      - "2525:25"      # SMTP port
+    networks:
+      - cms-network
+
+  # CMS Application
+  app:
+    build:
+      context: .
+      dockerfile: src/CMS.Main/Dockerfile
+    container_name: cms-app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=http://+:8080
+      # Database connection string
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=CMS;Username=postgres;Password=postgres;Include Error Detail=true
+      # Email settings for smtp4dev
+      - EmailSettings__Smtp__Host=smtp4dev
+      - EmailSettings__Smtp__Port=25
+      - EmailSettings__Smtp__Username=noreply@cms.local
+      - EmailSettings__Smtp__Password=NoPassword
+      - EmailSettings__FromName=CMS
+    ports:
+      - "12354:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      smtp4dev:
+        condition: service_started
+    networks:
+      - cms-network
+    volumes:
+      - dataprotection-keys:/var/DataProtection-Keys
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+    driver: local
+  dataprotection-keys:
+    driver: local
+
+networks:
+  cms-network:
+    driver: bridge

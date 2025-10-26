@@ -15,7 +15,7 @@ public static class FluentEmailConfiguration
         var fluentBuilder = services.AddFluentEmail(smtp.Username, emailSettings.FromName)
             .AddRazorRenderer();
 
-        if (hostEnvironment.IsDevelopment())
+        if (!hostEnvironment.IsProduction())
             fluentBuilder.AddSmtpSender(new SmtpClient(smtp.Host, smtp.Port)
             {
                 EnableSsl = false

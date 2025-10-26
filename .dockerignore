@@ -1,0 +1,58 @@
+# .NET build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.cache
+*.swp
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Development files
+**/.DS_Store
+*.log
+*.tmp
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+**/.dockerignore
+**/Dockerfile*
+**/docker-compose*
+**/*.md
+
+# Test results
+TestResults/
+coverage/
+
+# Database
+*.db
+*.sqlite
+
+# Environment
+.env
+.env.local
+appsettings.Development.json
+
+# Documentation
+README.md
+DOCKER.md
+STYLE_GUIDE.md
+LICENSE
+
+# Containers
+.containers/
+.devcontainer/

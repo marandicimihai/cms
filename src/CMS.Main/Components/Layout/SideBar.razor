@@ -10,6 +10,7 @@
             <VerticalStack Gap="StackGap.Small" Class="h-full">
                 <IconButton Outlined="false" IconName="dock_to_right" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
                 <IconButton Outlined="false" IconName="add" OnClick="OpenCreateProjectModal" aria-label="Create project" />
+                <SideBarButton Href="/documentation" Icon="description" Class="p-2!" />
             </VerticalStack>
             <AuthorizeView>
                 <NotAuthorized>
@@ -37,7 +38,10 @@
                 <IconButton IconName="deployed_code" Outlined="false" aria-label="Just random cube" />
                 <IconButton IconName="dock_to_right" Outlined="false" OnClick="ToggleSidebar" aria-label="Toggle sidebar" />
             </HorizontalStack>
-            <PrimaryButton Variant="ButtonVariant.Primary" Outlined="false" Icon="add" OnClick="OpenCreateProjectModal" Class="w-full !justify-start">Create Project</PrimaryButton>
+            <VerticalStack Gap="StackGap.Small" Class="w-full">
+                <PrimaryButton Variant="ButtonVariant.Primary" Outlined="false" Icon="add" OnClick="OpenCreateProjectModal" Class="w-full justify-start!">Create Project</PrimaryButton>
+                <SideBarButton Href="/documentation" Icon="description" Class="w-full justify-start!">Documentation</SideBarButton>
+            </VerticalStack>
 
             <VerticalStack Gap="StackGap.Medium" Class="w-full h-full">
                 <h2 class="text-xs font-medium uppercase tracking-wide text-neutral-400">Projects</h2>
@@ -53,19 +57,19 @@
             <AuthorizeView>
                 <NotAuthorized>
                     <VerticalStack Gap="StackGap.Small" Class="w-full">
-                        <SideBarButton Class="w-full !justify-start" Href="/Account/Login" Icon="login">Sign in</SideBarButton>
-                        <SideBarButton Class="w-full !justify-start" Href="/Account/Register" Icon="person_add">Register</SideBarButton>
+                        <SideBarButton Class="w-full justify-start!" Href="/Account/Login" Icon="login">Sign in</SideBarButton>
+                        <SideBarButton Class="w-full justify-start!" Href="/Account/Register" Icon="person_add">Register</SideBarButton>
                     </VerticalStack>
                 </NotAuthorized>
                 <Authorized>
                     <VerticalStack Gap="StackGap.Small" Class="w-full">
-                        <SideBarButton Href="/Account/Manage" Icon="person" Class="w-full !justify-start">
+                        <SideBarButton Href="/Account/Manage" Icon="person" Class="w-full justify-start!">
                             <span class="truncate">@context.User.Identity?.Name</span>
                         </SideBarButton>
                         <form method="post" action="/Account/Logout" class="w-full">
                             <AntiforgeryToken/>
                             <input type="hidden" name="returnUrl" value="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"/>
-                            <PrimaryButton Class="w-full !justify-start !px-2" Variant="ButtonVariant.Danger" Outlined="false" Type="submit" Size="ButtonSize.Small" Icon="logout" aria-label="Sign out">Sign out</PrimaryButton>
+                            <PrimaryButton Class="w-full justify-start! px-2!" Variant="ButtonVariant.Danger" Outlined="false" Type="submit" Size="ButtonSize.Small" Icon="logout" aria-label="Sign out">Sign out</PrimaryButton>
                         </form>
                     </VerticalStack>
                 </Authorized>

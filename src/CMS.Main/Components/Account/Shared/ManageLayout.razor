@@ -2,12 +2,12 @@
 @layout Layout.MainLayout
 
 <div class="p-4">
-    <h1 class="text-2xl font-semibold mb-4 text-neutral-100">Manage your account</h1>
-    <div class="flex gap-4">
-        <div class="w-64 min-w-[16rem] rounded-xl border border-neutral-800 bg-neutral-800 p-4 flex-shrink-0">
+    <h1 class="text-2xl font-semibold mb-6 text-neutral-100">Manage your account</h1>
+    <div class="flex flex-col">
+        <div class="flex gap-1 border-b border-neutral-800">
             <ManageNavMenu/>
         </div>
-        <main class="flex-1">
+        <main class="flex-1 pt-6">
             @Body
         </main>
     </div>

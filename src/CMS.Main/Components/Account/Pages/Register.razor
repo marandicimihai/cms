@@ -18,8 +18,8 @@
 
 <PageTitle>Register</PageTitle>
 
-<div class="min-h-screen bg-neutral-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <Paper Class="max-w-md w-full space-y-8">
         <div>
             <h1 class="text-2xl font-semibold text-neutral-100 text-center">Create your account</h1>
             <p class="mt-2 text-center text-sm text-neutral-400">
@@ -28,7 +28,6 @@
             </p>
         </div>
         
-        <div class="rounded-xl border border-neutral-800 bg-linear-to-b from-neutral-800 to-neutral-800/90 shadow-sm p-6">
             <StatusMessage Message="@Message"/>
             
             <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
@@ -83,22 +82,9 @@
                 </div>
             </EditForm>
             
-            <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-neutral-800" />
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-neutral-800 text-neutral-400">Or continue with</span>
-                    </div>
-                </div>
-                
-                <div class="mt-6">
-                    <ExternalLoginPicker/>
-                </div>
-            </div>
-        </div>
-    </div>
+            
+        
+    </Paper>
 </div>
 
 @code {
