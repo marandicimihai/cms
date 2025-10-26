@@ -2,6 +2,10 @@
 
 A modern, headless content management system built with ASP.NET Core 9.0, Blazor, and PostgreSQL. Create custom content schemas, manage entries via REST API, and integrate seamlessly with any frontend framework.
 
+## 🎥 Demo
+
+https://github.com/marandicimihai/cms/assets/showcase.mov
+
 ## ✨ Features
 
 - **Custom Schemas** - Define your own content types with flexible field properties
