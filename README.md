@@ -4,7 +4,7 @@ A modern, headless content management system built with ASP.NET Core 9.0, Blazor
 
 ## 🎥 Demo
 
-https://github.com/marandicimihai/cms/assets/showcase.mov
+![CMS Showcase](./assets/showcase-gif.gif)
 
 ## ✨ Features
 
