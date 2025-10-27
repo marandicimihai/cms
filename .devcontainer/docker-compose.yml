@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -28,7 +26,7 @@ services:
     image: postgres:latest
     restart: unless-stopped
     volumes:
-      - ../.containers/postgresql:/var/lib/postgresql/data
+      - cms_postgres:/var/lib/postgresql
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
@@ -36,3 +34,6 @@ services:
       
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
+  
+volumes:
+  cms_postgres:
